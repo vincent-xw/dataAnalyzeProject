@@ -1,4 +1,5 @@
 import { index, integer, sqliteTable, text, uniqueIndex } from 'drizzle-orm/sqlite-core'
+import { z } from 'zod'
 
 export const analysisTemplates = sqliteTable('analysis_templates', {
   id: text('id').primaryKey(),
@@ -89,3 +90,69 @@ export const fieldMappings = sqliteTable(
     uniqueIndex('field_mappings_template_target_unique').on(table.templateId, table.targetField),
   ],
 )
+
+export const scripts = sqliteTable(
+  'scripts',
+  {
+    id: text('id').notNull(),
+    version: text('version').notNull(),
+    metadataJson: text('metadata_json').notNull(),
+    enabled: integer('enabled', { mode: 'boolean' }).notNull(),
+    createdAt: text('created_at').notNull(),
+  },
+  (table) => [uniqueIndex('scripts_id_version_unique').on(table.id, table.version)],
+)
+
+export const executionPlans = sqliteTable(
+  'execution_plans',
+  {
+    id: text('id').primaryKey(),
+    datasetVersionId: text('dataset_version_id')
+      .notNull()
+      .references(() => datasetVersions.id, { onDelete: 'restrict' }),
+    modelName: text('model_name').notNull(),
+    promptVersionId: text('prompt_version_id')
+      .notNull()
+      .references(() => promptVersions.id, { onDelete: 'restrict' }),
+    userRequirement: text('user_requirement').notNull(),
+    decisionJson: text('decision_json').notNull(),
+    scriptId: text('script_id'),
+    scriptVersion: text('script_version'),
+    parametersJson: text('parameters_json'),
+    confirmationStatus: text('confirmation_status', {
+      enum: ['pending', 'confirmed'],
+    }).notNull(),
+    confirmedAt: text('confirmed_at'),
+    createdAt: text('created_at').notNull(),
+  },
+  (table) => [index('execution_plans_dataset_version_created_at_idx').on(table.datasetVersionId, table.createdAt)],
+)
+
+export const processingTasks = sqliteTable(
+  'processing_tasks',
+  {
+    id: text('id').primaryKey(),
+    planId: text('plan_id')
+      .notNull()
+      .unique()
+      .references(() => executionPlans.id, { onDelete: 'restrict' }),
+    status: text('status', { enum: ['queued', 'running', 'succeeded', 'failed'] }).notNull(),
+    resultObjectKey: text('result_object_key'),
+    resultSchemaObjectKey: text('result_schema_object_key'),
+    resultSummaryObjectKey: text('result_summary_object_key'),
+    errorObjectKey: text('error_object_key'),
+    retryCount: integer('retry_count').notNull(),
+    createdAt: text('created_at').notNull(),
+    startedAt: text('started_at'),
+    completedAt: text('completed_at'),
+    updatedAt: text('updated_at').notNull(),
+  },
+  (table) => [index('processing_tasks_status_created_at_idx').on(table.status, table.createdAt)],
+)
+
+export const ProcessingTaskInsertSchema = z
+  .object({
+    id: z.string().uuid(),
+    status: z.literal('queued'),
+  })
+  .strict()
