@@ -1,0 +1,40 @@
+apps/worker/wrangler.jsonc
+  s_ccb52fc5578d7b::t_de8b3cf4ba652e 12-15
+apps/worker/vitest.config.ts
+  s_ccb52fc5578d7b::t_de8b3cf4ba652e 19-22
+apps/web/src/features/scripts/ScriptUploadPage.tsx
+  s_ccb52fc5578d7b::t_1ecdfb58dc9fcd 1-55,57-71
+  s_ccb52fc5578d7b::t_5d07f43a82a4d4 56
+apps/worker/src/features/script-admin/routes.test.ts
+  s_ccb52fc5578d7b::t_638c5567e187fb 1-38,40-46,48-51
+  s_ccb52fc5578d7b::t_53a3a499021c0f 39,47
+apps/worker/src/features/plans/routes.test.ts
+  s_ccb52fc5578d7b::t_585216158edca0 35-38
+apps/web/src/router.tsx
+  s_ccb52fc5578d7b::t_1ecdfb58dc9fcd 13,30
+apps/worker/src/index.ts
+  s_ccb52fc5578d7b::t_de8b3cf4ba652e 10,23-26,45
+apps/web/src/features/scripts/ScriptUploadPage.test.tsx
+  s_ccb52fc5578d7b::t_638c5567e187fb 1-17,19-23,26-35,37-40
+  s_ccb52fc5578d7b::t_53a3a499021c0f 18,24-25,36
+apps/worker/src/features/script-admin/routes.ts
+  s_ccb52fc5578d7b::t_de8b3cf4ba652e 1-56
+apps/worker/src/testing/env.d.ts
+  s_ccb52fc5578d7b::t_de8b3cf4ba652e 14-17
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.3",
+  "base_commit_sha": "bd6a1bc991d8b025ca5cf0b0b1b29eb33b1435a6",
+  "prompts": {},
+  "sessions": {
+    "s_ccb52fc5578d7b": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019f5f35-a53f-7fb0-a9a3-3bd057c963d8",
+        "model": "gpt-5.6-sol"
+      },
+      "human_author": "xuewen.jia <xuewen.jia@ly.com>"
+    }
+  }
+}
