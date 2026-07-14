@@ -1,0 +1,28 @@
+apps/worker/src/features/reports/service.ts
+  s_ccb52fc5578d7b::t_f5287afb0d7082 1-251
+apps/worker/src/features/reports/routes.test.ts
+  s_ccb52fc5578d7b::t_feb56acb8a3c07 1-178
+apps/worker/src/index.ts
+  s_ccb52fc5578d7b::t_f5287afb0d7082 9,30-31
+apps/worker/src/features/reports/routes.ts
+  s_ccb52fc5578d7b::t_f5287afb0d7082 1-87
+apps/worker/src/features/reports/materialize.ts
+  s_ccb52fc5578d7b::t_f5287afb0d7082 5-8,16-54
+  s_ccb52fc5578d7b::t_9dc10a26795939 55-56
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.3",
+  "base_commit_sha": "3983f0ff5bad5c16ede341ace60531d1f0bb45df",
+  "prompts": {},
+  "sessions": {
+    "s_ccb52fc5578d7b": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019f5f35-a53f-7fb0-a9a3-3bd057c963d8",
+        "model": "gpt-5.6-sol"
+      },
+      "human_author": "xuewen.jia <xuewen.jia@ly.com>"
+    }
+  }
+}
