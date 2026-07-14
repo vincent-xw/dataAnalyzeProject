@@ -11,6 +11,9 @@ export default defineConfig({
       },
       miniflare: {
         bindings: {
+          LLM_API_KEY: 'test-key',
+          LLM_BASE_URL: 'https://llm.example.com/v1',
+          LLM_MODEL: 'unified-model',
           TEST_MIGRATIONS: migrations,
         },
       },

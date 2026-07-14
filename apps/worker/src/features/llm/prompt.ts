@@ -1,0 +1,44 @@
+import type { FieldDefinition, ScriptMetadata } from '@data-analyze/contracts'
+
+export const PROCESSING_PLATFORM_RULES = [
+  '只能选择一个清单内脚本及其精确版本。',
+  '不得生成代码。',
+  '不得组合脚本。',
+  '不得发明字段或参数。',
+  '无法完整满足需求时必须返回 supported:false。',
+].join('\n')
+
+export type ProcessingContext = {
+  platformRules: string
+  dataset: {
+    rowCount: number
+    columnCount: number
+    fields: FieldDefinition[]
+  }
+  scripts: ScriptMetadata[]
+  templatePrompt: string
+  userRequirement: string
+}
+
+type ProcessingContextInput = Omit<ProcessingContext, 'platformRules' | 'dataset'> & {
+  rowCount: number
+  columnCount: number
+  fields: FieldDefinition[]
+}
+
+/**
+ * 参数刻意不包含数据行、对象 Key 或 R2 URL，从类型边界阻止原始数据进入模型上下文。
+ */
+export function buildProcessingContext(input: ProcessingContextInput): ProcessingContext {
+  return {
+    platformRules: PROCESSING_PLATFORM_RULES,
+    dataset: {
+      rowCount: input.rowCount,
+      columnCount: input.columnCount,
+      fields: input.fields,
+    },
+    scripts: input.scripts,
+    templatePrompt: input.templatePrompt,
+    userRequirement: input.userRequirement,
+  }
+}

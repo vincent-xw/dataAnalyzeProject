@@ -7,6 +7,9 @@ export type Env = {
   Bindings: {
     DB: D1Database
     DATA_BUCKET: R2Bucket
+    LLM_API_KEY: string
+    LLM_BASE_URL: string
+    LLM_MODEL: string
   }
 }
 
