@@ -1,0 +1,27 @@
+README.md
+  s_ccb52fc5578d7b::t_c9726a1a603f65 1-41
+docs/runbooks/cloudflare-deployment.md
+  s_ccb52fc5578d7b::t_c9726a1a603f65 1-109
+.github/workflows/deploy.yml
+  s_ccb52fc5578d7b::t_c9726a1a603f65 38
+docs/runbooks/incident-recovery.md
+  s_ccb52fc5578d7b::t_c9726a1a603f65 1-65
+.dev.vars.example
+  s_ccb52fc5578d7b::t_c9726a1a603f65 1-12
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.3",
+  "base_commit_sha": "9fdda161124db52bde28d15ad3cfd2e5ff45b4a9",
+  "prompts": {},
+  "sessions": {
+    "s_ccb52fc5578d7b": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019f5f35-a53f-7fb0-a9a3-3bd057c963d8",
+        "model": "gpt-5.6-sol"
+      },
+      "human_author": "xuewen.jia <xuewen.jia@ly.com>"
+    }
+  }
+}
