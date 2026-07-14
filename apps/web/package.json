@@ -10,6 +10,7 @@
     "test": "vitest run --passWithNoTests"
   },
   "dependencies": {
+    "@data-analyze/contracts": "workspace:*",
     "react": "19.2.7",
     "react-dom": "19.2.7",
     "react-router-dom": "7.18.1"

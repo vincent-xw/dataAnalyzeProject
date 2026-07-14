@@ -1,9 +1,16 @@
 import { Hono } from 'hono'
 import { z } from 'zod'
 
+import {
+  DatasetInspectionSchema,
+  FieldDefinitionSchema,
+  FieldMappingListSchema,
+} from '@data-analyze/contracts'
+
 import type { Env } from '../../index'
 import { InspectionError, inspectCsv } from './inspect-csv'
 import { inspectXlsx } from './inspect-xlsx'
+import { validateMapping } from './mapping'
 import { MAX_FILE_SIZE, parseUploadMetadata, UploadRequestError } from './upload'
 
 const CsvInspectionRequestSchema = z.object({
@@ -155,6 +162,98 @@ datasetRoutes.post('/:versionId/inspect', async (context) => {
     }
     throw error
   }
+})
+
+datasetRoutes.put('/:versionId/mapping', async (context) => {
+  const mappings = FieldMappingListSchema.safeParse(
+    await context.req.json().catch(() => undefined),
+  )
+  if (!mappings.success) {
+    return context.json({ code: 'INVALID_MAPPING', message: '字段映射协议无效' }, 400)
+  }
+
+  const version = await context.env.DB.prepare(
+    `SELECT dv.schema_object_key, dv.validation_status, d.template_id, at.input_schema_json
+     FROM dataset_versions dv
+     JOIN datasets d ON d.id = dv.dataset_id
+     JOIN analysis_templates at ON at.id = d.template_id
+     WHERE dv.id = ?`,
+  )
+    .bind(context.req.param('versionId'))
+    .first<{
+      schema_object_key: string | null
+      validation_status: string
+      template_id: string
+      input_schema_json: string
+    }>()
+  if (!version) {
+    return context.json({ code: 'DATASET_VERSION_NOT_FOUND', message: '数据集版本不存在' }, 404)
+  }
+  if (
+    !version.schema_object_key ||
+    !['inspected', 'mapped'].includes(version.validation_status)
+  ) {
+    return context.json({ code: 'DATASET_NOT_INSPECTED', message: '数据集尚未完成结构检查' }, 409)
+  }
+
+  const schemaObject = await context.env.DATA_BUCKET.get(version.schema_object_key)
+  if (!schemaObject) {
+    return context.json({ code: 'SCHEMA_NOT_FOUND', message: '数据集结构文件不存在' }, 404)
+  }
+  const inspection = DatasetInspectionSchema.safeParse(await schemaObject.json())
+  const templateFields = z.array(FieldDefinitionSchema).safeParse(JSON.parse(version.input_schema_json))
+  if (!inspection.success || !templateFields.success) {
+    return context.json({ code: 'INVALID_CONTROL_DATA', message: '控制面结构数据无效' }, 500)
+  }
+
+  const validation = validateMapping(
+    inspection.data.sourceFields,
+    templateFields.data,
+    mappings.data,
+  )
+  if (
+    validation.unknownSources.length > 0 ||
+    validation.unknownTargets.length > 0 ||
+    validation.missingRequired.length > 0
+  ) {
+    return context.json({ code: 'MAPPING_VALIDATION_FAILED', ...validation }, 422)
+  }
+
+  const now = new Date().toISOString()
+  const templateByName = new Map(templateFields.data.map((field) => [field.name, field]))
+  const insertStatements = mappings.data.map((mapping) => {
+    // 目标字段已通过 validateMapping 校验，因此此处取值失败属于控制面损坏而非可兜底场景。
+    const targetField = templateByName.get(mapping.targetField)
+    if (!targetField) {
+      throw new Error('VALIDATED_TARGET_FIELD_NOT_FOUND')
+    }
+    return context.env.DB.prepare(
+      `INSERT INTO field_mappings
+        (id, template_id, source_field, target_field, target_type, required, created_at)
+       VALUES (?, ?, ?, ?, ?, ?, ?)`,
+    ).bind(
+      crypto.randomUUID(),
+      version.template_id,
+      mapping.sourceField,
+      mapping.targetField,
+      targetField.type,
+      targetField.required ? 1 : 0,
+      now,
+    )
+  })
+
+  // D1 batch 原子替换模板映射并推进当前数据集版本状态，避免读取到半套映射。
+  await context.env.DB.batch([
+    context.env.DB.prepare('DELETE FROM field_mappings WHERE template_id = ?').bind(
+      version.template_id,
+    ),
+    ...insertStatements,
+    context.env.DB.prepare(
+      "UPDATE dataset_versions SET validation_status = 'mapped' WHERE id = ?",
+    ).bind(context.req.param('versionId')),
+  ])
+
+  return context.json({ status: 'mapped' as const, mappingCount: mappings.data.length })
 })
 
 datasetRoutes.get('/:id', async (context) => {
