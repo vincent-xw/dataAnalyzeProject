@@ -11,6 +11,10 @@ declare global {
       TASK_QUEUE: Queue
       CF_ACCESS_AUD: string
       CF_ACCESS_TEAM_DOMAIN: string
+      GITHUB_TOKEN: string
+      GITHUB_OWNER: string
+      GITHUB_REPO: string
+      GITHUB_BASE_BRANCH: string
       TEST_MIGRATIONS: D1Migration[]
     }
   }

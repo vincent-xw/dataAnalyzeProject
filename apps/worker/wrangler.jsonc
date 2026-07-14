@@ -9,7 +9,10 @@
     "LLM_BASE_URL": "https://llm.example.com/v1",
     "LLM_MODEL": "unified-model",
     "CF_ACCESS_TEAM_DOMAIN": "replace.cloudflareaccess.com",
-    "CF_ACCESS_AUD": "replace-with-access-audience"
+    "CF_ACCESS_AUD": "replace-with-access-audience",
+    "GITHUB_OWNER": "replace-with-github-owner",
+    "GITHUB_REPO": "replace-with-github-repo",
+    "GITHUB_BASE_BRANCH": "main"
   },
   "r2_buckets": [
     {

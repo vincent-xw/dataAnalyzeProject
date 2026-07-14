@@ -32,6 +32,10 @@ function requestEnv(queue: Queue): Env['Bindings'] {
     TASK_QUEUE: queue,
     CF_ACCESS_AUD: env.CF_ACCESS_AUD,
     CF_ACCESS_TEAM_DOMAIN: env.CF_ACCESS_TEAM_DOMAIN,
+    GITHUB_TOKEN: env.GITHUB_TOKEN,
+    GITHUB_OWNER: env.GITHUB_OWNER,
+    GITHUB_REPO: env.GITHUB_REPO,
+    GITHUB_BASE_BRANCH: env.GITHUB_BASE_BRANCH,
   }
 }
 

@@ -10,6 +10,7 @@ import { PlanConfirmationPage } from './features/analysis/PlanConfirmationPage'
 import { TaskDetailPage } from './features/tasks/TaskDetailPage'
 import { ReportEditorPage } from './features/reports/ReportEditorPage'
 import { ReportViewPage } from './features/reports/ReportViewPage'
+import { ScriptUploadPage } from './features/scripts/ScriptUploadPage'
 
 export const router = createBrowserRouter([
   {
@@ -26,6 +27,7 @@ export const router = createBrowserRouter([
       { path: 'tasks/:taskId', element: <TaskDetailPage /> },
       { path: 'tasks/:taskId/reports/new', element: <ReportEditorPage /> },
       { path: 'reports/:reportVersionId', element: <ReportViewPage /> },
+      { path: 'internal/scripts', element: <ScriptUploadPage /> },
     ],
   },
 ])
