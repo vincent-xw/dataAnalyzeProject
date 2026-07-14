@@ -1,0 +1,27 @@
+apps/worker/wrangler.jsonc
+  s_ccb52fc5578d7b::t_232ef9d14ea88a 7-15
+apps/worker/migrations/0001_control.sql
+  s_ccb52fc5578d7b::t_232ef9d14ea88a 1-75
+apps/worker/src/db/schema.ts
+  s_ccb52fc5578d7b::t_232ef9d14ea88a 1-91
+apps/worker/src/db/schema.test.ts
+  s_ccb52fc5578d7b::t_1e573e08499db8 1-20
+apps/worker/src/db/client.ts
+  s_ccb52fc5578d7b::t_232ef9d14ea88a 1-9
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.3",
+  "base_commit_sha": "46b946e366d5c07033c17f0c64632886fee0fd6f",
+  "prompts": {},
+  "sessions": {
+    "s_ccb52fc5578d7b": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019f5f35-a53f-7fb0-a9a3-3bd057c963d8",
+        "model": "gpt-5.6-sol"
+      },
+      "human_author": "xuewen.jia <xuewen.jia@ly.com>"
+    }
+  }
+}
