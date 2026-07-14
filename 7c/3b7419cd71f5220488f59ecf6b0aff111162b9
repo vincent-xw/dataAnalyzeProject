@@ -1,0 +1,50 @@
+packages/scripts/src/registry.ts
+  s_ccb52fc5578d7b::t_1f852d060f0254 5
+scripts/validate-script-registry.test.ts
+  s_ccb52fc5578d7b::t_f616ef6a16042d 1
+  s_ccb52fc5578d7b::t_ebf856be154400 2-28
+apps/worker/src/features/script-admin/sync.ts
+  s_ccb52fc5578d7b::t_1f852d060f0254 1-33
+apps/worker/src/features/script-admin/routes.test.ts
+  s_ccb52fc5578d7b::t_1f852d060f0254 24
+apps/worker/src/features/script-admin/sync.test.ts
+  s_ccb52fc5578d7b::t_090427fc9c0659 8
+  s_ccb52fc5578d7b::t_ebf856be154400 1-7,10-24
+  s_ccb52fc5578d7b::t_f616ef6a16042d 9
+packages/scripts/src/registry-validation.ts
+  s_ccb52fc5578d7b::t_1f852d060f0254 1-27
+apps/worker/src/index.ts
+  s_ccb52fc5578d7b::t_1f852d060f0254 45
+.github/workflows/deploy.yml
+  s_ccb52fc5578d7b::t_02de2ac2a715b7 1-43
+scripts/validate-script-registry.ts
+  s_ccb52fc5578d7b::t_f616ef6a16042d 1-2
+  s_ccb52fc5578d7b::t_1f852d060f0254 3-10
+apps/worker/src/features/script-admin/routes.ts
+  s_ccb52fc5578d7b::t_1f852d060f0254 12,25,54-55
+  s_ccb52fc5578d7b::t_6811babe88e383 56-57
+.github/workflows/ci.yml
+  s_ccb52fc5578d7b::t_02de2ac2a715b7 1-22
+package.json
+  s_ccb52fc5578d7b::t_090427fc9c0659 9
+  s_ccb52fc5578d7b::t_fc59d4ad70290d 11
+  s_ccb52fc5578d7b::t_f755c8ad0da43c 15
+pnpm-lock.yaml
+  s_ccb52fc5578d7b::t_32c29923287d49 11-13
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.3",
+  "base_commit_sha": "7c3b7419cd71f5220488f59ecf6b0aff111162b9",
+  "prompts": {},
+  "sessions": {
+    "s_ccb52fc5578d7b": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019f5f35-a53f-7fb0-a9a3-3bd057c963d8",
+        "model": "gpt-5.6-sol"
+      },
+      "human_author": "xuewen.jia <xuewen.jia@ly.com>"
+    }
+  }
+}
