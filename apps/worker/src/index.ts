@@ -6,6 +6,7 @@ import { datasetVersionPlanRoutes, planRoutes } from './features/plans/routes'
 import type { TaskMessage } from './features/plans/service'
 import { consumeTaskBatch } from './features/tasks/consumer'
 import { taskRoutes } from './features/tasks/routes'
+import { reportVersionRoutes, taskReportRoutes } from './features/reports/routes'
 
 export type Env = {
   Bindings: {
@@ -26,6 +27,8 @@ app.route('/api/datasets', datasetRoutes)
 app.route('/api/dataset-versions', datasetVersionPlanRoutes)
 app.route('/api/plans', planRoutes)
 app.route('/api/tasks', taskRoutes)
+app.route('/api/tasks', taskReportRoutes)
+app.route('/api/report-versions', reportVersionRoutes)
 
 export default {
   fetch: app.fetch,
