@@ -1,0 +1,43 @@
+name: Deploy
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: production
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment: production
+    env:
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+      CF_PAGES_PROJECT: ${{ vars.CF_PAGES_PROJECT }}
+      WORKER_BASE_URL: ${{ vars.WORKER_BASE_URL }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22.23.1
+          cache: pnpm
+      - run: corepack enable
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm validate:scripts
+      - run: pnpm typecheck
+      - run: pnpm test
+      - run: pnpm build
+      - name: Apply D1 migrations
+        run: pnpm --filter @data-analyze/worker exec wrangler d1 migrations apply data-analyze-db --remote
+      - name: Deploy Worker
+        run: pnpm --filter @data-analyze/worker exec wrangler deploy
+      - name: Deploy Pages
+        run: pnpm exec wrangler pages deploy apps/web/dist --project-name "$CF_PAGES_PROJECT"
+      - name: Sync script catalog
+        run: |
+          curl --fail-with-body --request POST "$WORKER_BASE_URL/internal/scripts/sync" \
+            --header "CF-Access-Client-Id: ${{ secrets.CF_ACCESS_CLIENT_ID }}" \
+            --header "CF-Access-Client-Secret: ${{ secrets.CF_ACCESS_CLIENT_SECRET }}"

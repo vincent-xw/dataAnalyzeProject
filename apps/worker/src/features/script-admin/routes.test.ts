@@ -21,7 +21,7 @@ describe('候选脚本管理 API', () => {
     })
     const routes = createScriptAdminRoutes(createPullRequest)
     const bindings = env as Env['Bindings']
-    const response = await routes.request('/', {
+    const response = await routes.request('/candidates', {
       method: 'POST',
       headers: { 'content-type': 'application/json' },
       body: JSON.stringify({ id: 'regional-sales', version: '1.1.0', source }),

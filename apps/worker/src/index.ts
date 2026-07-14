@@ -42,7 +42,7 @@ app.route('/api/plans', planRoutes)
 app.route('/api/tasks', taskRoutes)
 app.route('/api/tasks', taskReportRoutes)
 app.route('/api/report-versions', reportVersionRoutes)
-app.route('/internal/scripts/candidates', scriptAdminRoutes)
+app.route('/internal/scripts', scriptAdminRoutes)
 
 export default {
   fetch: app.fetch,

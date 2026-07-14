@@ -2,6 +2,7 @@ import type { ScriptMetadata } from '@data-analyze/contracts'
 import type { DataProcessor } from '@data-analyze/script-sdk'
 
 import { salesRegionSummary } from './sales-region-summary'
+export { validateScriptRegistry } from './registry-validation'
 
 const scripts = new Map<string, DataProcessor<unknown>>([
   [

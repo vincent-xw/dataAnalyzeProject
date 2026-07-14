@@ -9,6 +9,7 @@ import {
   type GitHubBindings,
   type ScriptPullRequestResult,
 } from './github'
+import { syncScriptCatalog } from './sync'
 
 type PullRequestCreator = (
   upload: ScriptUploadRequest,
@@ -21,7 +22,7 @@ export function createScriptAdminRoutes(
 ): Hono<Env> {
   const routes = new Hono<Env>()
 
-  routes.post('/', async (context) => {
+  routes.post('/candidates', async (context) => {
     const request = ScriptUploadRequestSchema.safeParse(await context.req.json().catch(() => null))
     if (!request.success) {
       return context.json(
@@ -48,6 +49,10 @@ export function createScriptAdminRoutes(
       }
       throw error
     }
+  })
+
+  routes.post('/sync', async (context) => {
+    return context.json(await syncScriptCatalog(context.env.DB))
   })
 
   return routes
