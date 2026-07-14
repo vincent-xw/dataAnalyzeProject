@@ -1,0 +1,37 @@
+apps/worker/src/index.ts
+  s_ccb52fc5578d7b::t_bc8933fbba6db6 7,28-31
+apps/worker/src/features/tasks/executor.ts
+  s_ccb52fc5578d7b::t_bc8933fbba6db6 1-11,18-103,105-116,118-120,122,124-176,178-198
+  s_ccb52fc5578d7b::t_c9d1015d10c6a4 12-17,104,117,121,123,177
+apps/worker/package.json
+  s_ccb52fc5578d7b::t_bc8933fbba6db6 15
+apps/worker/src/features/tasks/normalize.ts
+  s_ccb52fc5578d7b::t_bc8933fbba6db6 1-143
+apps/worker/src/features/tasks/executor.test.ts
+  s_ccb52fc5578d7b::t_a44fbea7e2a9e7 2,135-163
+  s_ccb52fc5578d7b::t_b87e1859ad5978 206,215
+  s_ccb52fc5578d7b::t_f76c5bf1fd9245 1,3-134,164-205,207-214,216-225
+apps/worker/src/features/tasks/consumer.ts
+  s_ccb52fc5578d7b::t_bc8933fbba6db6 1-63
+apps/worker/src/features/tasks/output-writer.ts
+  s_ccb52fc5578d7b::t_c9d1015d10c6a4 11-77,86,102,109,117
+  s_ccb52fc5578d7b::t_bc8933fbba6db6 1-10,78-85,87-101,103-108,110-116,118-120
+pnpm-lock.yaml
+  s_ccb52fc5578d7b::t_f8c23711e0d1ae 66-68
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.3",
+  "base_commit_sha": "39c03f285b87ccd56d894302950358033a85f48e",
+  "prompts": {},
+  "sessions": {
+    "s_ccb52fc5578d7b": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019f5f35-a53f-7fb0-a9a3-3bd057c963d8",
+        "model": "gpt-5.6-sol"
+      },
+      "human_author": "xuewen.jia <xuewen.jia@ly.com>"
+    }
+  }
+}
