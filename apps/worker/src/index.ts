@@ -7,6 +7,7 @@ import type { TaskMessage } from './features/plans/service'
 import { consumeTaskBatch } from './features/tasks/consumer'
 import { taskRoutes } from './features/tasks/routes'
 import { reportVersionRoutes, taskReportRoutes } from './features/reports/routes'
+import { requireAccess, type AuthenticatedUser } from './middleware/access-auth'
 
 export type Env = {
   Bindings: {
@@ -16,12 +17,19 @@ export type Env = {
     LLM_BASE_URL: string
     LLM_MODEL: string
     TASK_QUEUE: Queue<TaskMessage>
+    CF_ACCESS_AUD: string
+    CF_ACCESS_TEAM_DOMAIN: string
+  }
+  Variables: {
+    authenticatedUser: AuthenticatedUser
   }
 }
 
 export const app = new Hono<Env>()
 
 app.get('/health', (context) => context.json({ status: 'ok' as const }))
+app.use('/api/*', requireAccess())
+app.use('/internal/*', requireAccess())
 app.route('/api/templates', templateRoutes)
 app.route('/api/datasets', datasetRoutes)
 app.route('/api/dataset-versions', datasetVersionPlanRoutes)

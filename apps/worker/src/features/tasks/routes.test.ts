@@ -1,7 +1,7 @@
 import { env } from 'cloudflare:test'
 import { beforeEach, describe, expect, it } from 'vitest'
 
-import { app } from '../../index'
+import { authenticatedRequest } from '../../testing/request'
 
 describe('任务状态 API', () => {
   beforeEach(async () => {
@@ -75,7 +75,7 @@ describe('任务状态 API', () => {
       ).bind(taskId, planId, errorKey, now, now),
     ])
 
-    const response = await app.request(`/api/tasks/${taskId}`, {}, env)
+    const response = await authenticatedRequest(`/api/tasks/${taskId}`, {}, env)
 
     expect(response.status).toBe(200)
     expect(await response.json()).toMatchObject({
@@ -83,6 +83,6 @@ describe('任务状态 API', () => {
       status: 'failed',
       error: { code: 'FIELD_TYPE_MISMATCH', retryable: false },
     })
-    expect(await (await app.request(`/api/tasks/${taskId}`, {}, env)).text()).not.toContain('r2://')
+    expect(await (await authenticatedRequest(`/api/tasks/${taskId}`, {}, env)).text()).not.toContain('r2://')
   })
 })

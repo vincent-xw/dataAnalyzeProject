@@ -1,7 +1,7 @@
 import { env } from 'cloudflare:test'
 import { beforeEach, describe, expect, it } from 'vitest'
 
-import { app } from '../../index'
+import { authenticatedRequest } from '../../testing/request'
 
 const templateId = '00000000-0000-4000-8000-000000000001'
 const datasetId = '00000000-0000-4000-8000-000000000002'
@@ -53,7 +53,7 @@ describe('字段映射 API', () => {
   })
 
   it('缺少必填字段时拒绝保存', async () => {
-    const response = await app.request(
+    const response = await authenticatedRequest(
       `/api/datasets/${versionId}/mapping`,
       {
         method: 'PUT',
@@ -68,7 +68,7 @@ describe('字段映射 API', () => {
   })
 
   it('保存一一映射并将版本状态更新为 mapped', async () => {
-    const response = await app.request(
+    const response = await authenticatedRequest(
       `/api/datasets/${versionId}/mapping`,
       {
         method: 'PUT',

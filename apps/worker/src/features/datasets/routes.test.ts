@@ -2,12 +2,12 @@ import { env } from 'cloudflare:test'
 import * as XLSX from 'xlsx'
 import { beforeEach, describe, expect, it } from 'vitest'
 
-import { app } from '../../index'
+import { authenticatedRequest } from '../../testing/request'
 
 const MAX_FILE_SIZE = 10 * 1024 * 1024
 
 async function createTemplate() {
-  const response = await app.request(
+  const response = await authenticatedRequest(
     '/api/templates',
     {
       method: 'POST',
@@ -32,7 +32,7 @@ async function uploadDataset(options: {
   fileName: string
   templateId: string
 }) {
-  return app.request(
+  return authenticatedRequest(
     '/api/datasets',
     {
       method: 'POST',
@@ -102,7 +102,7 @@ describe('数据集上传和结构检查 API', () => {
 
     expect(upload.status).toBe(201)
 
-    const inspect = await app.request(
+    const inspect = await authenticatedRequest(
       `/api/datasets/${uploaded.versionId}/inspect`,
       {
         method: 'POST',
@@ -131,7 +131,7 @@ describe('数据集上传和结构检查 API', () => {
     })
     const uploaded = (await upload.json()) as { versionId: string }
 
-    const inspect = await app.request(
+    const inspect = await authenticatedRequest(
       `/api/datasets/${uploaded.versionId}/inspect`,
       {
         method: 'POST',
@@ -157,7 +157,7 @@ describe('数据集上传和结构检查 API', () => {
     })
     const uploaded = (await upload.json()) as { versionId: string }
 
-    const inspect = await app.request(
+    const inspect = await authenticatedRequest(
       `/api/datasets/${uploaded.versionId}/inspect`,
       {
         method: 'POST',
@@ -186,14 +186,14 @@ describe('数据集上传和结构检查 API', () => {
     })
     const uploaded = (await upload.json()) as { versionId: string }
 
-    const pending = await app.request(
+    const pending = await authenticatedRequest(
       `/api/datasets/${uploaded.versionId}/inspect`,
       { method: 'POST', headers: { 'content-type': 'application/json' }, body: '{}' },
       env,
     )
     expect(await pending.json()).toMatchObject({ status: 'awaiting_sheet', sheets: ['一月', '二月'] })
 
-    const selected = await app.request(
+    const selected = await authenticatedRequest(
       `/api/datasets/${uploaded.versionId}/inspect`,
       {
         method: 'POST',

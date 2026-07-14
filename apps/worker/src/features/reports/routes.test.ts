@@ -1,7 +1,7 @@
 import { env } from 'cloudflare:test'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
-import { app } from '../../index'
+import { authenticatedRequest } from '../../testing/request'
 
 const templateId = '40000000-0000-4000-8000-000000000001'
 const processingPromptId = '40000000-0000-4000-8000-000000000002'
@@ -40,7 +40,7 @@ function mockReportConfig(config: unknown = validConfig) {
 }
 
 async function createDraft() {
-  return app.request(
+  return authenticatedRequest(
     `/api/tasks/${taskId}/reports`,
     {
       method: 'POST',
@@ -130,15 +130,15 @@ describe('报表草稿和发布 API', () => {
     expect(response.status).toBe(201)
     const draft = (await response.json()) as { id: string }
 
-    const detail = await app.request(`/api/report-versions/${draft.id}`, {}, env)
+    const detail = await authenticatedRequest(`/api/report-versions/${draft.id}`, {}, env)
     expect(await detail.json()).toMatchObject({
       validationStatus: 'valid',
       confirmedAt: null,
       published: false,
     })
 
-    const first = await app.request(`/api/report-versions/${draft.id}/confirm`, { method: 'POST' }, env)
-    const second = await app.request(`/api/report-versions/${draft.id}/confirm`, { method: 'POST' }, env)
+    const first = await authenticatedRequest(`/api/report-versions/${draft.id}/confirm`, { method: 'POST' }, env)
+    const second = await authenticatedRequest(`/api/report-versions/${draft.id}/confirm`, { method: 'POST' }, env)
     expect(await first.json()).toMatchObject({ published: true })
     expect(await second.json()).toMatchObject({ published: true })
     fetchMock.mockRestore()
@@ -147,7 +147,7 @@ describe('报表草稿和发布 API', () => {
   it('只能通过 D1 中的精确 Key 读取私有报表数据', async () => {
     const fetchMock = mockReportConfig()
     const draft = (await (await createDraft()).json()) as { id: string }
-    const response = await app.request(`/api/report-versions/${draft.id}/data`, {}, env)
+    const response = await authenticatedRequest(`/api/report-versions/${draft.id}/data`, {}, env)
     expect(response.status).toBe(200)
     expect(await response.json()).toEqual([
       { region: '华东', totalAmount: 150 },

@@ -14,6 +14,8 @@ export default defineConfig({
           LLM_API_KEY: 'test-key',
           LLM_BASE_URL: 'https://llm.example.com/v1',
           LLM_MODEL: 'unified-model',
+          CF_ACCESS_AUD: 'test-access-audience',
+          CF_ACCESS_TEAM_DOMAIN: 'test.cloudflareaccess.com',
           TEST_MIGRATIONS: migrations,
         },
       },

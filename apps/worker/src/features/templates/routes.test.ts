@@ -1,7 +1,7 @@
 import { env } from 'cloudflare:test'
 import { beforeEach, describe, expect, it } from 'vitest'
 
-import { app } from '../../index'
+import { authenticatedRequest } from '../../testing/request'
 
 const validTemplateRequest = {
   name: '销售分析',
@@ -15,7 +15,7 @@ const validTemplateRequest = {
 }
 
 async function createTemplate() {
-  return app.request(
+  return authenticatedRequest(
     '/api/templates',
     {
       method: 'POST',
@@ -47,7 +47,7 @@ describe('分析模板 API', () => {
   })
 
   it('拒绝重复标准字段名', async () => {
-    const response = await app.request(
+    const response = await authenticatedRequest(
       '/api/templates',
       {
         method: 'POST',
@@ -66,7 +66,7 @@ describe('分析模板 API', () => {
 
   it('创建新 Prompt 版本并更新模板当前版本', async () => {
     const created = (await (await createTemplate()).json()) as { id: string }
-    const promptResponse = await app.request(
+    const promptResponse = await authenticatedRequest(
       `/api/templates/${created.id}/prompts`,
       {
         method: 'POST',
@@ -79,7 +79,7 @@ describe('分析模板 API', () => {
     expect(promptResponse.status).toBe(201)
     expect(await promptResponse.json()).toMatchObject({ type: 'processing', version: 2 })
 
-    const detail = await app.request(`/api/templates/${created.id}`, {}, env)
+    const detail = await authenticatedRequest(`/api/templates/${created.id}`, {}, env)
     expect(await detail.json()).toMatchObject({
       processingPrompt: { version: 2, content: '更新后的加工约束' },
       reportingPrompt: { version: 1 },
@@ -89,7 +89,7 @@ describe('分析模板 API', () => {
   it('返回模板列表', async () => {
     await createTemplate()
 
-    const response = await app.request('/api/templates', {}, env)
+    const response = await authenticatedRequest('/api/templates', {}, env)
 
     expect(response.status).toBe(200)
     expect((await response.json()) as unknown[]).toHaveLength(1)

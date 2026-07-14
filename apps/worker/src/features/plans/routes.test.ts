@@ -1,7 +1,8 @@
 import { env } from 'cloudflare:test'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
-import { app, type Env } from '../../index'
+import type { Env } from '../../index'
+import { authenticatedRequest } from '../../testing/request'
 
 const templateId = '10000000-0000-4000-8000-000000000001'
 const promptVersionId = '10000000-0000-4000-8000-000000000002'
@@ -29,6 +30,8 @@ function requestEnv(queue: Queue): Env['Bindings'] {
     LLM_BASE_URL: env.LLM_BASE_URL,
     LLM_MODEL: env.LLM_MODEL,
     TASK_QUEUE: queue,
+    CF_ACCESS_AUD: env.CF_ACCESS_AUD,
+    CF_ACCESS_TEAM_DOMAIN: env.CF_ACCESS_TEAM_DOMAIN,
   }
 }
 
@@ -129,7 +132,7 @@ describe('执行计划 API', () => {
       ),
     )
 
-    const response = await app.request(
+    const response = await authenticatedRequest(
       `/api/dataset-versions/${datasetVersionId}/plans`,
       {
         method: 'POST',
@@ -148,7 +151,7 @@ describe('执行计划 API', () => {
   it('只有确认受支持计划时才投递 taskId', async () => {
     const planId = await insertPlan(supportedDecision)
     const queueSend = vi.fn().mockResolvedValue(undefined)
-    const response = await app.request(
+    const response = await authenticatedRequest(
       `/api/plans/${planId}/confirm`,
       { method: 'POST' },
       requestEnv(createQueue(queueSend)),
@@ -161,7 +164,7 @@ describe('执行计划 API', () => {
   it('拒绝确认不存在的脚本版本', async () => {
     const planId = await insertPlan({ ...supportedDecision, scriptVersion: '9.9.9' })
     const queueSend = vi.fn().mockResolvedValue(undefined)
-    const response = await app.request(
+    const response = await authenticatedRequest(
       `/api/plans/${planId}/confirm`,
       { method: 'POST' },
       requestEnv(createQueue(queueSend)),
@@ -183,7 +186,7 @@ describe('执行计划 API', () => {
     const queueSend = vi.fn().mockResolvedValue(undefined)
     expect(
       (
-        await app.request(
+        await authenticatedRequest(
           `/api/plans/${unsupportedId}/confirm`,
           { method: 'POST' },
           requestEnv(createQueue(queueSend)),
@@ -193,13 +196,13 @@ describe('执行计划 API', () => {
 
     const supportedId = await insertPlan(supportedDecision)
     const binding = requestEnv(createQueue(queueSend))
-    expect((await app.request(`/api/plans/${supportedId}/confirm`, { method: 'POST' }, binding)).status).toBe(202)
-    expect((await app.request(`/api/plans/${supportedId}/confirm`, { method: 'POST' }, binding)).status).toBe(409)
+    expect((await authenticatedRequest(`/api/plans/${supportedId}/confirm`, { method: 'POST' }, binding)).status).toBe(202)
+    expect((await authenticatedRequest(`/api/plans/${supportedId}/confirm`, { method: 'POST' }, binding)).status).toBe(409)
   })
 
   it('Queue 发送失败时将任务标记为 failed', async () => {
     const planId = await insertPlan(supportedDecision)
-    const response = await app.request(
+    const response = await authenticatedRequest(
       `/api/plans/${planId}/confirm`,
       { method: 'POST' },
       requestEnv(createQueue(vi.fn().mockRejectedValue(new Error('queue down')))),
