@@ -9,9 +9,12 @@
     "validate:scripts": "node --import tsx scripts/validate-script-registry.ts",
     "typecheck": "pnpm -r typecheck",
     "test": "vitest run scripts/validate-script-registry.test.ts && pnpm -r test",
+    "test:e2e": "playwright test",
     "build": "pnpm -r build"
   },
   "devDependencies": {
+    "@playwright/test": "1.61.1",
+    "jose": "6.2.3",
     "tsx": "4.23.1",
     "typescript": "7.0.2",
     "vitest": "4.1.10"

@@ -2,6 +2,7 @@ import type { FieldDefinition } from '@data-analyze/contracts'
 import { ReportConfigSchema, type ReportConfig } from '@data-analyze/report-schema'
 
 import type { LlmBindings } from '../llm/client'
+import { createFakeReportConfig } from '../../testing/fake-llm'
 
 export const REPORT_PLATFORM_RULES = [
   '只能使用协议内的 metric、table、bar、line、pie 组件。',
@@ -65,6 +66,7 @@ export async function requestReportConfig(
   fetcher: typeof fetch = fetch,
   timeoutMs = 15_000,
 ): Promise<ReportConfig> {
+  if (bindings.ENVIRONMENT === 'test') return createFakeReportConfig()
   let response: Response
   try {
     response = await fetcher(`${bindings.LLM_BASE_URL.replace(/\/$/, '')}/chat/completions`, {

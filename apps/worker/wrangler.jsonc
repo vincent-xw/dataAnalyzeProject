@@ -12,7 +12,8 @@
     "CF_ACCESS_AUD": "replace-with-access-audience",
     "GITHUB_OWNER": "replace-with-github-owner",
     "GITHUB_REPO": "replace-with-github-repo",
-    "GITHUB_BASE_BRANCH": "main"
+    "GITHUB_BASE_BRANCH": "main",
+    "ENVIRONMENT": "production"
   },
   "r2_buckets": [
     {

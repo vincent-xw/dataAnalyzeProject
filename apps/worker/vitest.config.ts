@@ -20,6 +20,8 @@ export default defineConfig({
           GITHUB_OWNER: 'test-owner',
           GITHUB_REPO: 'test-repo',
           GITHUB_BASE_BRANCH: 'main',
+          ENVIRONMENT: 'unit-test',
+          ACCESS_TEST_PUBLIC_JWK: '{}',
           TEST_MIGRATIONS: migrations,
         },
       },

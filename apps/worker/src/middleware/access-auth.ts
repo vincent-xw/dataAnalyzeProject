@@ -1,5 +1,6 @@
 import {
   createRemoteJWKSet,
+  importJWK,
   jwtVerify,
   type JWTVerifyGetKey,
 } from 'jose'
@@ -12,6 +13,7 @@ export type AuthenticatedUser = { email: string }
 type KeyFactory = (issuer: string) => JWTVerifyGetKey
 
 const jwksByIssuer = new Map<string, ReturnType<typeof createRemoteJWKSet>>()
+const testKeysByJwk = new Map<string, ReturnType<typeof importJWK>>()
 
 let keyFactory: KeyFactory = (issuer) => {
   const cached = jwksByIssuer.get(issuer)
@@ -35,10 +37,19 @@ export function requireAccess(): MiddlewareHandler<Env> {
 
     const issuer = `https://${context.env.CF_ACCESS_TEAM_DOMAIN}`
     try {
-      const { payload } = await jwtVerify(token, keyFactory(issuer), {
-        issuer,
-        audience: context.env.CF_ACCESS_AUD,
-      })
+      // E2E 环境仍验证完整 JWT，仅将远程 JWKS 替换为仓库内测试公钥。
+      const verificationOptions = { issuer, audience: context.env.CF_ACCESS_AUD }
+      let payload
+      if (context.env.ENVIRONMENT === 'test') {
+        if (!context.env.ACCESS_TEST_PUBLIC_JWK) throw new Error('ACCESS_TEST_PUBLIC_JWK_REQUIRED')
+        payload = (await jwtVerify(
+          token,
+          await getTestVerificationKey(context.env.ACCESS_TEST_PUBLIC_JWK),
+          verificationOptions,
+        )).payload
+      } else {
+        payload = (await jwtVerify(token, keyFactory(issuer), verificationOptions)).payload
+      }
       if (typeof payload.email !== 'string') {
         return context.json({ code: 'ACCESS_EMAIL_REQUIRED', message: '身份缺少邮箱' }, 401)
       }
@@ -48,4 +59,13 @@ export function requireAccess(): MiddlewareHandler<Env> {
       return context.json({ code: 'ACCESS_TOKEN_INVALID', message: '登录凭证无效' }, 401)
     }
   }
+}
+
+async function getTestVerificationKey(serializedJwk: string) {
+  let key = testKeysByJwk.get(serializedJwk)
+  if (!key) {
+    key = importJWK(JSON.parse(serializedJwk), 'RS256')
+    testKeysByJwk.set(serializedJwk, key)
+  }
+  return key
 }

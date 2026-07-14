@@ -12,6 +12,13 @@ type TaskDetail = {
   error: { code: string; message: string; retryable: boolean } | null
 }
 
+const statusLabels: Record<TaskDetail['status'], string> = {
+  queued: '等待执行',
+  running: '正在执行',
+  succeeded: '执行成功',
+  failed: '执行失败',
+}
+
 export function TaskDetailPage() {
   const { taskId } = useParams()
   const [task, setTask] = useState<TaskDetail | null>(null)
@@ -47,7 +54,7 @@ export function TaskDetailPage() {
   return (
     <section className="panel stack">
       <h2>数据加工任务</h2>
-      <p>状态：{task.status}</p>
+      <p>状态：{statusLabels[task.status]}</p>
       <p>执行次数：{task.retryCount}</p>
       {task.summary ? <pre>{JSON.stringify(task.summary, null, 2)}</pre> : null}
       {task.error ? <p className="error">{task.error.code}：{task.error.message}</p> : null}

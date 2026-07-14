@@ -15,6 +15,8 @@ declare global {
       GITHUB_OWNER: string
       GITHUB_REPO: string
       GITHUB_BASE_BRANCH: string
+      ENVIRONMENT: string
+      ACCESS_TEST_PUBLIC_JWK: string
       TEST_MIGRATIONS: D1Migration[]
     }
   }

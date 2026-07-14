@@ -2,11 +2,13 @@ import { ScriptDecisionSchema, type ScriptDecision } from '@data-analyze/contrac
 
 import type { ProcessingContext } from './prompt'
 import { createLogger, type SafeLogger } from '../../lib/logger'
+import { createFakeScriptDecision } from '../../testing/fake-llm'
 
 export type LlmBindings = {
   LLM_BASE_URL: string
   LLM_MODEL: string
   LLM_API_KEY: string
+  ENVIRONMENT?: string
 }
 
 export class LlmClientError extends Error {
@@ -49,6 +51,7 @@ export async function requestScriptDecision(
   timeoutMs = 15_000,
   logger: SafeLogger = createLogger(),
 ): Promise<ScriptDecision> {
+  if (bindings.ENVIRONMENT === 'test') return createFakeScriptDecision(context)
   const startedAt = Date.now()
   let response: Response
   try {

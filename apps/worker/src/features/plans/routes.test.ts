@@ -36,6 +36,8 @@ function requestEnv(queue: Queue): Env['Bindings'] {
     GITHUB_OWNER: env.GITHUB_OWNER,
     GITHUB_REPO: env.GITHUB_REPO,
     GITHUB_BASE_BRANCH: env.GITHUB_BASE_BRANCH,
+    ENVIRONMENT: env.ENVIRONMENT,
+    ACCESS_TEST_PUBLIC_JWK: env.ACCESS_TEST_PUBLIC_JWK,
   }
 }
 

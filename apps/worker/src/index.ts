@@ -25,6 +25,8 @@ export type Env = {
     GITHUB_OWNER: string
     GITHUB_REPO: string
     GITHUB_BASE_BRANCH: string
+    ENVIRONMENT: string
+    ACCESS_TEST_PUBLIC_JWK?: string
   }
   Variables: {
     authenticatedUser: AuthenticatedUser
