@@ -1,0 +1,28 @@
+packages/contracts/src/dataset.test.ts
+  s_ccb52fc5578d7b::t_fb1c788ff12240 23-31
+  s_ccb52fc5578d7b::t_01eae0400475c0 1-22,32-45
+packages/contracts/src/template.test.ts
+  s_ccb52fc5578d7b::t_01eae0400475c0 1-36
+packages/contracts/src/dataset.ts
+  s_ccb52fc5578d7b::t_746f185306209a 1-55
+packages/contracts/src/template.ts
+  s_ccb52fc5578d7b::t_746f185306209a 1-45
+packages/contracts/src/index.ts
+  s_ccb52fc5578d7b::t_746f185306209a 1-2
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.3",
+  "base_commit_sha": "fc87564197750b538613fe582b11e2b1e13d8d92",
+  "prompts": {},
+  "sessions": {
+    "s_ccb52fc5578d7b": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019f5f35-a53f-7fb0-a9a3-3bd057c963d8",
+        "model": "gpt-5.6-sol"
+      },
+      "human_author": "xuewen.jia <xuewen.jia@ly.com>"
+    }
+  }
+}
