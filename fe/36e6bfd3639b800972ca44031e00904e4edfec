@@ -1,0 +1,31 @@
+packages/scripts/package.json
+  s_ccb52fc5578d7b::t_72d428f40755bd 1-23
+packages/scripts/src/sales-region-summary.test.ts
+  s_ccb52fc5578d7b::t_72d428f40755bd 1-62
+packages/scripts/src/sales-region-summary.ts
+  s_ccb52fc5578d7b::t_c44737f73321d7 1-109
+packages/scripts/src/registry.ts
+  s_ccb52fc5578d7b::t_c44737f73321d7 1-23
+packages/scripts/src/registry.test.ts
+  s_ccb52fc5578d7b::t_72d428f40755bd 1-14
+packages/scripts/tsconfig.json
+  s_ccb52fc5578d7b::t_72d428f40755bd 1-7
+pnpm-lock.yaml
+  s_ccb52fc5578d7b::t_de4d09e6cec0f4 117-135
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.3",
+  "base_commit_sha": "fe36e6bfd3639b800972ca44031e00904e4edfec",
+  "prompts": {},
+  "sessions": {
+    "s_ccb52fc5578d7b": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019f5f35-a53f-7fb0-a9a3-3bd057c963d8",
+        "model": "gpt-5.6-sol"
+      },
+      "human_author": "xuewen.jia <xuewen.jia@ly.com>"
+    }
+  }
+}
