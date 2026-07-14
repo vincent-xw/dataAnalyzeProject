@@ -63,6 +63,9 @@ importers:
       '@data-analyze/contracts':
         specifier: workspace:*
         version: link:../../packages/contracts
+      '@data-analyze/scripts':
+        specifier: workspace:*
+        version: link:../../packages/scripts
       csv-parse:
         specifier: 7.0.1
         version: 7.0.1

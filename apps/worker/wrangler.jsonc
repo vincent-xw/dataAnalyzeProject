@@ -15,6 +15,20 @@
       "bucket_name": "data-analyze-data"
     }
   ],
+  "queues": {
+    "producers": [
+      {
+        "binding": "TASK_QUEUE",
+        "queue": "data-analyze-tasks"
+      }
+    ],
+    "consumers": [
+      {
+        "queue": "data-analyze-tasks",
+        "max_retries": 2
+      }
+    ]
+  },
   "d1_databases": [
     {
       "binding": "DB",

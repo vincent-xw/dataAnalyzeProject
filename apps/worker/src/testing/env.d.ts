@@ -8,6 +8,7 @@ declare global {
       LLM_API_KEY: string
       LLM_BASE_URL: string
       LLM_MODEL: string
+      TASK_QUEUE: Queue
       TEST_MIGRATIONS: D1Migration[]
     }
   }
