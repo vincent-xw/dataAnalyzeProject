@@ -1,0 +1,40 @@
+apps/web/src/router.tsx
+  s_ccb52fc5578d7b::t_d40728f8d7b82d 8-10,22-24
+apps/worker/src/features/plans/service.ts
+  s_ccb52fc5578d7b::t_52e2aca8aebfba 132-140,147-148,156-191,211,215,237,241-242,244
+apps/worker/src/features/plans/routes.ts
+  s_ccb52fc5578d7b::t_52e2aca8aebfba 15-20,44-52,61-65,68-74
+apps/web/src/features/analysis/PlanConfirmationPage.tsx
+  s_ccb52fc5578d7b::t_d40728f8d7b82d 1-17,19-20,22-51,53-91,93-100,102-112
+  s_ccb52fc5578d7b::t_303435e012f0f5 18,21,52,92,101
+apps/web/src/features/analysis/PlanConfirmationPage.test.tsx
+  s_ccb52fc5578d7b::t_54f908f662e058 1-45
+apps/worker/src/features/tasks/routes.ts
+  s_ccb52fc5578d7b::t_52e2aca8aebfba 1-59
+apps/web/src/features/analysis/AnalysisRequestPage.tsx
+  s_ccb52fc5578d7b::t_d40728f8d7b82d 1-89
+apps/worker/src/features/tasks/routes.test.ts
+  s_ccb52fc5578d7b::t_994530b9258ef2 1-88
+apps/web/src/features/tasks/TaskDetailPage.tsx
+  s_ccb52fc5578d7b::t_d40728f8d7b82d 1-55
+apps/worker/src/index.ts
+  s_ccb52fc5578d7b::t_52e2aca8aebfba 8,28
+apps/web/src/features/datasets/FieldMappingPage.tsx
+  s_ccb52fc5578d7b::t_d40728f8d7b82d 2,86,91-101
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.3",
+  "base_commit_sha": "65461c8866f63dc85f8fcdc76895f6e036c4a7f7",
+  "prompts": {},
+  "sessions": {
+    "s_ccb52fc5578d7b": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019f5f35-a53f-7fb0-a9a3-3bd057c963d8",
+        "model": "gpt-5.6-sol"
+      },
+      "human_author": "xuewen.jia <xuewen.jia@ly.com>"
+    }
+  }
+}
