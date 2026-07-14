@@ -1,0 +1,25 @@
+apps/worker/src/features/reports/materialize.ts
+  s_ccb52fc5578d7b::t_7eb2ff78ce7315 1-52
+apps/worker/src/db/schema.ts
+  s_ccb52fc5578d7b::t_7eb2ff78ce7315 159-194
+apps/worker/src/features/reports/materialize.test.ts
+  s_ccb52fc5578d7b::t_36485d082c190e 1-39
+apps/worker/migrations/0003_reports.sql
+  s_ccb52fc5578d7b::t_7eb2ff78ce7315 1-31
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.3",
+  "base_commit_sha": "a26e7ecc571fbc03241cdc71bf229a5b7d60f8ba",
+  "prompts": {},
+  "sessions": {
+    "s_ccb52fc5578d7b": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019f5f35-a53f-7fb0-a9a3-3bd057c963d8",
+        "model": "gpt-5.6-sol"
+      },
+      "human_author": "xuewen.jia <xuewen.jia@ly.com>"
+    }
+  }
+}
