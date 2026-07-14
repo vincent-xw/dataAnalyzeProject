@@ -12,6 +12,7 @@
   "dependencies": {
     "@data-analyze/contracts": "workspace:*",
     "@data-analyze/scripts": "workspace:*",
+    "@data-analyze/script-sdk": "workspace:*",
     "csv-parse": "7.0.1",
     "drizzle-orm": "0.45.2",
     "hono": "4.12.30",

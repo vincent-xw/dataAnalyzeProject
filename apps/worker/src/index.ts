@@ -4,6 +4,7 @@ import { templateRoutes } from './features/templates/routes'
 import { datasetRoutes } from './features/datasets/routes'
 import { datasetVersionPlanRoutes, planRoutes } from './features/plans/routes'
 import type { TaskMessage } from './features/plans/service'
+import { consumeTaskBatch } from './features/tasks/consumer'
 
 export type Env = {
   Bindings: {
@@ -24,4 +25,7 @@ app.route('/api/datasets', datasetRoutes)
 app.route('/api/dataset-versions', datasetVersionPlanRoutes)
 app.route('/api/plans', planRoutes)
 
-export default app
+export default {
+  fetch: app.fetch,
+  queue: consumeTaskBatch,
+} satisfies ExportedHandler<Env['Bindings'], TaskMessage>
