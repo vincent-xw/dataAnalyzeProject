@@ -1,0 +1,34 @@
+apps/worker/vitest.config.ts
+  s_ccb52fc5578d7b::t_c2787dfe4149c0 32-33
+apps/worker/src/features/script-admin/github.ts
+  s_ccb52fc5578d7b::t_931177e48bcfb2 40
+apps/worker/src/middleware/error-handler.ts
+  s_ccb52fc5578d7b::t_931177e48bcfb2 19
+apps/worker/src/features/plans/service.ts
+  s_ccb52fc5578d7b::t_dfd5f960d26fb7 96-101
+  s_ccb52fc5578d7b::t_931177e48bcfb2 74-81,95,112-113,212-215
+scripts/start-e2e-worker.ts
+  s_ccb52fc5578d7b::t_931177e48bcfb2 8,21-35
+  s_ccb52fc5578d7b::t_130c81cc5d1e12 36
+apps/worker/src/features/tasks/executor.ts
+  s_ccb52fc5578d7b::t_931177e48bcfb2 145
+apps/worker/src/features/plans/routes.test.ts
+  s_ccb52fc5578d7b::t_2f00d0c92a038b 6,131-162
+  s_ccb52fc5578d7b::t_98bbfefc7fe649 216-230
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.3",
+  "base_commit_sha": "16f4ee23a0c1adfb0552b59573ded2aa8c222a1c",
+  "prompts": {},
+  "sessions": {
+    "s_ccb52fc5578d7b": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019f5f35-a53f-7fb0-a9a3-3bd057c963d8",
+        "model": "gpt-5.6-sol"
+      },
+      "human_author": "xuewen.jia <xuewen.jia@ly.com>"
+    }
+  }
+}
