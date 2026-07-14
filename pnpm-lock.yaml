@@ -57,6 +57,9 @@ importers:
 
   apps/worker:
     dependencies:
+      '@data-analyze/contracts':
+        specifier: workspace:*
+        version: link:../../packages/contracts
       csv-parse:
         specifier: 7.0.1
         version: 7.0.1

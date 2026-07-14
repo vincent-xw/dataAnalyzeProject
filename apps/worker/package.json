@@ -10,6 +10,7 @@
     "test": "vitest run --passWithNoTests"
   },
   "dependencies": {
+    "@data-analyze/contracts": "workspace:*",
     "csv-parse": "7.0.1",
     "drizzle-orm": "0.45.2",
     "hono": "4.12.30",
