@@ -5,6 +5,12 @@
   "compatibility_date": "2026-07-14",
   "compatibility_flags": ["nodejs_compat"],
   "workers_dev": true,
+  "r2_buckets": [
+    {
+      "binding": "DATA_BUCKET",
+      "bucket_name": "data-analyze-data"
+    }
+  ],
   "d1_databases": [
     {
       "binding": "DB",
