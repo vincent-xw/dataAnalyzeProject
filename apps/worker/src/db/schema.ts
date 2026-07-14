@@ -156,3 +156,39 @@ export const ProcessingTaskInsertSchema = z
     status: z.literal('queued'),
   })
   .strict()
+
+export const reports = sqliteTable(
+  'reports',
+  {
+    id: text('id').primaryKey(),
+    taskId: text('task_id')
+      .notNull()
+      .references(() => processingTasks.id, { onDelete: 'restrict' }),
+    createdAt: text('created_at').notNull(),
+  },
+  (table) => [index('reports_task_created_at_idx').on(table.taskId, table.createdAt)],
+)
+
+export const reportVersions = sqliteTable(
+  'report_versions',
+  {
+    id: text('id').primaryKey(),
+    reportId: text('report_id')
+      .notNull()
+      .references(() => reports.id, { onDelete: 'restrict' }),
+    version: integer('version').notNull(),
+    userRequirement: text('user_requirement').notNull(),
+    promptVersionId: text('prompt_version_id')
+      .notNull()
+      .references(() => promptVersions.id, { onDelete: 'restrict' }),
+    configObjectKey: text('config_object_key').notNull(),
+    dataObjectKey: text('data_object_key').notNull(),
+    validationStatus: text('validation_status', { enum: ['valid', 'invalid'] }).notNull(),
+    confirmedAt: text('confirmed_at'),
+    createdAt: text('created_at').notNull(),
+  },
+  (table) => [
+    uniqueIndex('report_versions_report_version_unique').on(table.reportId, table.version),
+    index('report_versions_status_created_at_idx').on(table.validationStatus, table.createdAt),
+  ],
+)
