@@ -1,0 +1,23 @@
+apps/worker/src/db/schema.ts
+  s_ccb52fc5578d7b::t_f3bddad03acc57 2,93-158
+apps/worker/migrations/0002_execution.sql
+  s_ccb52fc5578d7b::t_f3bddad03acc57 1-50
+apps/worker/src/db/execution-schema.test.ts
+  s_ccb52fc5578d7b::t_10f33551451361 1-21
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.3",
+  "base_commit_sha": "bf62282f1a0e1e57f264101cf16c2526fdcaca86",
+  "prompts": {},
+  "sessions": {
+    "s_ccb52fc5578d7b": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019f5f35-a53f-7fb0-a9a3-3bd057c963d8",
+        "model": "gpt-5.6-sol"
+      },
+      "human_author": "xuewen.jia <xuewen.jia@ly.com>"
+    }
+  }
+}
