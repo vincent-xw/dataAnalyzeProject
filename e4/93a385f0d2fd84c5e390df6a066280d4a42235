@@ -1,0 +1,53 @@
+apps/web/src/main.tsx
+  s_ccb52fc5578d7b::t_c025060f11750e 3,5-6,16
+apps/worker/src/features/datasets/mapping.ts
+  s_ccb52fc5578d7b::t_5931ff6a5b7935 1-26
+apps/web/src/features/templates/TemplateListPage.tsx
+  s_ccb52fc5578d7b::t_c025060f11750e 1-49
+apps/web/src/features/datasets/FieldMappingPage.tsx
+  s_ccb52fc5578d7b::t_d77b4c255abacc 94,97-101
+  s_ccb52fc5578d7b::t_c025060f11750e 1-93,95-96
+apps/web/src/features/templates/TemplateEditorPage.tsx
+  s_ccb52fc5578d7b::t_c025060f11750e 1-71
+apps/web/src/api/client.ts
+  s_ccb52fc5578d7b::t_c025060f11750e 1-38
+apps/web/src/styles.css
+  s_ccb52fc5578d7b::t_c025060f11750e 1-83
+apps/web/src/App.test.tsx
+  s_ccb52fc5578d7b::t_1834cc37f346ef 2,9-13
+apps/worker/src/features/datasets/routes.ts
+  s_ccb52fc5578d7b::t_5931ff6a5b7935 4-9,13,167-256
+  s_ccb52fc5578d7b::t_682ed2daaf3dc0 257-258
+apps/web/src/App.tsx
+  s_ccb52fc5578d7b::t_c025060f11750e 1-2,4-15
+apps/web/src/router.tsx
+  s_ccb52fc5578d7b::t_c025060f11750e 1-21
+apps/web/src/features/datasets/FieldMappingPage.test.tsx
+  s_ccb52fc5578d7b::t_c84542781f7bcb 1-34
+apps/worker/src/features/datasets/mapping.test.ts
+  s_ccb52fc5578d7b::t_a60275725b0975 1-22
+apps/worker/src/features/datasets/mapping-routes.test.ts
+  s_ccb52fc5578d7b::t_a60275725b0975 1-92
+apps/web/package.json
+  s_ccb52fc5578d7b::t_c025060f11750e 13
+apps/web/src/features/datasets/DatasetUploadPage.tsx
+  s_ccb52fc5578d7b::t_c025060f11750e 1-93
+pnpm-lock.yaml
+  s_ccb52fc5578d7b::t_3f67324759c8a2 20-22
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.3",
+  "base_commit_sha": "e493a385f0d2fd84c5e390df6a066280d4a42235",
+  "prompts": {},
+  "sessions": {
+    "s_ccb52fc5578d7b": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019f5f35-a53f-7fb0-a9a3-3bd057c963d8",
+        "model": "gpt-5.6-sol"
+      },
+      "human_author": "xuewen.jia <xuewen.jia@ly.com>"
+    }
+  }
+}
