@@ -1,0 +1,12 @@
+LLM_BASE_URL=https://llm-gateway.example.com/v1
+LLM_MODEL=data-analysis-model
+CF_ACCESS_TEAM_DOMAIN=example.cloudflareaccess.com
+CF_ACCESS_AUD=replace-with-access-audience
+GITHUB_OWNER=replace-with-owner
+GITHUB_REPO=data-analyze-project
+GITHUB_BASE_BRANCH=main
+ENVIRONMENT=production
+
+# Secret 不在示例文件中保存。分别执行：
+# pnpm --filter @data-analyze/worker exec wrangler secret put LLM_API_KEY
+# pnpm --filter @data-analyze/worker exec wrangler secret put GITHUB_TOKEN

@@ -35,7 +35,7 @@ jobs:
       - name: Deploy Worker
         run: pnpm --filter @data-analyze/worker exec wrangler deploy
       - name: Deploy Pages
-        run: pnpm exec wrangler pages deploy apps/web/dist --project-name "$CF_PAGES_PROJECT"
+        run: pnpm --filter @data-analyze/worker exec wrangler pages deploy ../../apps/web/dist --project-name "$CF_PAGES_PROJECT"
       - name: Sync script catalog
         run: |
           curl --fail-with-body --request POST "$WORKER_BASE_URL/internal/scripts/sync" \
