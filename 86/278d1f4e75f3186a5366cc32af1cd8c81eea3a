@@ -1,0 +1,39 @@
+apps/web/package.json
+  s_ccb52fc5578d7b::t_e98806c84c67fd 14-15
+apps/web/src/features/reports/filter-data.test.ts
+  s_ccb52fc5578d7b::t_e98806c84c67fd 1-32
+apps/web/src/features/reports/components/EChartWidget.tsx
+  s_ccb52fc5578d7b::t_76b1f92975254d 1-42
+apps/web/src/features/reports/components/DataTable.tsx
+  s_ccb52fc5578d7b::t_76b1f92975254d 1-44
+apps/web/src/features/reports/ReportRenderer.tsx
+  s_ccb52fc5578d7b::t_76b1f92975254d 1-47
+apps/web/src/features/reports/ReportRenderer.test.tsx
+  s_ccb52fc5578d7b::t_e98806c84c67fd 1-39
+apps/web/src/features/reports/components/MetricCard.tsx
+  s_ccb52fc5578d7b::t_76b1f92975254d 1-34
+apps/web/src/features/reports/filter-data.ts
+  s_ccb52fc5578d7b::t_76b1f92975254d 1-39
+apps/web/src/features/reports/reports.css
+  s_ccb52fc5578d7b::t_76b1f92975254d 1-47
+apps/web/src/features/reports/components/ReportFilters.tsx
+  s_ccb52fc5578d7b::t_76b1f92975254d 1-61
+pnpm-lock.yaml
+  s_ccb52fc5578d7b::t_ef36907d887689 23-28,1461-1463,1818-1820,2005-2007,2791-2795,3201-3202,3362-3365
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.3",
+  "base_commit_sha": "86278d1f4e75f3186a5366cc32af1cd8c81eea3a",
+  "prompts": {},
+  "sessions": {
+    "s_ccb52fc5578d7b": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019f5f35-a53f-7fb0-a9a3-3bd057c963d8",
+        "model": "gpt-5.6-sol"
+      },
+      "human_author": "xuewen.jia <xuewen.jia@ly.com>"
+    }
+  }
+}
