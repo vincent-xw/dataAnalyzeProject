@@ -1,0 +1,26 @@
+{
+  "name": "@data-analyze/worker",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "wrangler dev",
+    "build": "wrangler deploy --dry-run",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run --passWithNoTests"
+  },
+  "dependencies": {
+    "csv-parse": "7.0.1",
+    "drizzle-orm": "0.45.2",
+    "hono": "4.12.30",
+    "iconv-lite": "0.7.3",
+    "xlsx": "0.18.5",
+    "zod": "4.4.3"
+  },
+  "devDependencies": {
+    "@cloudflare/vitest-pool-workers": "0.18.4",
+    "@cloudflare/workers-types": "5.20260714.1",
+    "drizzle-kit": "0.31.10",
+    "wrangler": "4.110.0"
+  }
+}
