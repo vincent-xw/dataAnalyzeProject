@@ -1,0 +1,38 @@
+apps/worker/src/features/datasets/upload.ts
+  s_ccb52fc5578d7b::t_e3b9e66219fc67 1-57
+apps/worker/src/features/datasets/inspect-xlsx.ts
+  s_ccb52fc5578d7b::t_e3b9e66219fc67 1-74
+apps/worker/src/index.ts
+  s_ccb52fc5578d7b::t_e3b9e66219fc67 4,17
+apps/worker/src/features/datasets/routes.ts
+  s_ccb52fc5578d7b::t_e3b9e66219fc67 1-45,52-133,141-216
+  s_ccb52fc5578d7b::t_f367eb2c0fc1f8 46-51,134-140
+apps/worker/src/testing/env.d.ts
+  s_ccb52fc5578d7b::t_f367eb2c0fc1f8 1
+  s_ccb52fc5578d7b::t_3fefe0a9a3a083 3-9,12-13
+apps/worker/src/features/datasets/inspect-csv.ts
+  s_ccb52fc5578d7b::t_e3b9e66219fc67 1-26,31-39,41-75
+  s_ccb52fc5578d7b::t_f367eb2c0fc1f8 27-30,40
+apps/worker/wrangler.jsonc
+  s_ccb52fc5578d7b::t_e3b9e66219fc67 8-13
+apps/worker/tsconfig.json
+  s_ccb52fc5578d7b::t_f367eb2c0fc1f8 4-8
+apps/worker/src/features/datasets/routes.test.ts
+  s_ccb52fc5578d7b::t_c9d38b7c6d8834 1-211
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.3",
+  "base_commit_sha": "3266eb09fcf33c7b85e658b58b44ed6b617b8713",
+  "prompts": {},
+  "sessions": {
+    "s_ccb52fc5578d7b": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019f5f35-a53f-7fb0-a9a3-3bd057c963d8",
+        "model": "gpt-5.6-sol"
+      },
+      "human_author": "xuewen.jia <xuewen.jia@ly.com>"
+    }
+  }
+}
