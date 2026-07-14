@@ -9,6 +9,7 @@ import { taskRoutes } from './features/tasks/routes'
 import { reportVersionRoutes, taskReportRoutes } from './features/reports/routes'
 import { scriptAdminRoutes } from './features/script-admin/routes'
 import { requireAccess, type AuthenticatedUser } from './middleware/access-auth'
+import { handleError, requestContext } from './middleware/error-handler'
 
 export type Env = {
   Bindings: {
@@ -27,11 +28,14 @@ export type Env = {
   }
   Variables: {
     authenticatedUser: AuthenticatedUser
+    requestId: string
   }
 }
 
 export const app = new Hono<Env>()
 
+app.use('*', requestContext())
+app.onError(handleError)
 app.get('/health', (context) => context.json({ status: 'ok' as const }))
 app.use('/api/*', requireAccess())
 app.use('/internal/*', requireAccess())

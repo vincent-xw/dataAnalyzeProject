@@ -3,6 +3,7 @@ import { getScript } from '@data-analyze/scripts'
 import type { StandardRecord } from '@data-analyze/script-sdk'
 
 import type { Env } from '../../index'
+import { createLogger } from '../../lib/logger'
 import {
   normalizeRecord,
   readSourceRecords,
@@ -102,6 +103,12 @@ export async function executeTask(taskId: string, env: Env['Bindings']) {
   const resultSchemaKey = `${baseKey}/result/schema.json`
   const resultSummaryKey = `${baseKey}/result/summary.json`
   const normalizedSink: R2NdjsonSink = createR2NdjsonSink(env.DATA_BUCKET, normalizedKey)
+  const logger = createLogger({
+    taskId,
+    datasetId: task.dataset_id,
+    scriptId: decision.scriptId,
+    scriptVersion: decision.scriptVersion,
+  })
   let normalizedCompleted = false
   let outputWriter: StreamingOutputWriter | undefined
 
@@ -134,7 +141,8 @@ export async function executeTask(taskId: string, env: Env['Bindings']) {
         parameters,
         input: normalizedInput(),
         output: outputWriter,
-        logger: { info: () => undefined },
+        // 脚本即使尝试记录参数或原始记录，也会被 Worker logger 的字段白名单剔除。
+        logger: { info: (message, fields) => logger.info(message, fields) },
       })
     } catch (error) {
       if (error instanceof TaskExecutionError) throw error
@@ -172,6 +180,9 @@ export async function executeTask(taskId: string, env: Env['Bindings']) {
       .run()
     return { status: 'succeeded' as const, resultObjectKey: resultKey }
   } catch (error) {
+    logger.error('脚本任务执行失败', {
+      errorCode: error instanceof TaskExecutionError ? error.code : 'UNEXPECTED_TASK_ERROR',
+    })
     await outputWriter?.abort()
     if (!normalizedCompleted) {
       await normalizedSink.abort()

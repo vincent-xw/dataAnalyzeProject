@@ -1,6 +1,7 @@
 import { ScriptDecisionSchema, type ScriptDecision } from '@data-analyze/contracts'
 
 import type { ProcessingContext } from './prompt'
+import { createLogger, type SafeLogger } from '../../lib/logger'
 
 export type LlmBindings = {
   LLM_BASE_URL: string
@@ -46,7 +47,9 @@ export async function requestScriptDecision(
   bindings: LlmBindings,
   fetcher: typeof fetch = fetch,
   timeoutMs = 15_000,
+  logger: SafeLogger = createLogger(),
 ): Promise<ScriptDecision> {
+  const startedAt = Date.now()
   let response: Response
   try {
     response = await fetcher(`${bindings.LLM_BASE_URL.replace(/\/$/, '')}/chat/completions`, {
@@ -70,12 +73,15 @@ export async function requestScriptDecision(
     })
   } catch (error) {
     if (error instanceof DOMException && error.name === 'AbortError') {
+      logger.error('LLM 脚本决策请求超时', { errorCode: 'LLM_REQUEST_TIMEOUT', durationMs: Date.now() - startedAt })
       throw new LlmClientError('LLM_REQUEST_TIMEOUT', 'LLM 请求超时')
     }
+    logger.error('LLM 脚本决策请求失败', { errorCode: 'LLM_REQUEST_FAILED', durationMs: Date.now() - startedAt })
     throw new LlmClientError('LLM_REQUEST_FAILED', 'LLM 请求失败')
   }
 
   if (!response.ok) {
+    logger.error('LLM 脚本决策状态异常', { errorCode: 'LLM_REQUEST_FAILED', durationMs: Date.now() - startedAt })
     throw new LlmClientError('LLM_REQUEST_FAILED', `LLM HTTP 状态异常: ${response.status}`)
   }
 
@@ -85,8 +91,11 @@ export async function requestScriptDecision(
     }
     const content = body.choices?.[0]?.message?.content
     if (!content) throw new Error('LLM_CONTENT_MISSING')
-    return ScriptDecisionSchema.parse(JSON.parse(content))
+    const decision = ScriptDecisionSchema.parse(JSON.parse(content))
+    logger.info('LLM 脚本决策完成', { durationMs: Date.now() - startedAt })
+    return decision
   } catch {
+    logger.error('LLM 脚本决策协议无效', { errorCode: 'LLM_INVALID_RESPONSE', durationMs: Date.now() - startedAt })
     throw new LlmClientError('LLM_INVALID_RESPONSE', 'LLM 响应不符合脚本决策协议')
   }
 }
