@@ -1,0 +1,41 @@
+docs/superpowers/plans/2026-07-14-analysis-execution.md
+  s_ccb52fc5578d7b::t_1ffcf8adbd9c2a 75-76,188-189
+  s_ccb52fc5578d7b::t_56a499e7f3bf93 470
+  s_ccb52fc5578d7b::t_868c5c34624bca 415
+  s_ccb52fc5578d7b::t_15b11d40fc862c 1-74,77-127,130-133,136-187,190,192-253,255-414,416-469,471-483,485-509
+  s_ccb52fc5578d7b::t_30d2f0f6f2c51a 254,484
+  s_ccb52fc5578d7b::t_192b14b6232d1e 128-129,134-135,191
+docs/superpowers/plans/2026-07-14-script-publishing-hardening.md
+  s_ccb52fc5578d7b::t_192b14b6232d1e 379,422
+  s_ccb52fc5578d7b::t_4464ec774df2de 1-101,104-377,380-421,423-453,455-506
+  s_ccb52fc5578d7b::t_0ca46127ade242 102-103,378,454
+docs/superpowers/plans/2026-07-14-foundation-ingestion.md
+  s_ccb52fc5578d7b::t_192b14b6232d1e 19
+  s_ccb52fc5578d7b::t_30d2f0f6f2c51a 91-92,311
+  s_ccb52fc5578d7b::t_0b5f871f969659 9,136-138,430,509
+  s_ccb52fc5578d7b::t_d3b0c231204055 1-8,10-18,20-90,93-135,139-310,312-429,431-508,510-532
+docs/superpowers/specs/2026-07-14-data-analysis-agent-design.md
+  s_ccb52fc5578d7b::t_d08ac7b065b082 4
+docs/superpowers/plans/2026-07-14-reporting.md
+  s_ccb52fc5578d7b::t_b6f55b99b972aa 1-77,80-103,105-167,169-175,177-303,306-377,379-401
+  s_ccb52fc5578d7b::t_30d2f0f6f2c51a 176,378
+  s_ccb52fc5578d7b::t_706aee5fbd5882 168,304-305
+  s_ccb52fc5578d7b::t_1ffcf8adbd9c2a 78-79
+  s_ccb52fc5578d7b::t_192b14b6232d1e 104
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.3",
+  "base_commit_sha": "ca49d27d4e08833de3836814b1a1f972e6ad09b2",
+  "prompts": {},
+  "sessions": {
+    "s_ccb52fc5578d7b": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019f5f35-a53f-7fb0-a9a3-3bd057c963d8",
+        "model": "gpt-5.6-sol"
+      },
+      "human_author": "xuewen.jia <xuewen.jia@ly.com>"
+    }
+  }
+}
