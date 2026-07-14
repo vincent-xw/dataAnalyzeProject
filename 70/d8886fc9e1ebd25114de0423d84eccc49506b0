@@ -1,0 +1,67 @@
+tsconfig.base.json
+  s_ccb52fc5578d7b::t_a3d218f85702c7 1-16
+apps/web/index.html
+  s_ccb52fc5578d7b::t_a3d218f85702c7 1-12
+.gitignore
+  s_ccb52fc5578d7b::t_a3d218f85702c7 1-9
+apps/web/src/App.test.tsx
+  s_ccb52fc5578d7b::t_03aac48d952bf9 1-12
+apps/web/src/main.tsx
+  s_ccb52fc5578d7b::t_34e27998480b45 1-16
+apps/web/src/App.tsx
+  s_ccb52fc5578d7b::t_34e27998480b45 1-3
+apps/worker/src/index.test.ts
+  s_ccb52fc5578d7b::t_03aac48d952bf9 1-12
+apps/web/package.json
+  s_ccb52fc5578d7b::t_253488d6fcdaae 11-26
+  s_ccb52fc5578d7b::t_a3d218f85702c7 1-10,27-28
+apps/web/src/test-setup.ts
+  s_ccb52fc5578d7b::t_a3d218f85702c7 1
+apps/worker/package.json
+  s_ccb52fc5578d7b::t_253488d6fcdaae 11-24
+  s_ccb52fc5578d7b::t_a3d218f85702c7 1-10,25-26
+apps/worker/wrangler.jsonc
+  s_ccb52fc5578d7b::t_a3d218f85702c7 1-8
+apps/worker/vitest.config.ts
+  s_ccb52fc5578d7b::t_a3d218f85702c7 1-7
+packages/contracts/package.json
+  s_ccb52fc5578d7b::t_a3d218f85702c7 1-12,16-17
+  s_ccb52fc5578d7b::t_3b9fb4f74ad190 13-15
+packages/contracts/tsconfig.json
+  s_ccb52fc5578d7b::t_a3d218f85702c7 1-7
+packages/contracts/src/index.ts
+  s_ccb52fc5578d7b::t_a3d218f85702c7 1
+apps/web/tsconfig.json
+  s_ccb52fc5578d7b::t_a3d218f85702c7 1-8
+apps/worker/src/index.ts
+  s_ccb52fc5578d7b::t_34e27998480b45 1-14
+apps/web/vite.config.ts
+  s_ccb52fc5578d7b::t_a3d218f85702c7 1,3-10
+  s_ccb52fc5578d7b::t_ffabb7fe355908 2
+apps/worker/tsconfig.json
+  s_ccb52fc5578d7b::t_a3d218f85702c7 1-7
+package.json
+  s_ccb52fc5578d7b::t_a3d218f85702c7 1-17
+pnpm-workspace.yaml
+  s_ccb52fc5578d7b::t_a3d218f85702c7 1-3
+  s_ccb52fc5578d7b::t_253488d6fcdaae 4,8-9
+  s_ccb52fc5578d7b::t_f3246eff885384 5-7
+pnpm-lock.yaml
+  s_ccb52fc5578d7b::t_e47b782df240d2 1-3276
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.3",
+  "base_commit_sha": "70d8886fc9e1ebd25114de0423d84eccc49506b0",
+  "prompts": {},
+  "sessions": {
+    "s_ccb52fc5578d7b": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019f5f35-a53f-7fb0-a9a3-3bd057c963d8",
+        "model": "gpt-5.6-sol"
+      },
+      "human_author": "xuewen.jia <xuewen.jia@ly.com>"
+    }
+  }
+}
