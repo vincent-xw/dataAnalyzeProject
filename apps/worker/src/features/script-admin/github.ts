@@ -37,7 +37,7 @@ function decodeBase64(value: string): string {
 
 /** 为候选脚本生成确定性的注册表导入和 Map 条目。 */
 function updateRegistrySource(source: string, upload: ScriptUploadRequest): string {
-  const alias = `${upload.id.replace(/-([a-z0-9])/g, (_, char: string) => char.toUpperCase())}${upload.version.replace(/\./g, '_')}Script`
+  const alias = `candidate${upload.id.replace(/-([a-z0-9])/g, (_, char: string) => char.toUpperCase())}${upload.version.replace(/\./g, '_')}Script`
   const importLine = `import { script as ${alias} } from './${upload.id}/${upload.version}'\n`
   const marker = 'const scripts = new Map<string, DataProcessor<unknown>>([\n'
   if (!source.includes(marker)) throw new GitHubApiError(422, '更新脚本注册表')

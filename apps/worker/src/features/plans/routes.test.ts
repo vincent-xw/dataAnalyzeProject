@@ -3,6 +3,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest'
 
 import type { Env } from '../../index'
 import { authenticatedRequest } from '../../testing/request'
+import { syncScriptCatalog } from '../script-admin/sync'
 
 const templateId = '10000000-0000-4000-8000-000000000001'
 const promptVersionId = '10000000-0000-4000-8000-000000000002'
@@ -127,6 +128,38 @@ describe('执行计划 API', () => {
         sourceFields: ['区域', '销售额', '订单号'],
       }),
     )
+    await syncScriptCatalog(env.DB)
+  })
+
+  it('不会把 D1 中未启用的构建脚本暴露给模型', async () => {
+    await env.DB.prepare("UPDATE scripts SET enabled = 0 WHERE id = 'sales-region-summary' AND version = '1.0.0'").run()
+    const fetchMock = vi.spyOn(globalThis, 'fetch').mockImplementation(async (_url, init) => {
+      const body = JSON.parse(String(init?.body)) as { messages: Array<{ role: string; content: string }> }
+      const userContext = JSON.parse(body.messages.find((message) => message.role === 'user')?.content ?? '{}') as { scripts: unknown[] }
+      expect(userContext.scripts).toEqual([])
+      return new Response(JSON.stringify({ choices: [{ message: { content: JSON.stringify({
+        supported: false,
+        scriptId: null,
+        scriptVersion: null,
+        parameters: null,
+        reason: '没有已启用脚本',
+        limitations: ['脚本目录尚未同步'],
+      }) } }] }), { status: 200 })
+    })
+
+    const response = await authenticatedRequest(
+      `/api/dataset-versions/${datasetVersionId}/plans`,
+      {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ promptVersionId, userRequirement: '按区域汇总销售额' }),
+      },
+      requestEnv(createQueue(vi.fn())),
+    )
+
+    expect(response.status).toBe(201)
+    expect(await response.json()).toMatchObject({ decision: { supported: false } })
+    fetchMock.mockRestore()
   })
 
   it('创建推荐时不投递任务且保存模型决策', async () => {
@@ -177,6 +210,21 @@ describe('执行计划 API', () => {
     )
 
     expect(response.status).toBe(409)
+    expect(queueSend).not.toHaveBeenCalled()
+  })
+
+  it('拒绝确认已被目录同步禁用的脚本版本', async () => {
+    const planId = await insertPlan(supportedDecision)
+    await env.DB.prepare("UPDATE scripts SET enabled = 0 WHERE id = 'sales-region-summary' AND version = '1.0.0'").run()
+    const queueSend = vi.fn().mockResolvedValue(undefined)
+    const response = await authenticatedRequest(
+      `/api/plans/${planId}/confirm`,
+      { method: 'POST' },
+      requestEnv(createQueue(queueSend)),
+    )
+
+    expect(response.status).toBe(409)
+    expect(await response.json()).toMatchObject({ code: 'SCRIPT_VERSION_STALE' })
     expect(queueSend).not.toHaveBeenCalled()
   })
 

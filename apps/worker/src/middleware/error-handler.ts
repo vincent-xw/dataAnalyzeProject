@@ -16,6 +16,7 @@ export function requestContext(): MiddlewareHandler<Env> {
     const body: unknown = await context.res.clone().json().catch(() => null)
     if (!body || typeof body !== 'object' || Array.isArray(body) || 'requestId' in body) return
     const headers = new Headers(context.res.headers)
+    headers.delete('content-length')
     context.res = new Response(JSON.stringify({ ...body, requestId }), {
       status: context.res.status,
       headers,

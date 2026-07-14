@@ -71,7 +71,14 @@ export class PlanService {
     }
 
     const fields = z.array(FieldDefinitionSchema).parse(JSON.parse(source.input_schema_json))
-    const availableScripts = listScriptMetadata()
+    const enabledRows = await this.env.DB.prepare(
+      'SELECT id, version FROM scripts WHERE enabled = 1 ORDER BY id, version',
+    ).all<{ id: string; version: string }>()
+    const enabledVersions = new Set(enabledRows.results.map((row) => `${row.id}@${row.version}`))
+    // D1 只负责开放开关，metadata 与可执行代码始终来自当前构建产物。
+    const availableScripts = listScriptMetadata().filter((metadata) =>
+      enabledVersions.has(`${metadata.id}@${metadata.version}`),
+    )
     const context = buildProcessingContext({
       rowCount: source.row_count,
       columnCount: source.column_count,
@@ -85,22 +92,13 @@ export class PlanService {
 
     const planId = crypto.randomUUID()
     const now = new Date().toISOString()
-    const scriptStatements = availableScripts.map((metadata) =>
-      this.env.DB.prepare(
-        `INSERT INTO scripts (id, version, metadata_json, enabled, created_at)
-         VALUES (?, ?, ?, 1, ?)
-         ON CONFLICT(id, version) DO UPDATE SET metadata_json = excluded.metadata_json, enabled = 1`,
-      ).bind(metadata.id, metadata.version, JSON.stringify(metadata), now),
-    )
-    await this.env.DB.batch([
-      ...scriptStatements,
-      this.env.DB.prepare(
-        `INSERT INTO execution_plans
-          (id, dataset_version_id, model_name, prompt_version_id, user_requirement,
-           decision_json, script_id, script_version, parameters_json,
-           confirmation_status, created_at)
-         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 'pending', ?)`,
-      ).bind(
+    await this.env.DB.prepare(
+      `INSERT INTO execution_plans
+        (id, dataset_version_id, model_name, prompt_version_id, user_requirement,
+         decision_json, script_id, script_version, parameters_json,
+         confirmation_status, created_at)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 'pending', ?)`,
+    ).bind(
         planId,
         datasetVersionId,
         this.env.LLM_MODEL,
@@ -111,8 +109,8 @@ export class PlanService {
         decision.supported ? decision.scriptVersion : null,
         decision.supported ? JSON.stringify(decision.parameters) : null,
         now,
-      ),
-    ])
+      )
+      .run()
 
     return { id: planId, decision, confirmationStatus: 'pending' as const, createdAt: now }
   }
@@ -211,6 +209,10 @@ export class PlanService {
     const selectedParameters = parameterOverride ?? decision.parameters
     let script
     try {
+      const catalogEntry = await this.env.DB.prepare(
+        'SELECT enabled FROM scripts WHERE id = ? AND version = ?',
+      ).bind(decision.scriptId, decision.scriptVersion).first<{ enabled: number }>()
+      if (catalogEntry?.enabled !== 1) throw new Error('SCRIPT_NOT_ENABLED')
       script = getScript(decision.scriptId, decision.scriptVersion)
       script.parseParameters(selectedParameters)
     } catch {

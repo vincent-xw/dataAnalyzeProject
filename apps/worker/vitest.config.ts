@@ -29,5 +29,7 @@ export default defineConfig({
   ],
   test: {
     setupFiles: ['./src/testing/setup.ts'],
+    // Cloudflare pool 同时启动过多 workerd 会出现 ECONNRESET；限制并发保证 CI 稳定。
+    maxWorkers: 4,
   },
 })

@@ -5,6 +5,7 @@ import {
   TEST_ACCESS_DOMAIN,
   TEST_ACCESS_PUBLIC_JWK,
 } from '../tests/e2e/test-access-token'
+import { listScriptMetadata } from '../packages/scripts/src/registry'
 
 const workerFilter = ['--filter', '@data-analyze/worker', 'exec', 'wrangler']
 const persistArguments = ['--persist-to', '.wrangler/e2e-state']
@@ -16,6 +17,22 @@ const migration = spawnSync(
   { stdio: 'inherit' },
 )
 if (migration.status !== 0) process.exit(migration.status ?? 1)
+
+/** E2E 显式初始化 D1 脚本目录，模拟生产部署后的同步结果，不使用运行时兜底。 */
+const now = new Date().toISOString()
+const catalogSql = [
+  'UPDATE scripts SET enabled = 0 WHERE enabled = 1',
+  ...listScriptMetadata().map((metadata) => {
+    const serialized = JSON.stringify(metadata).replace(/'/g, "''")
+    return `INSERT INTO scripts (id, version, metadata_json, enabled, created_at) VALUES ('${metadata.id}', '${metadata.version}', '${serialized}', 1, '${now}') ON CONFLICT (id, version) DO UPDATE SET metadata_json = excluded.metadata_json, enabled = 1`
+  }),
+].join('; ')
+const catalog = spawnSync(
+  'pnpm',
+  [...workerFilter, 'd1', 'execute', 'data-analyze-db', '--local', ...persistArguments, '--command', catalogSql],
+  { stdio: 'inherit' },
+)
+if (catalog.status !== 0) process.exit(catalog.status ?? 1)
 
 const worker = spawn(
   'pnpm',

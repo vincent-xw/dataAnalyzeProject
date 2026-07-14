@@ -142,7 +142,7 @@ export async function executeTask(taskId: string, env: Env['Bindings']) {
         input: normalizedInput(),
         output: outputWriter,
         // 脚本即使尝试记录参数或原始记录，也会被 Worker logger 的字段白名单剔除。
-        logger: { info: (message, fields) => logger.info(message, fields) },
+        logger: { info: (_message, fields) => logger.info('脚本运行信息', fields) },
       })
     } catch (error) {
       if (error instanceof TaskExecutionError) throw error
