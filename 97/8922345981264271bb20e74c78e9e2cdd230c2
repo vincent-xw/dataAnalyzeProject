@@ -1,0 +1,69 @@
+apps/worker/src/index.ts
+  s_ccb52fc5578d7b::t_84805018b5e406 28
+  s_ccb52fc5578d7b::t_f4086cb5f60d7f 29
+apps/worker/wrangler.jsonc
+  s_ccb52fc5578d7b::t_84805018b5e406 15
+  s_ccb52fc5578d7b::t_f4086cb5f60d7f 16
+apps/worker/src/testing/env.d.ts
+  s_ccb52fc5578d7b::t_84805018b5e406 18-19
+apps/web/vite.config.ts
+  s_ccb52fc5578d7b::t_84805018b5e406 6-12
+tests/e2e/unsupported-flow.spec.ts
+  s_ccb52fc5578d7b::t_83e5b53080a75f 1-26
+.github/workflows/ci.yml
+  s_ccb52fc5578d7b::t_e392ca01298a33 23-24
+apps/web/src/features/tasks/TaskDetailPage.tsx
+  s_ccb52fc5578d7b::t_84805018b5e406 15-21,57
+package.json
+  s_ccb52fc5578d7b::t_82cff33c2bc13f 16
+  s_ccb52fc5578d7b::t_e4a4d19d67982b 17
+  s_ccb52fc5578d7b::t_83e5b53080a75f 12
+apps/worker/vitest.config.ts
+  s_ccb52fc5578d7b::t_84805018b5e406 23-24
+tests/e2e/helpers.ts
+  s_ccb52fc5578d7b::t_12b33972dd5d1c 15-16
+  s_ccb52fc5578d7b::t_54f40d6dc99234 32
+  s_ccb52fc5578d7b::t_83e5b53080a75f 1-14,17-31,33-60
+scripts/start-e2e-worker.ts
+  s_ccb52fc5578d7b::t_e392ca01298a33 1-45
+apps/worker/src/features/llm/client.ts
+  s_ccb52fc5578d7b::t_84805018b5e406 5,11,54
+playwright.config.ts
+  s_ccb52fc5578d7b::t_e392ca01298a33 5-25
+  s_ccb52fc5578d7b::t_83e5b53080a75f 1-4,26
+apps/worker/src/features/plans/routes.test.ts
+  s_ccb52fc5578d7b::t_84805018b5e406 39-40
+tests/e2e/test-access-token.ts
+  s_ccb52fc5578d7b::t_83e5b53080a75f 1-51
+tests/e2e/main-flow.spec.ts
+  s_ccb52fc5578d7b::t_83e5b53080a75f 1-20
+tests/e2e/fixtures/sales.csv
+  s_ccb52fc5578d7b::t_83e5b53080a75f 1-4
+apps/worker/src/testing/fake-llm.ts
+  s_ccb52fc5578d7b::t_84805018b5e406 1-56
+apps/worker/src/features/reports/llm.ts
+  s_ccb52fc5578d7b::t_84805018b5e406 5,69
+apps/worker/src/middleware/access-auth.ts
+  s_ccb52fc5578d7b::t_977b487df0f566 41
+  s_ccb52fc5578d7b::t_f4086cb5f60d7f 42-52
+  s_ccb52fc5578d7b::t_84805018b5e406 3,16,40,63-70
+  s_ccb52fc5578d7b::t_6a98d45f02f3da 71
+pnpm-lock.yaml
+  s_ccb52fc5578d7b::t_277c5f1fce1d46 11-16,953-957,1526-1530,1699-1708,2515-2518,2936-2938,3083-3090
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.3",
+  "base_commit_sha": "978922345981264271bb20e74c78e9e2cdd230c2",
+  "prompts": {},
+  "sessions": {
+    "s_ccb52fc5578d7b": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019f5f35-a53f-7fb0-a9a3-3bd057c963d8",
+        "model": "gpt-5.6-sol"
+      },
+      "human_author": "xuewen.jia <xuewen.jia@ly.com>"
+    }
+  }
+}
