@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react'
-import { useLocation, useParams } from 'react-router-dom'
+import { useLocation, useNavigate, useParams } from 'react-router-dom'
 
 import type { DatasetInspection, FieldDefinition, FieldMapping } from '@data-analyze/contracts'
 
@@ -83,11 +83,22 @@ function FieldMappingForm({ template, inspection, versionId, onConfirm }: FieldM
 function RoutedFieldMappingPage() {
   const { versionId } = useParams()
   const location = useLocation()
+  const navigate = useNavigate()
   const state = location.state as MappingRouteState | null
   if (!versionId || !state) {
     return <p className="error">缺少字段映射所需的数据集结构，请重新上传并检查文件。</p>
   }
-  return <FieldMappingForm versionId={versionId} template={state.template} inspection={state.inspection} />
+  return (
+    <FieldMappingForm
+      versionId={versionId}
+      template={state.template}
+      inspection={state.inspection}
+      onConfirm={async (mappings) => {
+        await saveFieldMapping(versionId, mappings)
+        navigate(`/datasets/${versionId}/analysis`)
+      }}
+    />
+  )
 }
 
 export function FieldMappingPage(props: FieldMappingProps | Record<string, never>) {

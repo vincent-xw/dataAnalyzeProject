@@ -129,13 +129,23 @@ export class PlanService {
     )
       .bind(id)
       .first()
+    const decision = ScriptDecisionSchema.parse(JSON.parse(plan.decision_json))
+    let scriptMetadata = null
+    if (decision.supported) {
+      try {
+        scriptMetadata = getScript(decision.scriptId, decision.scriptVersion).metadata
+      } catch {
+        // 已失效脚本仍保留原始决策供用户查看，但不能确认执行。
+      }
+    }
     return {
       id: plan.id,
       datasetVersionId: plan.dataset_version_id,
       modelName: plan.model_name,
       promptVersionId: plan.prompt_version_id,
       userRequirement: plan.user_requirement,
-      decision: ScriptDecisionSchema.parse(JSON.parse(plan.decision_json)),
+      decision,
+      scriptMetadata,
       confirmationStatus: plan.confirmation_status,
       confirmedAt: plan.confirmed_at,
       createdAt: plan.created_at,
@@ -143,7 +153,42 @@ export class PlanService {
     }
   }
 
-  async confirm(id: string) {
+  async getAnalysisContext(datasetVersionId: string) {
+    const row = await this.env.DB.prepare(
+      `SELECT d.template_id, at.name AS template_name,
+              at.processing_prompt_version_id, pv.content AS processing_prompt,
+              dv.validation_status
+       FROM dataset_versions dv
+       JOIN datasets d ON d.id = dv.dataset_id
+       JOIN analysis_templates at ON at.id = d.template_id
+       LEFT JOIN prompt_versions pv ON pv.id = at.processing_prompt_version_id
+       WHERE dv.id = ?`,
+    )
+      .bind(datasetVersionId)
+      .first<{
+        template_id: string
+        template_name: string
+        processing_prompt_version_id: string | null
+        processing_prompt: string | null
+        validation_status: string
+      }>()
+    if (!row) throw new PlanServiceError('DATASET_VERSION_NOT_FOUND', '数据集版本不存在', 404)
+    if (row.validation_status !== 'mapped') {
+      throw new PlanServiceError('DATASET_NOT_MAPPED', '数据集尚未完成字段映射', 409)
+    }
+    if (!row.processing_prompt_version_id || !row.processing_prompt) {
+      throw new PlanServiceError('PROCESSING_PROMPT_MISSING', '模板缺少加工 Prompt', 409)
+    }
+    return {
+      datasetVersionId,
+      templateId: row.template_id,
+      templateName: row.template_name,
+      processingPromptVersionId: row.processing_prompt_version_id,
+      processingPrompt: row.processing_prompt,
+    }
+  }
+
+  async confirm(id: string, parameterOverride?: Record<string, unknown>) {
     const plan = await this.env.DB.prepare(
       `SELECT ep.*, d.template_id
        FROM execution_plans ep
@@ -163,10 +208,11 @@ export class PlanService {
       throw new PlanServiceError('PLAN_NOT_SUPPORTED', '不支持的计划不能执行', 409)
     }
 
+    const selectedParameters = parameterOverride ?? decision.parameters
     let script
     try {
       script = getScript(decision.scriptId, decision.scriptVersion)
-      script.parseParameters(decision.parameters)
+      script.parseParameters(selectedParameters)
     } catch {
       throw new PlanServiceError('SCRIPT_VERSION_STALE', '脚本版本或参数已失效', 409)
     }
@@ -188,12 +234,14 @@ export class PlanService {
 
     const taskId = crypto.randomUUID()
     const now = new Date().toISOString()
+    const confirmedDecision = { ...decision, parameters: selectedParameters }
     await this.env.DB.batch([
       this.env.DB.prepare(
         `UPDATE execution_plans
-         SET confirmation_status = 'confirmed', confirmed_at = ?
+         SET confirmation_status = 'confirmed', confirmed_at = ?,
+             decision_json = ?, parameters_json = ?
          WHERE id = ? AND confirmation_status = 'pending'`,
-      ).bind(now, id),
+      ).bind(now, JSON.stringify(confirmedDecision), JSON.stringify(selectedParameters), id),
       this.env.DB.prepare(
         `INSERT INTO processing_tasks
           (id, plan_id, status, retry_count, created_at, updated_at)

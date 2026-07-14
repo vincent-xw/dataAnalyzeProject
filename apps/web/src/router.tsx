@@ -5,6 +5,9 @@ import { DatasetUploadPage } from './features/datasets/DatasetUploadPage'
 import { FieldMappingPage } from './features/datasets/FieldMappingPage'
 import { TemplateEditorPage } from './features/templates/TemplateEditorPage'
 import { TemplateListPage } from './features/templates/TemplateListPage'
+import { AnalysisRequestPage } from './features/analysis/AnalysisRequestPage'
+import { PlanConfirmationPage } from './features/analysis/PlanConfirmationPage'
+import { TaskDetailPage } from './features/tasks/TaskDetailPage'
 
 export const router = createBrowserRouter([
   {
@@ -16,6 +19,9 @@ export const router = createBrowserRouter([
       { path: 'templates/new', element: <TemplateEditorPage /> },
       { path: 'datasets/new', element: <DatasetUploadPage /> },
       { path: 'datasets/:versionId/mapping', element: <FieldMappingPage /> },
+      { path: 'datasets/:versionId/analysis', element: <AnalysisRequestPage /> },
+      { path: 'plans/:planId', element: <PlanConfirmationPage /> },
+      { path: 'tasks/:taskId', element: <TaskDetailPage /> },
     ],
   },
 ])

@@ -12,6 +12,12 @@ const CreatePlanRequestSchema = z
   })
   .strict()
 
+const ConfirmPlanRequestSchema = z
+  .object({
+    parameters: z.record(z.string(), z.unknown()),
+  })
+  .strict()
+
 export const datasetVersionPlanRoutes = new Hono<Env>()
 export const planRoutes = new Hono<Env>()
 
@@ -35,6 +41,15 @@ datasetVersionPlanRoutes.post('/:id/plans', async (context) => {
   }
 })
 
+datasetVersionPlanRoutes.get('/:id/analysis-context', async (context) => {
+  try {
+    const service = new PlanService(context.env)
+    return context.json(await service.getAnalysisContext(context.req.param('id')))
+  } catch (error) {
+    return handlePlanError(context, error)
+  }
+})
+
 planRoutes.get('/:id', async (context) => {
   const service = new PlanService(context.env)
   const plan = await service.get(context.req.param('id'))
@@ -43,9 +58,20 @@ planRoutes.get('/:id', async (context) => {
 })
 
 planRoutes.post('/:id/confirm', async (context) => {
+  const rawBody: unknown = await context.req.json().catch(() => undefined)
+  const request = rawBody === undefined ? undefined : ConfirmPlanRequestSchema.safeParse(rawBody)
+  if (request && !request.success) {
+    return context.json({ code: 'INVALID_REQUEST', message: '确认参数无效' }, 400)
+  }
   try {
     const service = new PlanService(context.env)
-    return context.json(await service.confirm(context.req.param('id')), 202)
+    return context.json(
+      await service.confirm(
+        context.req.param('id'),
+        request?.success ? request.data.parameters : undefined,
+      ),
+      202,
+    )
   } catch (error) {
     return handlePlanError(context, error)
   }
