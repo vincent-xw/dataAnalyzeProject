@@ -1,16 +1,21 @@
 import { useEffect, useRef } from 'react'
-import * as echarts from 'echarts'
+import { BarChart, LineChart, PieChart } from 'echarts/charts'
+import { GridComponent, TooltipComponent } from 'echarts/components'
+import { init, use } from 'echarts/core'
+import { CanvasRenderer } from 'echarts/renderers'
 
 import type { ChartWidget } from '@data-analyze/report-schema'
 
 import type { ReportRow } from '../filter-data'
+
+use([BarChart, LineChart, PieChart, GridComponent, TooltipComponent, CanvasRenderer])
 
 export function EChartWidget({ widget, data }: { widget: ChartWidget; data: ReportRow[] }) {
   const container = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
     if (!container.current || data.length === 0) return
-    const chart = echarts.init(container.current)
+    const chart = init(container.current)
     const dimensions = data.map((row) => String(row[widget.dimension]))
     const metrics = data.map((row) => row[widget.metric])
     const option = widget.type === 'pie'

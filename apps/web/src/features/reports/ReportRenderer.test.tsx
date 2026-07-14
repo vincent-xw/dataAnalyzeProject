@@ -5,7 +5,8 @@ import type { ReportConfig } from '@data-analyze/report-schema'
 
 import { ReportRenderer } from './ReportRenderer'
 
-vi.mock('echarts', () => ({
+vi.mock('echarts/core', () => ({
+  use: vi.fn(),
   init: () => ({ setOption: vi.fn(), resize: vi.fn(), dispose: vi.fn() }),
 }))
 

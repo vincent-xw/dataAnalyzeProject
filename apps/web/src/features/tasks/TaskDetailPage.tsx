@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useParams } from 'react-router-dom'
+import { Link } from 'react-router-dom'
 
 import { apiRequest } from '../../api/client'
 
@@ -50,6 +51,7 @@ export function TaskDetailPage() {
       <p>执行次数：{task.retryCount}</p>
       {task.summary ? <pre>{JSON.stringify(task.summary, null, 2)}</pre> : null}
       {task.error ? <p className="error">{task.error.code}：{task.error.message}</p> : null}
+      {task.status === 'succeeded' ? <Link to={`/tasks/${task.id}/reports/new`}>创建报表</Link> : null}
     </section>
   )
 }

@@ -8,6 +8,8 @@ import { TemplateListPage } from './features/templates/TemplateListPage'
 import { AnalysisRequestPage } from './features/analysis/AnalysisRequestPage'
 import { PlanConfirmationPage } from './features/analysis/PlanConfirmationPage'
 import { TaskDetailPage } from './features/tasks/TaskDetailPage'
+import { ReportEditorPage } from './features/reports/ReportEditorPage'
+import { ReportViewPage } from './features/reports/ReportViewPage'
 
 export const router = createBrowserRouter([
   {
@@ -22,6 +24,8 @@ export const router = createBrowserRouter([
       { path: 'datasets/:versionId/analysis', element: <AnalysisRequestPage /> },
       { path: 'plans/:planId', element: <PlanConfirmationPage /> },
       { path: 'tasks/:taskId', element: <TaskDetailPage /> },
+      { path: 'tasks/:taskId/reports/new', element: <ReportEditorPage /> },
+      { path: 'reports/:reportVersionId', element: <ReportViewPage /> },
     ],
   },
 ])
