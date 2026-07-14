@@ -63,6 +63,9 @@ importers:
       '@data-analyze/contracts':
         specifier: workspace:*
         version: link:../../packages/contracts
+      '@data-analyze/report-schema':
+        specifier: workspace:*
+        version: link:../../packages/report-schema
       '@data-analyze/script-sdk':
         specifier: workspace:*
         version: link:../../packages/script-sdk
