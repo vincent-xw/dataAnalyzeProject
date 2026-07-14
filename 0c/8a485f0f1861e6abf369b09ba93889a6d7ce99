@@ -1,0 +1,28 @@
+packages/contracts/src/script-upload.test.ts
+  s_ccb52fc5578d7b::t_0f34a9cbe3ac54 1-50
+apps/worker/src/features/script-admin/github.test.ts
+  s_ccb52fc5578d7b::t_0f34a9cbe3ac54 1-31,36-58
+  s_ccb52fc5578d7b::t_c2479f5b6c4e00 32-35
+apps/worker/src/features/script-admin/github.ts
+  s_ccb52fc5578d7b::t_c2479f5b6c4e00 1-141
+packages/contracts/src/index.ts
+  s_ccb52fc5578d7b::t_c2479f5b6c4e00 3
+packages/contracts/src/script-upload.ts
+  s_ccb52fc5578d7b::t_c2479f5b6c4e00 1-37
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.3",
+  "base_commit_sha": "0c8a485f0f1861e6abf369b09ba93889a6d7ce99",
+  "prompts": {},
+  "sessions": {
+    "s_ccb52fc5578d7b": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019f5f35-a53f-7fb0-a9a3-3bd057c963d8",
+        "model": "gpt-5.6-sol"
+      },
+      "human_author": "xuewen.jia <xuewen.jia@ly.com>"
+    }
+  }
+}
