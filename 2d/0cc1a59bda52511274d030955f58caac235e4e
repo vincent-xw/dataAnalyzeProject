@@ -1,0 +1,113 @@
+apps/worker/src/features/datasets/inspect-csv.ts
+  s_edbf29209c8443::t_4fc889aa9c6daf 18-31,64
+apps/worker/src/features/datasets/upload.ts
+  s_edbf29209c8443::t_3fe0497ec2272b 27-35,41,45,48,74,76,79
+  s_edbf29209c8443::t_12f0f097011d2b 16,73,75,77-78,80-83,86
+  s_edbf29209c8443::t_3750c45b67c0ae 84
+  s_edbf29209c8443::t_871a26aa3943aa 12-15,85
+docs/superpowers/plans/2026-07-16-template-prompts-and-source-inspection.md
+  s_edbf29209c8443::t_da541a8ded24c8 1-133
+apps/web/src/features/templates/TemplateEditorPage.tsx
+  s_edbf29209c8443::t_cbee78449649ea 10,60-93,106,114,118,146
+  s_edbf29209c8443::t_5eb464c570d1ab 105,131,182-183
+  s_edbf29209c8443::t_a21f9c4aa41d25 9,48-49,116,123,151
+  s_edbf29209c8443::t_921b7bb572c588 44-47,50-51,109,111,113,115,117,119-122,124-129,132-133,144-145,147-150,152-155
+  s_edbf29209c8443::t_30cb5e4ea06c47 104,110,112,139,181,184-185
+  s_edbf29209c8443::t_3fe0497ec2272b 6,107,130,186-193
+  s_edbf29209c8443::t_ac767dd3a67d40 7,18-36,41-42,52,172,174,177-178
+  s_edbf29209c8443::t_c73252984ab383 8
+  s_edbf29209c8443::t_7c4beffd157461 108
+apps/web/src/features/templates/PromptEditorDialog.tsx
+  s_edbf29209c8443::t_ac767dd3a67d40 1-34
+apps/web/src/features/datasets/DatasetUploadPage.tsx
+  s_edbf29209c8443::t_3fe0497ec2272b 61
+apps/worker/src/features/templates/routes.test.ts
+  s_edbf29209c8443::t_7ed68b0abb3ded 115-116
+  s_edbf29209c8443::t_fd8809b658c72e 6,195-198,202-203
+  s_edbf29209c8443::t_191fa51afc70cc 118
+  s_edbf29209c8443::t_4fae7a50c0867f 117
+  s_edbf29209c8443::t_e6780a1443dc53 100-101,103-112,114,119
+  s_edbf29209c8443::t_340fd90401d775 120-139
+  s_edbf29209c8443::t_b0c461a01d5124 102
+  s_edbf29209c8443::t_5cc68070ef2b77 113
+  s_edbf29209c8443::t_066d8c6545f40a 7,199-201,204
+  s_edbf29209c8443::t_1dc751f0c07718 3,155-194,205
+  s_edbf29209c8443::t_37cfe2258d2981 140-154,206
+apps/worker/src/features/reports/llm.ts
+  s_edbf29209c8443::t_fff0298d7c7a03 12,81-82
+apps/web/src/features/templates/TemplateEditorPage.test.tsx
+  s_edbf29209c8443::t_4a0b3842b8e27b 59-74
+  s_edbf29209c8443::t_71b573c593615b 1,14
+  s_edbf29209c8443::t_e46d54997a56ff 2-3,5-8,15-38,58,75
+  s_edbf29209c8443::t_4ed112a30da8b2 4,9-11,13,39-43,45-54
+  s_edbf29209c8443::t_87ab0834d9c885 12,44,55-57
+apps/worker/src/features/llm/prompt.ts
+  s_edbf29209c8443::t_fff0298d7c7a03 9
+apps/worker/src/testing/fake-llm.ts
+  s_edbf29209c8443::t_7a0ba84a7ed2ec 1,28-34
+  s_edbf29209c8443::t_bd080e1d28bc2d 35-36
+apps/worker/src/lib/logger.ts
+  s_edbf29209c8443::t_c3ece0e2eb7136 10
+  s_edbf29209c8443::t_b8debe36570b8d 11
+apps/worker/src/features/templates/routes.ts
+  s_edbf29209c8443::t_a54ed8c76a1b2e 7,75-83,85-91
+  s_edbf29209c8443::t_c7c68eee121491 8-9,37-40,46-54,61-72,84
+  s_edbf29209c8443::t_3750c45b67c0ae 41-45
+  h_c3a612a540ca0b 73-74
+  s_edbf29209c8443::t_3fe0497ec2272b 10,55-57
+  s_edbf29209c8443::t_19e78d2ad88cee 1
+  s_edbf29209c8443::t_4fc889aa9c6daf 58-60
+  s_edbf29209c8443::t_76bb3bfd6aecae 92
+apps/worker/src/features/reports/llm.test.ts
+  s_edbf29209c8443::t_ec14fbc6f4ef5b 54
+apps/web/src/styles.css
+  s_edbf29209c8443::t_ac767dd3a67d40 65-99
+  s_edbf29209c8443::t_30cb5e4ea06c47 104-129
+packages/contracts/src/dataset.ts
+  s_edbf29209c8443::t_7a0ba84a7ed2ec 52-56,61
+apps/worker/src/features/datasets/inspect-xlsx.ts
+  s_edbf29209c8443::t_4fc889aa9c6daf 5,54
+apps/worker/src/features/llm/client.ts
+  s_edbf29209c8443::t_cfb7749e6521a0 89-90,96-100,146-149,151-162
+  s_edbf29209c8443::t_b8debe36570b8d 91-95,150
+  s_edbf29209c8443::t_5f71eedfd42222 56,63-67,76-79
+  s_edbf29209c8443::t_cce98db9918d89 1-8,12,44-55,57-59,68-75,82-84,86-88,101-103,105-106,114,144,163
+  s_edbf29209c8443::t_fff0298d7c7a03 80-81,191-192
+  h_c3a612a540ca0b 85
+  s_edbf29209c8443::t_c3ece0e2eb7136 30-43,104,107-113,115-143,145
+  s_edbf29209c8443::t_3f34ff4142ba9f 60-62
+apps/worker/src/features/llm/client.test.ts
+  s_edbf29209c8443::t_36557601763342 3,86-94,104-113
+  s_edbf29209c8443::t_cf23467e0e8e51 95-100,103
+  s_edbf29209c8443::t_ba48675b76c39d 43-46
+  s_edbf29209c8443::t_235b64c0ec083b 101-102
+  s_edbf29209c8443::t_47114d9d517767 116-130
+  s_edbf29209c8443::t_dba9e8a0bf02b1 114,144-159
+  s_edbf29209c8443::t_4906dc6c1d6e74 115,131-143
+  s_edbf29209c8443::t_1c0ccc337035ba 160
+ARCHITECTURE.md
+  s_edbf29209c8443::t_fc308949d3c72c 135-136
+  s_edbf29209c8443::t_cc88b4b4700c36 1-81,86-115,119-134,137-166
+  s_edbf29209c8443::t_1538b3509ccbae 82-85,116-118
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.3",
+  "base_commit_sha": "2d0cc1a59bda52511274d030955f58caac235e4e",
+  "prompts": {},
+  "humans": {
+    "h_c3a612a540ca0b": {
+      "author": "xuewen.jia <xuewen.jia@ly.com>"
+    }
+  },
+  "sessions": {
+    "s_edbf29209c8443": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019f650a-a789-7b51-899b-e27b3fb6cc98",
+        "model": "gpt-5.6-terra"
+      },
+      "human_author": "xuewen.jia <xuewen.jia@ly.com>"
+    }
+  }
+}
