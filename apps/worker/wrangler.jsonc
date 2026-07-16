@@ -1,46 +1,59 @@
 {
-  "$schema": "node_modules/wrangler/config-schema.json",
-  "name": "data-analyze-worker",
-  "main": "src/index.ts",
-  "compatibility_date": "2026-07-14",
-  "compatibility_flags": ["nodejs_compat"],
-  "workers_dev": false,
-  "vars": {
-    "LLM_BASE_URL": "https://llm.example.com/v1",
-    "LLM_MODEL": "unified-model",
-    "CF_ACCESS_TEAM_DOMAIN": "replace.cloudflareaccess.com",
-    "CF_ACCESS_AUD": "replace-with-access-audience",
-    "GITHUB_OWNER": "replace-with-github-owner",
-    "GITHUB_REPO": "replace-with-github-repo",
-    "GITHUB_BASE_BRANCH": "main",
-    "ENVIRONMENT": "production"
-  },
-  "r2_buckets": [
-    {
-      "binding": "DATA_BUCKET",
-      "bucket_name": "data-analyze-data"
-    }
-  ],
-  "queues": {
-    "producers": [
-      {
-        "binding": "TASK_QUEUE",
-        "queue": "data-analyze-tasks"
-      }
-    ],
-    "consumers": [
-      {
-        "queue": "data-analyze-tasks",
-        "max_retries": 2
-      }
-    ]
-  },
-  "d1_databases": [
-    {
-      "binding": "DB",
-      "database_name": "data-analyze-db",
-      "database_id": "00000000-0000-0000-0000-000000000001",
-      "migrations_dir": "migrations"
-    }
-  ]
+	"$schema": "node_modules/wrangler/config-schema.json",
+	"name": "data-analyze-worker",
+	"main": "src/index.ts",
+	"compatibility_date": "2026-07-14",
+	"compatibility_flags": [
+		"nodejs_compat"
+	],
+	"workers_dev": false,
+	"vars": {
+		"LLM_BASE_URL": "https://api.deepseek.com",
+		"LLM_MODEL": "deepseek-v4-flash",
+		"CF_ACCESS_TEAM_DOMAIN": "bold-pine-ccca.cloudflareaccess.com",
+		"CF_ACCESS_AUD": "098b3ab19f6cea0000ed52468f3f49c8a3fd4f85c770a0a273395c56f6a11d60",
+		"GITHUB_OWNER": "vincent-xw",
+		"GITHUB_REPO": "dataAnalyzeProject",
+		"GITHUB_BASE_BRANCH": "main",
+		"ENVIRONMENT": "production"
+	},
+	"r2_buckets": [
+		{
+			"binding": "DATA_BUCKET",
+			"bucket_name": "data-analyze-data"
+		},
+		{
+			"bucket_name": "data-analyze-data",
+			"binding": "data_analyze_data",
+			"remote": true
+		}
+	],
+	"queues": {
+		"producers": [
+			{
+				"binding": "TASK_QUEUE",
+				"queue": "data-analyze-tasks"
+			}
+		],
+		"consumers": [
+			{
+				"queue": "data-analyze-tasks",
+				"max_retries": 2
+			}
+		]
+	},
+	"d1_databases": [
+		{
+			"binding": "DB",
+			"database_name": "data-analyze-db",
+			"database_id": "00a898db-0120-4de1-b651-a348da9ddf81",
+			"migrations_dir": "migrations"
+		},
+		{
+			"binding": "data_analyze_db",
+			"database_name": "data-analyze-db",
+			"database_id": "00a898db-0120-4de1-b651-a348da9ddf81",
+			"remote": true
+		}
+	]
 }
