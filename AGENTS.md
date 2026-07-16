@@ -17,6 +17,8 @@
 pnpm install --frozen-lockfile  # 按 lockfile 安装依赖
 pnpm --filter @data-analyze/web dev  # 启动 Vite 前端
 pnpm --filter @data-analyze/worker dev  # 启动本地 Worker
+pnpm dev:worker  # 初始化本地 D1、脚本目录并启动可手工联调的 Worker
+pnpm dev:web  # 启动带本地开发认证代理的 Vite 前端
 pnpm validate:scripts  # 校验静态脚本注册表
 pnpm typecheck && pnpm test && pnpm build
 pnpm test:e2e  # 启动本地服务、应用 D1 Migration 并运行 Playwright

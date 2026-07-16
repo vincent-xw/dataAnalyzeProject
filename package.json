@@ -6,6 +6,8 @@
     "node": "22.23.1"
   },
   "scripts": {
+    "dev:worker": "node --import tsx scripts/start-dev-worker.ts",
+    "dev:web": "pnpm --filter @data-analyze/web dev",
     "validate:scripts": "node --import tsx scripts/validate-script-registry.ts",
     "typecheck": "pnpm -r typecheck",
     "test": "vitest run scripts/validate-script-registry.test.ts && pnpm -r test",

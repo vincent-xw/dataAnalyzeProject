@@ -6,8 +6,14 @@ export default defineConfig({
   server: {
     // 浏览器保持同源请求，开发代理将 Access JWT 原样转发给本地 Worker。
     proxy: {
-      '/api': 'http://127.0.0.1:8787',
-      '/internal': 'http://127.0.0.1:8787',
+      '/api': {
+        target: 'http://127.0.0.1:8787',
+        headers: { 'X-Local-Dev-Session': 'vite-proxy' },
+      },
+      '/internal': {
+        target: 'http://127.0.0.1:8787',
+        headers: { 'X-Local-Dev-Session': 'vite-proxy' },
+      },
     },
   },
   test: {

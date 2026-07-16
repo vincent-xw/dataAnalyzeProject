@@ -21,11 +21,6 @@
 		{
 			"binding": "DATA_BUCKET",
 			"bucket_name": "data-analyze-data"
-		},
-		{
-			"bucket_name": "data-analyze-data",
-			"binding": "data_analyze_data",
-			"remote": true
 		}
 	],
 	"queues": {
@@ -48,12 +43,6 @@
 			"database_name": "data-analyze-db",
 			"database_id": "00a898db-0120-4de1-b651-a348da9ddf81",
 			"migrations_dir": "migrations"
-		},
-		{
-			"binding": "data_analyze_db",
-			"database_name": "data-analyze-db",
-			"database_id": "00a898db-0120-4de1-b651-a348da9ddf81",
-			"remote": true
 		}
 	]
 }

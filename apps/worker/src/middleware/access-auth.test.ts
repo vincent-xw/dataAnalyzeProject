@@ -11,6 +11,27 @@ describe('Cloudflare Access 认证', () => {
     expect(await response.json()).toMatchObject({ code: 'ACCESS_TOKEN_REQUIRED' })
   })
 
+  it('开发代理标记不能绕过非开发环境认证', async () => {
+    const response = await app.request(
+      '/api/templates',
+      { headers: { 'X-Local-Dev-Session': 'vite-proxy' } },
+      env,
+    )
+
+    expect(response.status).toBe(401)
+    expect(await response.json()).toMatchObject({ code: 'ACCESS_TOKEN_REQUIRED' })
+  })
+
+  it('开发环境允许 Vite 代理注入本地开发用户', async () => {
+    const response = await app.request(
+      '/api/templates',
+      { headers: { 'X-Local-Dev-Session': 'vite-proxy' } },
+      { ...env, ENVIRONMENT: 'development' },
+    )
+
+    expect(response.status).toBe(200)
+  })
+
   it('无效 JWT 不能访问 API', async () => {
     const response = await app.request(
       '/api/templates',

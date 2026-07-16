@@ -14,6 +14,9 @@ type KeyFactory = (issuer: string) => JWTVerifyGetKey
 
 const jwksByIssuer = new Map<string, ReturnType<typeof createRemoteJWKSet>>()
 const testKeysByJwk = new Map<string, ReturnType<typeof importJWK>>()
+const localDevelopmentSessionHeader = 'X-Local-Dev-Session'
+const localDevelopmentSessionValue = 'vite-proxy'
+const localDevelopmentEmail = 'local-developer@example.test'
 
 let keyFactory: KeyFactory = (issuer) => {
   const cached = jwksByIssuer.get(issuer)
@@ -30,6 +33,16 @@ export function setAccessKeyFactoryForTest(factory: KeyFactory) {
 
 export function requireAccess(): MiddlewareHandler<Env> {
   return async (context, next) => {
+    // 仅由 `pnpm dev:worker` 启动的本地 Worker 接受 Vite 代理标记，生产与测试环境仍必须校验 JWT。
+    if (
+      context.env.ENVIRONMENT === 'development'
+      && context.req.header(localDevelopmentSessionHeader) === localDevelopmentSessionValue
+    ) {
+      context.set('authenticatedUser', { email: localDevelopmentEmail })
+      await next()
+      return
+    }
+
     const token = context.req.header('Cf-Access-Jwt-Assertion')
     if (!token) {
       return context.json({ code: 'ACCESS_TOKEN_REQUIRED', message: '需要登录' }, 401)

@@ -29,6 +29,17 @@ pnpm test:e2e
 
 `pnpm test:e2e` 会应用本地 D1 Migration，启动 Wrangler、Vite 和 Chromium，并使用测试专用私钥签发完整 JWT。测试模式仍校验签名、issuer、audience 和邮箱，不存在认证旁路；固定 LLM 响应也只在 `ENVIRONMENT=test` 时启用。
 
+## 本地开发
+
+复制 `apps/worker/.dev.vars.example` 为 `apps/worker/.dev.vars`，填写本地联调所需的 `LLM_API_KEY`；若要调试候选脚本 PR，再填写 `GITHUB_TOKEN`。随后在两个终端分别执行：
+
+```bash
+pnpm dev:worker
+pnpm dev:web
+```
+
+`pnpm dev:worker` 会使用 `.wrangler/dev-state` 初始化本地 D1 和脚本目录，并以 `ENVIRONMENT=development` 启动 Worker。Vite 代理只在该环境向本地 Worker 注入固定开发身份；生产环境与测试环境仍强制执行原有 Access JWT 校验。
+
 ## 主要流程
 
 1. 创建分析模板和标准字段，保存加工/报表 Prompt 版本。
