@@ -1,0 +1,35 @@
+apps/worker/src/middleware/access-auth.ts
+  s_edbf29209c8443::t_d8a0210921cdfc 17-19,36-45
+AGENTS.md
+  s_edbf29209c8443::t_d8a0210921cdfc 20-21
+apps/web/vite.config.ts
+  s_edbf29209c8443::t_d8a0210921cdfc 9-16
+apps/worker/wrangler.jsonc
+  s_edbf29209c8443::t_d39b5dd9c564ea 48
+README.md
+  s_edbf29209c8443::t_d8a0210921cdfc 32-42
+scripts/start-dev-worker.ts
+  s_edbf29209c8443::t_d8a0210921cdfc 1-50
+package.json
+  s_edbf29209c8443::t_d8a0210921cdfc 9-10
+apps/worker/src/middleware/access-auth.test.ts
+  s_edbf29209c8443::t_f924fad379b715 14-34
+apps/worker/.dev.vars.example
+  s_edbf29209c8443::t_d8a0210921cdfc 1-3
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.3",
+  "base_commit_sha": "de94a62c91563f0b9cbd181871ebfccdbc445600",
+  "prompts": {},
+  "sessions": {
+    "s_edbf29209c8443": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019f650a-a789-7b51-899b-e27b3fb6cc98",
+        "model": "gpt-5.6-terra"
+      },
+      "human_author": "xuewen.jia <xuewen.jia@ly.com>"
+    }
+  }
+}
