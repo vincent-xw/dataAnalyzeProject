@@ -1,4 +1,4 @@
-import type { ScriptDecision } from '@data-analyze/contracts'
+import type { DatasetInspection, FieldDefinition, ScriptDecision } from '@data-analyze/contracts'
 import type { ReportConfig } from '@data-analyze/report-schema'
 
 import type { ProcessingContext } from '../features/llm/prompt'
@@ -23,6 +23,15 @@ export function createFakeScriptDecision(context: ProcessingContext): ScriptDeci
     reason: '区域销售汇总脚本与字段结构和本次需求完全匹配',
     limitations: [],
   }
+}
+
+export function createFakeFieldDefinitions(inspection: DatasetInspection): FieldDefinition[] {
+  return inspection.sourceFields.map((sourceField, index) => ({
+    name: sourceField.replace(/[^a-zA-Z0-9]+/g, '_').replace(/^_|_$/g, '').toLowerCase() || `field_${index + 1}`,
+    type: 'string',
+    description: sourceField,
+    required: false,
+  }))
 }
 
 /** E2E 固定报表配置严格使用系统内置组件和脚本输出字段。 */

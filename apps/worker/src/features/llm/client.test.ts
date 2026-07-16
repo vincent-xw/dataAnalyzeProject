@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from 'vitest'
 
-import { requestScriptDecision } from './client'
+import { requestFieldDefinitions, requestScriptDecision } from './client'
 
 const context = {
   platformRules: '严格规则',
@@ -40,10 +40,10 @@ describe('requestScriptDecision', () => {
       supported: true,
       scriptVersion: '1.0.0',
     })
-    expect(fetcher).toHaveBeenCalledWith(
-      'https://llm.example.com/v1/chat/completions',
-      expect.objectContaining({ method: 'POST' }),
-    )
+    const request = fetcher.mock.calls[0]?.[1]
+    expect(request).toEqual(expect.objectContaining({ method: 'POST' }))
+    const payload = JSON.parse(String(request?.body))
+    expect(payload.response_format).toEqual({ type: 'json_object' })
   })
 
   it('拒绝非 JSON 和不符合 Schema 的响应', async () => {
@@ -81,5 +81,80 @@ describe('requestScriptDecision', () => {
     await expect(requestScriptDecision(context, llmEnv, fetcher)).resolves.toMatchObject({
       supported: false,
     })
+  })
+})
+
+describe('requestFieldDefinitions', () => {
+  it('按表头返回可编辑的标准字段', async () => {
+    const fetcher = vi.fn<typeof fetch>().mockResolvedValue(completion({
+      fields: [{ name: 'sales_amount', type: 'number', description: '销售额', required: true }],
+    }))
+    await expect(requestFieldDefinitions({ rowCount: 2, columnCount: 1, sheets: [], sourceFields: ['金额'] }, llmEnv, '', fetcher)).resolves.toEqual([
+      { name: 'sales_amount', type: 'number', description: '销售额', required: true },
+    ])
+    const request = fetcher.mock.calls[0]?.[1]
+    expect(request).toEqual(expect.objectContaining({ method: 'POST' }))
+    const payload = JSON.parse(String(request?.body))
+    expect(payload.messages).toEqual(expect.arrayContaining([
+      expect.objectContaining({ role: 'user' }),
+    ]))
+    expect(payload.messages[0].content).toContain('"fields"')
+    expect(payload.messages[0].content).toContain('string | number | boolean | date')
+    expect(payload.response_format).toEqual({ type: 'json_object' })
+  })
+
+  it('拒绝重复标准字段名', async () => {
+    const fetcher = vi.fn<typeof fetch>().mockResolvedValue(completion({
+      fields: [
+        { name: 'amount', type: 'number', description: '金额', required: false },
+        { name: 'amount', type: 'number', description: '金额2', required: false },
+      ],
+    }))
+    await expect(requestFieldDefinitions({ rowCount: 2, columnCount: 1, sheets: [], sourceFields: ['金额'] }, llmEnv, '', fetcher)).rejects.toMatchObject({ code: 'LLM_INVALID_RESPONSE' })
+  })
+
+  it('记录字段协议校验失败的安全原因', async () => {
+    const logger = { info: vi.fn(), error: vi.fn() }
+    const fetcher = vi.fn<typeof fetch>().mockResolvedValue(completion({
+      fields: [{ name: 'sales_amount', type: 'decimal', description: '销售额', required: true }],
+    }))
+
+    await expect(
+      requestFieldDefinitions({ rowCount: 2, columnCount: 1, sheets: [], sourceFields: ['金额'] }, llmEnv, '', fetcher, 15_000, logger),
+    ).rejects.toMatchObject({ code: 'LLM_INVALID_RESPONSE' })
+    expect(logger.error).toHaveBeenCalledWith(
+      'LLM 标准字段协议无效',
+      expect.objectContaining({ failureReason: 'FIELD_DEFINITION_INVALID' }),
+    )
+  })
+
+  it('保留上游字段生成失败的安全错误信息', async () => {
+    const fetcher = vi.fn<typeof fetch>().mockResolvedValue(new Response(
+      JSON.stringify({ error: { code: 'invalid_param', message: 'response_format 不受当前模型支持' } }),
+      { status: 400, headers: { 'content-type': 'application/json' } },
+    ))
+
+    await expect(
+      requestFieldDefinitions({ rowCount: 2, columnCount: 1, sheets: [], sourceFields: ['金额'] }, llmEnv, '', fetcher),
+    ).rejects.toMatchObject({
+      code: 'LLM_REQUEST_FAILED',
+      message: 'LLM HTTP 状态异常: 400（invalid_param：response_format 不受当前模型支持）',
+    })
+  })
+
+  it('非 JSON 上游错误不解析响应体且记录 HTTP 状态', async () => {
+    const logger = { info: vi.fn(), error: vi.fn() }
+    const fetcher = vi.fn<typeof fetch>().mockResolvedValue(new Response(
+      new Uint8Array([0, 1, 2]),
+      { status: 403, headers: { 'content-type': 'application/octet-stream' } },
+    ))
+
+    await expect(
+      requestFieldDefinitions({ rowCount: 2, columnCount: 1, sheets: [], sourceFields: ['金额'] }, llmEnv, '', fetcher, 15_000, logger),
+    ).rejects.toMatchObject({ message: 'LLM HTTP 状态异常: 403' })
+    expect(logger.error).toHaveBeenCalledWith(
+      'LLM 标准字段状态异常',
+      expect.objectContaining({ errorCode: 'LLM_REQUEST_FAILED', upstreamStatus: 403 }),
+    )
   })
 })

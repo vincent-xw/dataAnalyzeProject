@@ -58,7 +58,7 @@ export function DatasetUploadPage() {
         : 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
       const uploaded = await apiRequest<UploadResult>('/api/datasets', {
         method: 'POST',
-        headers: { 'content-type': contentType, 'x-file-name': file.name, 'x-template-id': selectedTemplate.id },
+        headers: { 'content-type': contentType, 'x-file-name': encodeURIComponent(file.name), 'x-template-id': selectedTemplate.id },
         body: file,
       })
       await inspect(uploaded.versionId)

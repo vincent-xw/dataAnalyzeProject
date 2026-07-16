@@ -9,6 +9,7 @@ export const REPORT_PLATFORM_RULES = [
   '只能引用结果 Schema 中存在的字段。',
   '不得输出 HTML、JavaScript、CSS 或运行时表达式。',
   '不得生成代码或自定义组件。',
+  '只返回一个合法 JSON 对象，不要使用 Markdown 代码块。',
 ].join('\n')
 
 export class ReportLlmError extends Error {
@@ -45,18 +46,6 @@ const componentProtocol = {
   layout: { columns: 12, x: '0..11', w: '1..12', h: '1..12' },
 } as const
 
-const responseJsonSchema = {
-  type: 'object',
-  required: ['title', 'description', 'filters', 'widgets'],
-  properties: {
-    title: { type: 'string' },
-    description: { type: 'string' },
-    filters: { type: 'array' },
-    widgets: { type: 'array', minItems: 1 },
-  },
-  additionalProperties: false,
-} as const
-
 /**
  * 输入类型不包含结果数据、任务对象 Key 或 URL；模型只能看到字段描述和固定组件协议。
  */
@@ -89,10 +78,8 @@ export async function requestReportConfig(
             }),
           },
         ],
-        response_format: {
-          type: 'json_schema',
-          json_schema: { name: 'report_config', strict: true, schema: responseJsonSchema },
-        },
+        // 当前模型不支持 json_schema；输出结构仍由后续 Zod 校验严格限制。
+        response_format: { type: 'json_object' },
       }),
       signal: AbortSignal.timeout(timeoutMs),
     })

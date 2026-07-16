@@ -7,6 +7,8 @@ const allowedFieldNames = [
   'scriptVersion',
   'reportId',
   'errorCode',
+  'failureReason',
+  'upstreamStatus',
   'durationMs',
 ] as const
 

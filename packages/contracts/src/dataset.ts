@@ -49,7 +49,13 @@ export const DatasetInspectionSchema = z.object({
   sourceFields: z.array(z.string().min(1)).max(200),
 })
 
+export const FieldGenerationRequestSchema = z.object({
+  inspection: DatasetInspectionSchema,
+  instruction: z.string().max(2000).optional(),
+})
+
 export type FieldType = z.infer<typeof FieldTypeSchema>
 export type FieldDefinition = z.infer<typeof FieldDefinitionSchema>
 export type FieldMapping = z.infer<typeof FieldMappingSchema>
 export type DatasetInspection = z.infer<typeof DatasetInspectionSchema>
+export type FieldGenerationRequest = z.infer<typeof FieldGenerationRequestSchema>

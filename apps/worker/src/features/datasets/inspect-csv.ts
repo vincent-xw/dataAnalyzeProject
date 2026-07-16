@@ -15,6 +15,20 @@ export class InspectionError extends Error {
   }
 }
 
+/** 重复列以清理后的列名和原始列序号呈现，帮助维护者定位肉眼不易发现的空格差异。 */
+export function describeDuplicateHeaders(headers: string[]) {
+  const positionsByHeader = new Map<string, number[]>()
+  headers.forEach((header, index) => {
+    const positions = positionsByHeader.get(header) || []
+    positions.push(index + 1)
+    positionsByHeader.set(header, positions)
+  })
+  return [...positionsByHeader.entries()]
+    .filter(([, positions]) => positions.length > 1)
+    .map(([header, positions]) => `“${header}”（第 ${positions.join('、')} 列）`)
+    .join('；')
+}
+
 /**
  * 解析 CSV 表头和行数。原始文件已经限制为 10 MB；循环仍会在越界瞬间终止，
  * 避免对已知无效文件继续消耗 Worker CPU 和内存。
@@ -47,7 +61,7 @@ export async function inspectCsv(
         throw new InspectionError('INVALID_HEADER', 'CSV 表头不能为空')
       }
       if (new Set(sourceFields).size !== sourceFields.length) {
-        throw new InspectionError('DUPLICATE_HEADER', 'CSV 表头不能重复')
+        throw new InspectionError('DUPLICATE_HEADER', `CSV 表头不能重复：${describeDuplicateHeaders(sourceFields)}`)
       }
       continue
     }

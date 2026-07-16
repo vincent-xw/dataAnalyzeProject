@@ -62,8 +62,69 @@ textarea {
   min-height: 120px;
 }
 
+.prompt-dialog-backdrop {
+  position: fixed;
+  z-index: 10;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+  background: rgb(23 32 51 / 55%);
+}
+
+.prompt-dialog {
+  display: grid;
+  width: min(960px, 100%);
+  max-height: calc(100vh - 48px);
+  gap: 20px;
+  padding: 24px;
+  overflow: auto;
+  border-radius: 12px;
+  background: white;
+}
+
+.prompt-dialog header {
+  justify-content: space-between;
+}
+
+.prompt-dialog h2 {
+  margin: 0;
+}
+
+.prompt-dialog-editor textarea {
+  min-height: min(62vh, 680px);
+  resize: vertical;
+  line-height: 1.6;
+}
+
 .error {
   color: #b42318;
+}
+
+.toast-error {
+  position: fixed;
+  z-index: 20;
+  top: 20px;
+  right: 20px;
+  display: flex;
+  width: min(440px, calc(100vw - 40px));
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 14px 16px;
+  border: 1px solid #fecdca;
+  border-radius: 10px;
+  box-shadow: 0 12px 32px rgb(23 32 51 / 18%);
+  color: #912018;
+  background: #fef3f2;
+}
+
+.toast-error button {
+  flex: 0 0 auto;
+  padding: 4px 8px;
+  border: 0;
+  color: inherit;
+  background: transparent;
 }
 
 .success {

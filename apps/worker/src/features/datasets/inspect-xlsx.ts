@@ -2,7 +2,7 @@ import * as XLSX from 'xlsx'
 
 import type { DatasetInspection } from '@data-analyze/contracts'
 
-import { InspectionError } from './inspect-csv'
+import { describeDuplicateHeaders, InspectionError } from './inspect-csv'
 
 export type XlsxInspectionResult =
   | { status: 'awaiting_sheet'; sheets: string[] }
@@ -51,7 +51,7 @@ export function inspectXlsx(content: ArrayBuffer, selectedSheet?: string): XlsxI
     throw new InspectionError('INVALID_HEADER', '工作表表头不能为空')
   }
   if (new Set(sourceFields).size !== sourceFields.length) {
-    throw new InspectionError('DUPLICATE_HEADER', '工作表表头不能重复')
+    throw new InspectionError('DUPLICATE_HEADER', `工作表表头不能重复：${describeDuplicateHeaders(sourceFields)}`)
   }
 
   // 检查每一行的逻辑列数，防止结构不规则的数据进入后续映射阶段。
@@ -71,4 +71,3 @@ export function inspectXlsx(content: ArrayBuffer, selectedSheet?: string): XlsxI
     },
   }
 }
-

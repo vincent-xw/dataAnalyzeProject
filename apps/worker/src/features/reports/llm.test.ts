@@ -51,6 +51,7 @@ describe('requestReportConfig', () => {
     expect(requestBody).not.toContain('data-analyze/tasks/')
     expect(requestBody).toContain('bar')
     expect(requestBody).toContain('metric')
+    expect(JSON.parse(requestBody).response_format).toEqual({ type: 'json_object' })
   })
 
   it('拒绝未知组件和非 JSON', async () => {

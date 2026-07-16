@@ -6,6 +6,7 @@ export const PROCESSING_PLATFORM_RULES = [
   '不得组合脚本。',
   '不得发明字段或参数。',
   '无法完整满足需求时必须返回 supported:false。',
+  '只返回一个合法 JSON 对象，不要使用 Markdown 代码块。',
 ].join('\n')
 
 export type ProcessingContext = {
