@@ -3,14 +3,43 @@ import { describe, expect, it } from 'vitest'
 import { AnalysisTemplateSchema, PromptVersionSchema } from './template'
 
 describe('AnalysisTemplateSchema', () => {
+  it('字段使用原始表头 sourceLabel，不接受旧 description 字段', () => {
+    const base = {
+      name: 'sales_amount',
+      type: 'number',
+      required: true,
+    }
+
+    expect(
+      AnalysisTemplateSchema.safeParse({
+        id: crypto.randomUUID(),
+        name: '销售分析',
+        description: '销售数据模板',
+        fields: [{ ...base, sourceLabel: '销售额' }],
+        processingPromptVersionId: crypto.randomUUID(),
+        reportingPromptVersionId: crypto.randomUUID(),
+      }).success,
+    ).toBe(true)
+    expect(
+      AnalysisTemplateSchema.safeParse({
+        id: crypto.randomUUID(),
+        name: '销售分析',
+        description: '销售数据模板',
+        fields: [{ ...base, description: '销售额' }],
+        processingPromptVersionId: crypto.randomUUID(),
+        reportingPromptVersionId: crypto.randomUUID(),
+      }).success,
+    ).toBe(false)
+  })
+
   it('拒绝重复的标准字段名', () => {
     const result = AnalysisTemplateSchema.safeParse({
       id: crypto.randomUUID(),
       name: '销售分析',
       description: '销售数据模板',
       fields: [
-        { name: 'salesAmount', type: 'number', description: '销售额', required: true },
-        { name: 'salesAmount', type: 'number', description: '重复销售额', required: false },
+        { name: 'salesAmount', type: 'number', sourceLabel: '销售额', required: true },
+        { name: 'salesAmount', type: 'number', sourceLabel: '重复销售额', required: false },
       ],
       processingPromptVersionId: crypto.randomUUID(),
       reportingPromptVersionId: crypto.randomUUID(),

@@ -34,6 +34,7 @@ type FieldProtocolFailureReason =
   | 'FIELD_LIST_EMPTY'
   | 'FIELD_DEFINITION_INVALID'
   | 'DUPLICATE_FIELD_NAME'
+  | 'SOURCE_LABEL_MISMATCH'
 
 class FieldProtocolError extends Error {
   constructor(readonly reason: FieldProtocolFailureReason) {
@@ -55,10 +56,10 @@ export async function requestFieldDefinitions(
   const startedAt = Date.now()
   const platformRules = [
     '你是数据标准字段设计助手。只根据数据表的列名和规模生成业务标准字段。',
-    '字段 name 必须是稳定、简洁的英文 snake_case 标识；description 使用中文，供界面展示。',
-    '不要虚构表头不存在且无法从列名推断的字段；一个来源列只对应一个标准字段。',
+    'sourceLabel 必须逐字复制自输入 sourceFields，禁止翻译、改写或遗漏。',
+    '字段 name 必须是稳定、简洁的英文 snake_case 标识。一个来源列只对应一个标准字段。',
     '必须为每个来源列生成一个字段，且只返回一个合法 JSON 对象，不要使用 Markdown 代码块。',
-    '返回值必须严格为 {"fields":[{"name":"english_snake_case","type":"string | number | boolean | date","description":"不超过 20 个中文字符","required":true}]}。',
+    '返回值必须严格为 {"fields":[{"sourceLabel":"原始表头","name":"english_snake_case","type":"string | number | boolean | date","required":true}]}。',
     'type 只能是 string、number、boolean、date 之一；required 必须是布尔值。',
   ].join('\n')
   const userInput = {
@@ -101,7 +102,7 @@ export async function requestFieldDefinitions(
   try {
     const body = (await response.json()) as { choices?: Array<{ message?: { content?: string } }> }
     const content = body.choices?.[0]?.message?.content
-    const parsed = parseFieldDefinitionsContent(content)
+    const parsed = parseFieldDefinitionsContent(content, parsedInspection.sourceFields)
     logger.info('LLM 标准字段生成完成', { durationMs: Date.now() - startedAt, fieldCount: parsed.length })
     return parsed
   } catch (error) {
@@ -115,8 +116,48 @@ export async function requestFieldDefinitions(
   }
 }
 
+/** 为人工审核准备候选源码；调用方仍需显式确认才会请求 GitHub 创建 PR。 */
+export async function requestCandidateScript(
+  context: { id: string; version: string; requirement: string; fields: unknown[] },
+  bindings: LlmBindings,
+  fetcher: typeof fetch = fetch,
+): Promise<{ source: string; rationale: string }> {
+  const rules = [
+    '生成一个 TypeScript 候选脚本，只使用以下字段和 @data-analyze/script-sdk。',
+    '必须导出 export const script，并在 metadata 中使用指定 id、version。',
+    '不要访问网络、环境变量、R2、D1，不要发明字段。',
+    '只返回 JSON：{"source":"完整 TypeScript 源码","rationale":"中文简要说明"}。',
+  ].join('\n')
+  let response: Response
+  try {
+    response = await fetcher(`${bindings.LLM_BASE_URL.replace(/\/$/, '')}/chat/completions`, {
+      method: 'POST',
+      headers: { authorization: `Bearer ${bindings.LLM_API_KEY}`, 'content-type': 'application/json' },
+      body: JSON.stringify({
+        model: bindings.LLM_MODEL,
+        messages: [{ role: 'system', content: rules }, { role: 'user', content: JSON.stringify(context) }],
+        response_format: { type: 'json_object' },
+      }),
+      signal: AbortSignal.timeout(30_000),
+    })
+  } catch {
+    throw new LlmClientError('LLM_REQUEST_FAILED', 'LLM 候选脚本请求失败')
+  }
+  if (!response.ok) throw new LlmClientError('LLM_REQUEST_FAILED', `LLM HTTP 状态异常: ${response.status}`)
+  const payload = (await response.json()) as { choices?: Array<{ message?: { content?: string } }> }
+  const content = payload.choices?.[0]?.message?.content
+  try {
+    return z.object({ source: z.string().min(1), rationale: z.string().min(1) }).parse(JSON.parse(content || ''))
+  } catch {
+    throw new LlmClientError('LLM_INVALID_RESPONSE', 'LLM 候选脚本响应无效')
+  }
+}
+
 /** 将模型 JSON 转为受协议约束的字段定义，日志仅保留原因枚举，不记录模型原文或表头。 */
-function parseFieldDefinitionsContent(content: string | undefined): FieldDefinition[] {
+function parseFieldDefinitionsContent(
+  content: string | undefined,
+  sourceFields: string[],
+): FieldDefinition[] {
   if (!content) throw new FieldProtocolError('LLM_CONTENT_MISSING')
 
   let payload: unknown
@@ -141,6 +182,14 @@ function parseFieldDefinitionsContent(content: string | undefined): FieldDefinit
   }
   if (new Set(parsed.map((field) => field.name)).size !== parsed.length) {
     throw new FieldProtocolError('DUPLICATE_FIELD_NAME')
+  }
+  // 只接受逐字对应的原始表头，避免模型另造中文名造成上传后无法自动匹配。
+  if (
+    parsed.length !== sourceFields.length ||
+    new Set(parsed.map((field) => field.sourceLabel)).size !== parsed.length ||
+    parsed.some((field) => !sourceFields.includes(field.sourceLabel))
+  ) {
+    throw new FieldProtocolError('SOURCE_LABEL_MISMATCH')
   }
   return parsed
 }

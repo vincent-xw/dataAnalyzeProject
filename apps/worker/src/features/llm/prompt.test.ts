@@ -9,8 +9,8 @@ const scriptMetadata: ScriptMetadata = {
   version: '1.0.0',
   name: '区域销售汇总',
   description: '按区域汇总',
-  inputFields: [{ name: 'region', type: 'string', description: '区域', required: true }],
-  outputFields: [{ name: 'region', type: 'string', description: '区域', required: true }],
+  inputFields: [{ name: 'region', type: 'string', sourceLabel: '区域', required: true }],
+  outputFields: [{ name: 'region', type: 'string', sourceLabel: '区域', required: true }],
   parameterSchema: {
     type: 'object',
     properties: {},
@@ -24,7 +24,7 @@ describe('buildProcessingContext', () => {
     const context = buildProcessingContext({
       rowCount: 2,
       columnCount: 2,
-      fields: [{ name: 'region', type: 'string', description: '区域', required: true }],
+      fields: [{ name: 'region', type: 'string', sourceLabel: '区域', required: true }],
       scripts: [scriptMetadata],
       templatePrompt: '选择完整脚本',
       userRequirement: '按区域汇总',

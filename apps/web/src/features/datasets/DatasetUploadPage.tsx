@@ -38,8 +38,13 @@ export function DatasetUploadPage() {
       body: JSON.stringify(options),
     })
     if (result.status === 'awaiting_sheet') {
+      const firstSheet = result.sheets[0]
+      if (!firstSheet) throw new Error('WORKBOOK_SHEET_MISSING')
       setPendingVersionId(versionId)
       setSheets(result.sheets)
+      setSelectedSheet(firstSheet)
+      // 工作簿目录的顺序即 Excel 中的工作表顺序；默认检查首表，减少一次手动确认。
+      await inspect(versionId, firstSheet)
       return
     }
     if (!selectedTemplate) throw new Error('SELECTED_TEMPLATE_NOT_FOUND')

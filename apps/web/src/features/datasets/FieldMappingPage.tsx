@@ -4,6 +4,7 @@ import { useLocation, useNavigate, useParams } from 'react-router-dom'
 import type { DatasetInspection, FieldDefinition, FieldMapping } from '@data-analyze/contracts'
 
 import { saveFieldMapping } from '../../api/client'
+import { createSuggestedTargets } from './field-mapping'
 
 type MappingTemplate = {
   id: string
@@ -24,7 +25,9 @@ type MappingRouteState = {
 }
 
 function FieldMappingForm({ template, inspection, versionId, onConfirm }: FieldMappingProps) {
-  const [targets, setTargets] = useState<Record<string, string>>({})
+  const [targets, setTargets] = useState(() =>
+    createSuggestedTargets(inspection.sourceFields, template.fields),
+  )
   const [status, setStatus] = useState('')
 
   const mappings = useMemo(
@@ -65,7 +68,7 @@ function FieldMappingForm({ template, inspection, versionId, onConfirm }: FieldM
               <td>
                 <select aria-label={`${sourceField} 对应标准字段`} value={targets[sourceField] ?? ''} onChange={(event) => setTargets((current) => ({ ...current, [sourceField]: event.target.value }))}>
                   <option value="">忽略</option>
-                  {template.fields.map((field) => <option key={field.name} value={field.name}>{field.name}（{field.description}）</option>)}
+                  {template.fields.map((field) => <option key={field.name} value={field.name}>{field.sourceLabel} → {field.name}（{field.type}）</option>)}
                 </select>
               </td>
             </tr>

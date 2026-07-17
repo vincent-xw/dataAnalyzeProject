@@ -7,7 +7,7 @@ const requiredSalesTemplate = {
   id: '00000000-0000-4000-8000-000000000001',
   name: '销售分析',
   fields: [
-    { name: 'salesAmount', type: 'number' as const, description: '销售额', required: true },
+    { name: 'salesAmount', type: 'number' as const, sourceLabel: '销售额', required: true },
   ],
 }
 
@@ -30,5 +30,17 @@ describe('FieldMappingPage', () => {
 
     expect(screen.getByRole('button', { name: '确认字段映射' })).toBeDisabled()
     expect(screen.getByText('未映射必填字段：salesAmount')).toBeVisible()
+  })
+
+  it('首次渲染时预选中文说明匹配的标准字段', () => {
+    render(
+      <FieldMappingPage
+        template={requiredSalesTemplate}
+        inspection={{ ...regionOnlyInspection, sourceFields: ['销售额'] }}
+        versionId="00000000-0000-4000-8000-000000000002"
+      />,
+    )
+
+    expect(screen.getByRole('combobox', { name: '销售额 对应标准字段' })).toHaveValue('salesAmount')
   })
 })

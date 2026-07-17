@@ -15,7 +15,7 @@ async function createTemplate() {
       body: JSON.stringify({
         name: '数据导入模板',
         description: '用于验证文件接入',
-        fields: [{ name: 'salesAmount', type: 'number', description: '销售额', required: true }],
+        fields: [{ name: 'salesAmount', type: 'number', sourceLabel: '销售额', required: true }],
         processingPrompt: '加工数据',
         reportingPrompt: '展示数据',
       }),

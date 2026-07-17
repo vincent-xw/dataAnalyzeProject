@@ -10,8 +10,8 @@ const validTemplateRequest = {
   name: '销售分析',
   description: '销售数据模板',
   fields: [
-    { name: 'salesAmount', type: 'number', description: '销售额', required: true },
-    { name: 'region', type: 'string', description: '销售区域', required: true },
+    { name: 'salesAmount', type: 'number', sourceLabel: '销售额', required: true },
+    { name: 'region', type: 'string', sourceLabel: '销售区域', required: true },
   ],
   processingPrompt: '选择能够完成销售分析的完整脚本',
   reportingPrompt: '使用固定组件展示销售结果',

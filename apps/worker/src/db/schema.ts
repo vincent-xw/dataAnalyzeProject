@@ -74,9 +74,9 @@ export const fieldMappings = sqliteTable(
   'field_mappings',
   {
     id: text('id').primaryKey(),
-    templateId: text('template_id')
+    datasetVersionId: text('dataset_version_id')
       .notNull()
-      .references(() => analysisTemplates.id, { onDelete: 'restrict' }),
+      .references(() => datasetVersions.id, { onDelete: 'restrict' }),
     sourceField: text('source_field').notNull(),
     targetField: text('target_field').notNull(),
     targetType: text('target_type', {
@@ -86,8 +86,8 @@ export const fieldMappings = sqliteTable(
     createdAt: text('created_at').notNull(),
   },
   (table) => [
-    uniqueIndex('field_mappings_template_source_unique').on(table.templateId, table.sourceField),
-    uniqueIndex('field_mappings_template_target_unique').on(table.templateId, table.targetField),
+    uniqueIndex('field_mappings_version_source_unique').on(table.datasetVersionId, table.sourceField),
+    uniqueIndex('field_mappings_version_target_unique').on(table.datasetVersionId, table.targetField),
   ],
 )
 

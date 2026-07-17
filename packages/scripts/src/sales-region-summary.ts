@@ -33,15 +33,15 @@ const metadata = ScriptMetadataSchema.parse({
   name: '区域销售汇总',
   description: '按区域汇总销售额、订单数和平均订单金额',
   inputFields: [
-    { name: 'region', type: 'string', description: '销售区域', required: true },
-    { name: 'salesAmount', type: 'number', description: '销售金额', required: true },
-    { name: 'orderId', type: 'string', description: '订单编号', required: true },
+    { name: 'region', type: 'string', sourceLabel: '销售区域', required: true },
+    { name: 'salesAmount', type: 'number', sourceLabel: '销售金额', required: true },
+    { name: 'orderId', type: 'string', sourceLabel: '订单编号', required: true },
   ],
   outputFields: [
-    { name: 'region', type: 'string', description: '销售区域', required: true },
-    { name: 'totalAmount', type: 'number', description: '销售总额', required: true },
-    { name: 'orderCount', type: 'number', description: '订单数', required: true },
-    { name: 'averageAmount', type: 'number', description: '平均订单金额', required: true },
+    { name: 'region', type: 'string', sourceLabel: '销售区域', required: true },
+    { name: 'totalAmount', type: 'number', sourceLabel: '销售总额', required: true },
+    { name: 'orderCount', type: 'number', sourceLabel: '订单数', required: true },
+    { name: 'averageAmount', type: 'number', sourceLabel: '平均订单金额', required: true },
   ],
   parameterSchema: {
     type: 'object',

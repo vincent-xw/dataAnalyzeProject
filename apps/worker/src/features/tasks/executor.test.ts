@@ -15,7 +15,11 @@ const planId = '20000000-0000-4000-8000-000000000005'
 const taskId = '20000000-0000-4000-8000-000000000006'
 const sourceObjectKey = `data-analyze/datasets/${datasetId}/${versionId}/source/original.csv`
 
-async function seedTask(source: string, status: 'queued' | 'succeeded' = 'queued') {
+async function seedTask(
+  source: string,
+  status: 'queued' | 'succeeded' = 'queued',
+  executionMode: 'baseline' | 'script' = 'script',
+) {
   const now = new Date().toISOString()
   await env.DATA_BUCKET.put(sourceObjectKey, source)
   await env.DB.batch([
@@ -27,9 +31,9 @@ async function seedTask(source: string, status: 'queued' | 'succeeded' = 'queued
     ).bind(
       templateId,
       JSON.stringify([
-        { name: 'region', type: 'string', description: '区域', required: true },
-        { name: 'salesAmount', type: 'number', description: '销售额', required: true },
-        { name: 'orderId', type: 'string', description: '订单号', required: true },
+        { name: 'region', type: 'string', sourceLabel: '区域', required: true },
+        { name: 'salesAmount', type: 'number', sourceLabel: '销售额', required: true },
+        { name: 'orderId', type: 'string', sourceLabel: '订单号', required: true },
       ]),
       promptVersionId,
       now,
@@ -55,17 +59,17 @@ async function seedTask(source: string, status: 'queued' | 'succeeded' = 'queued
     ].map(([sourceField, targetField, targetType]) =>
       env.DB.prepare(
         `INSERT INTO field_mappings
-          (id, template_id, source_field, target_field, target_type, required, created_at)
+          (id, dataset_version_id, source_field, target_field, target_type, required, created_at)
          VALUES (?, ?, ?, ?, ?, 1, ?)`,
-      ).bind(crypto.randomUUID(), templateId, sourceField, targetField, targetType, now),
+      ).bind(crypto.randomUUID(), versionId, sourceField, targetField, targetType, now),
     ),
     env.DB.prepare(
       `INSERT INTO execution_plans
         (id, dataset_version_id, model_name, prompt_version_id, user_requirement,
          decision_json, script_id, script_version, parameters_json,
-         confirmation_status, confirmed_at, created_at)
+         confirmation_status, confirmed_at, created_at, execution_mode)
        VALUES (?, ?, 'unified-model', ?, '按区域汇总', ?, 'sales-region-summary',
-               '1.0.0', ?, 'confirmed', ?, ?)`,
+               '1.0.0', ?, 'confirmed', ?, ?, ?)`,
     ).bind(
       planId,
       versionId,
@@ -81,6 +85,7 @@ async function seedTask(source: string, status: 'queued' | 'succeeded' = 'queued
       JSON.stringify({ includeEmptyRegion: false }),
       now,
       now,
+      executionMode,
     ),
     env.DB.prepare(
       `INSERT INTO processing_tasks
@@ -161,6 +166,20 @@ describe('任务执行器', () => {
       `data-analyze/datasets/${datasetId}/${versionId}/result/data.ndjson`,
     )
     expect(await result?.text()).toContain('"region":"华南"')
+  })
+
+  it('baseline 任务直接产出英文键的标准化数据且不依赖脚本输出', async () => {
+    await seedTask('区域,销售额,订单号\n华东,100,A\n', 'queued', 'baseline')
+
+    await expect(executeTask(taskId, env)).resolves.toMatchObject({ status: 'succeeded' })
+    const result = await env.DATA_BUCKET.get(
+      `data-analyze/datasets/${datasetId}/${versionId}/normalized/data.ndjson`,
+    )
+    expect(await result?.text()).toContain('{"region":"华东","salesAmount":100,"orderId":"A"}')
+    const summary = await env.DATA_BUCKET.get(
+      `data-analyze/datasets/${datasetId}/${versionId}/result/summary.json`,
+    )
+    expect(await summary?.json()).toEqual({ rowCount: 1, mode: 'baseline' })
   })
 
   it('类型错误终止且标记为不可重试错误', async () => {

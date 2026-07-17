@@ -10,9 +10,9 @@ type SourceInspection = { rowCount: number; columnCount: number; sheets: string[
 type SourceInspectionResult = { status: 'inspected' | 'awaiting_sheet'; inspection?: SourceInspection; sheets?: string[] }
 
 const initialField: FieldDefinition = {
+  sourceLabel: '',
   name: '',
   type: 'string',
-  description: '',
   required: false,
 }
 
@@ -161,7 +161,7 @@ export function TemplateEditorPage() {
               <select aria-label={`字段 ${index + 1} 类型`} value={field.type} onChange={(event) => updateField(index, { type: event.target.value as FieldType })}>
                 <option value="string">文本</option><option value="number">数字</option><option value="boolean">布尔</option><option value="date">日期</option>
               </select>
-              <input aria-label={`字段 ${index + 1} 描述`} required value={field.description} onChange={(event) => updateField(index, { description: event.target.value })} />
+              <input aria-label={`字段 ${index + 1} 原表头`} required value={field.sourceLabel} onChange={(event) => updateField(index, { sourceLabel: event.target.value })} />
               <label><input type="checkbox" checked={field.required} onChange={(event) => updateField(index, { required: event.target.checked })} />必填</label>
               {fields.length > 1 ? <button type="button" onClick={() => setFields((current) => current.filter((_, itemIndex) => itemIndex !== index))}>删除</button> : null}
             </div>

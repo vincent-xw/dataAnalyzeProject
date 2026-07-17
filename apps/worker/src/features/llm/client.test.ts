@@ -87,10 +87,10 @@ describe('requestScriptDecision', () => {
 describe('requestFieldDefinitions', () => {
   it('按表头返回可编辑的标准字段', async () => {
     const fetcher = vi.fn<typeof fetch>().mockResolvedValue(completion({
-      fields: [{ name: 'sales_amount', type: 'number', description: '销售额', required: true }],
+      fields: [{ sourceLabel: '销售额', name: 'sales_amount', type: 'number', required: true }],
     }))
-    await expect(requestFieldDefinitions({ rowCount: 2, columnCount: 1, sheets: [], sourceFields: ['金额'] }, llmEnv, '', fetcher)).resolves.toEqual([
-      { name: 'sales_amount', type: 'number', description: '销售额', required: true },
+    await expect(requestFieldDefinitions({ rowCount: 2, columnCount: 1, sheets: [], sourceFields: ['销售额'] }, llmEnv, '', fetcher)).resolves.toEqual([
+      { sourceLabel: '销售额', name: 'sales_amount', type: 'number', required: true },
     ])
     const request = fetcher.mock.calls[0]?.[1]
     expect(request).toEqual(expect.objectContaining({ method: 'POST' }))
@@ -106,8 +106,8 @@ describe('requestFieldDefinitions', () => {
   it('拒绝重复标准字段名', async () => {
     const fetcher = vi.fn<typeof fetch>().mockResolvedValue(completion({
       fields: [
-        { name: 'amount', type: 'number', description: '金额', required: false },
-        { name: 'amount', type: 'number', description: '金额2', required: false },
+        { sourceLabel: '金额', name: 'amount', type: 'number', required: false },
+        { sourceLabel: '金额2', name: 'amount', type: 'number', required: false },
       ],
     }))
     await expect(requestFieldDefinitions({ rowCount: 2, columnCount: 1, sheets: [], sourceFields: ['金额'] }, llmEnv, '', fetcher)).rejects.toMatchObject({ code: 'LLM_INVALID_RESPONSE' })
@@ -116,7 +116,7 @@ describe('requestFieldDefinitions', () => {
   it('记录字段协议校验失败的安全原因', async () => {
     const logger = { info: vi.fn(), error: vi.fn() }
     const fetcher = vi.fn<typeof fetch>().mockResolvedValue(completion({
-      fields: [{ name: 'sales_amount', type: 'decimal', description: '销售额', required: true }],
+      fields: [{ sourceLabel: '销售额', name: 'sales_amount', type: 'decimal', required: true }],
     }))
 
     await expect(

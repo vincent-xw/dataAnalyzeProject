@@ -3,9 +3,10 @@ import { z } from 'zod'
 export const FieldTypeSchema = z.enum(['string', 'number', 'boolean', 'date'])
 
 export const FieldDefinitionSchema = z.object({
+  // 保留上传表格的原始表头，界面展示与自动映射均以此字段为准。
+  sourceLabel: z.string().min(1),
   name: z.string().min(1),
   type: FieldTypeSchema,
-  description: z.string().min(1),
   required: z.boolean(),
 })
 

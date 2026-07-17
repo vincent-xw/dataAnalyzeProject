@@ -118,8 +118,8 @@ describe('报表草稿和发布 API', () => {
     await env.DATA_BUCKET.put(
       schemaKey,
       JSON.stringify([
-        { name: 'region', type: 'string', description: '区域', required: true },
-        { name: 'totalAmount', type: 'number', description: '销售额', required: true },
+        { name: 'region', type: 'string', sourceLabel: '区域', required: true },
+        { name: 'totalAmount', type: 'number', sourceLabel: '销售额', required: true },
       ]),
     )
   })

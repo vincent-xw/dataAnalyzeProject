@@ -49,7 +49,7 @@ export class ReportService {
 
   async getContext(taskId: string) {
     const row = await this.env.DB.prepare(
-      `SELECT pt.status, d.template_id, at.name AS template_name,
+      `SELECT pt.status, ep.dataset_version_id, d.template_id, at.name AS template_name,
               at.reporting_prompt_version_id, pv.content AS reporting_prompt
        FROM processing_tasks pt
        JOIN execution_plans ep ON ep.id = pt.plan_id
@@ -62,6 +62,7 @@ export class ReportService {
       .bind(taskId)
       .first<{
         status: string
+        dataset_version_id: string
         template_id: string
         template_name: string
         reporting_prompt_version_id: string | null
@@ -74,12 +75,23 @@ export class ReportService {
     if (!row.reporting_prompt_version_id || !row.reporting_prompt) {
       throw new ReportServiceError('REPORTING_PROMPT_MISSING', '模板缺少报表 Prompt', 409)
     }
+    const mappings = await this.env.DB.prepare(
+      `SELECT source_field, target_field, target_type
+       FROM field_mappings WHERE dataset_version_id = ? ORDER BY source_field`,
+    )
+      .bind(row.dataset_version_id)
+      .all<{ source_field: string; target_field: string; target_type: string }>()
     return {
       taskId,
       templateId: row.template_id,
       templateName: row.template_name,
       reportingPromptVersionId: row.reporting_prompt_version_id,
       reportingPrompt: row.reporting_prompt,
+      fields: mappings.results.map((mapping) => ({
+        sourceLabel: mapping.source_field,
+        name: mapping.target_field,
+        type: mapping.target_type,
+      })),
     }
   }
 

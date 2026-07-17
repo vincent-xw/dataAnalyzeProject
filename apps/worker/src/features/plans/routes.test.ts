@@ -86,9 +86,9 @@ describe('执行计划 API', () => {
       ).bind(
         templateId,
         JSON.stringify([
-          { name: 'region', type: 'string', description: '区域', required: true },
-          { name: 'salesAmount', type: 'number', description: '销售额', required: true },
-          { name: 'orderId', type: 'string', description: '订单号', required: true },
+          { name: 'region', type: 'string', sourceLabel: '区域', required: true },
+          { name: 'salesAmount', type: 'number', sourceLabel: '销售额', required: true },
+          { name: 'orderId', type: 'string', sourceLabel: '订单号', required: true },
         ]),
         promptVersionId,
         new Date().toISOString(),
@@ -114,9 +114,9 @@ describe('执行计划 API', () => {
       ].map(([source, target, type]) =>
         env.DB.prepare(
           `INSERT INTO field_mappings
-            (id, template_id, source_field, target_field, target_type, required, created_at)
+            (id, dataset_version_id, source_field, target_field, target_type, required, created_at)
            VALUES (?, ?, ?, ?, ?, 1, ?)`,
-        ).bind(crypto.randomUUID(), templateId, source, target, type, new Date().toISOString()),
+        ).bind(crypto.randomUUID(), datasetVersionId, source, target, type, new Date().toISOString()),
       ),
     ])
     await env.DATA_BUCKET.put(
@@ -129,6 +129,22 @@ describe('执行计划 API', () => {
       }),
     )
     await syncScriptCatalog(env.DB)
+  })
+
+  it('分析上下文返回当前数据集版本的原表头和英文键', async () => {
+    const response = await authenticatedRequest(
+      `/api/dataset-versions/${datasetVersionId}/analysis-context`,
+      {},
+      env,
+    )
+
+    expect(response.status).toBe(200)
+    expect(await response.json()).toMatchObject({
+      fields: [
+        { sourceLabel: '区域', name: 'region', type: 'string' },
+        { sourceLabel: '销售额', name: 'salesAmount', type: 'number' },
+      ],
+    })
   })
 
   it('不会把 D1 中未启用的构建脚本暴露给模型', async () => {

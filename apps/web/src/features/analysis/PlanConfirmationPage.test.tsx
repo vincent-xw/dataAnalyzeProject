@@ -18,8 +18,8 @@ const supportedPlan = {
     version: '1.0.0',
     name: '区域销售汇总',
     description: '按区域汇总销售额',
-    inputFields: [{ name: 'region', type: 'string' as const, description: '区域', required: true }],
-    outputFields: [{ name: 'totalAmount', type: 'number' as const, description: '销售总额', required: true }],
+    inputFields: [{ name: 'region', type: 'string' as const, sourceLabel: '区域', required: true }],
+    outputFields: [{ name: 'totalAmount', type: 'number' as const, sourceLabel: '销售总额', required: true }],
     parameterSchema: {
       type: 'object' as const,
       properties: {

@@ -29,7 +29,7 @@ export function createFakeFieldDefinitions(inspection: DatasetInspection): Field
   return inspection.sourceFields.map((sourceField, index) => ({
     name: sourceField.replace(/[^a-zA-Z0-9]+/g, '_').replace(/^_|_$/g, '').toLowerCase() || `field_${index + 1}`,
     type: 'string',
-    description: sourceField,
+    sourceLabel: sourceField,
     required: false,
   }))
 }

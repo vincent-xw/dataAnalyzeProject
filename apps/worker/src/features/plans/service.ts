@@ -177,25 +177,36 @@ export class PlanService {
     if (!row.processing_prompt_version_id || !row.processing_prompt) {
       throw new PlanServiceError('PROCESSING_PROMPT_MISSING', '模板缺少加工 Prompt', 409)
     }
+    const mappings = await this.env.DB.prepare(
+      `SELECT source_field, target_field, target_type
+       FROM field_mappings WHERE dataset_version_id = ? ORDER BY source_field`,
+    )
+      .bind(datasetVersionId)
+      .all<{ source_field: string; target_field: string; target_type: 'string' | 'number' | 'boolean' | 'date' }>()
     return {
       datasetVersionId,
       templateId: row.template_id,
       templateName: row.template_name,
       processingPromptVersionId: row.processing_prompt_version_id,
       processingPrompt: row.processing_prompt,
+      fields: mappings.results.map((mapping) => ({
+        sourceLabel: mapping.source_field,
+        name: mapping.target_field,
+        type: mapping.target_type,
+      })),
     }
   }
 
   async confirm(id: string, parameterOverride?: Record<string, unknown>) {
     const plan = await this.env.DB.prepare(
-      `SELECT ep.*, d.template_id
+      `SELECT ep.*
        FROM execution_plans ep
        JOIN dataset_versions dv ON dv.id = ep.dataset_version_id
        JOIN datasets d ON d.id = dv.dataset_id
        WHERE ep.id = ?`,
     )
       .bind(id)
-      .first<PlanRow & { template_id: string }>()
+      .first<PlanRow>()
     if (!plan) throw new PlanServiceError('PLAN_NOT_FOUND', '执行计划不存在', 404)
     if (plan.confirmation_status !== 'pending') {
       throw new PlanServiceError('PLAN_ALREADY_CONFIRMED', '执行计划已经确认', 409)
@@ -220,9 +231,9 @@ export class PlanService {
     }
 
     const mappings = await this.env.DB.prepare(
-      'SELECT target_field, target_type FROM field_mappings WHERE template_id = ?',
+      'SELECT target_field, target_type FROM field_mappings WHERE dataset_version_id = ?',
     )
-      .bind(plan.template_id)
+      .bind(plan.dataset_version_id)
       .all<{ target_field: string; target_type: string }>()
     const mappedTypes = new Map(
       mappings.results.map((mapping) => [mapping.target_field, mapping.target_type]),

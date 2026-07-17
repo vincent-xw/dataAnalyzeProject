@@ -1,6 +1,7 @@
 import { ScriptUploadRequestSchema, type ScriptUploadRequest } from '@data-analyze/contracts'
 import { listScriptMetadata } from '@data-analyze/scripts'
 import { Hono } from 'hono'
+import { z } from 'zod'
 
 import type { Env } from '../../index'
 import {
@@ -10,6 +11,8 @@ import {
   type ScriptPullRequestResult,
 } from './github'
 import { syncScriptCatalog } from './sync'
+import { generateCandidateDraft } from './generation'
+import { LlmClientError } from '../llm/client'
 
 type PullRequestCreator = (
   upload: ScriptUploadRequest,
@@ -21,6 +24,21 @@ export function createScriptAdminRoutes(
   createPullRequest: PullRequestCreator = createScriptPullRequest,
 ): Hono<Env> {
   const routes = new Hono<Env>()
+
+  routes.post('/drafts', async (context) => {
+    try {
+      const draft = await generateCandidateDraft(await context.req.json().catch(() => null), context.env)
+      return context.json(draft)
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return context.json({ code: 'INVALID_DRAFT_REQUEST', message: '候选代码请求无效' }, 400)
+      }
+      if (error instanceof LlmClientError) {
+        return context.json({ code: error.code, message: error.message }, 502)
+      }
+      throw error
+    }
+  })
 
   routes.post('/candidates', async (context) => {
     const request = ScriptUploadRequestSchema.safeParse(await context.req.json().catch(() => null))

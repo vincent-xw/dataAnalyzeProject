@@ -4,8 +4,8 @@ import { requestReportConfig } from './llm'
 
 const input = {
   fields: [
-    { name: 'region', type: 'string' as const, description: '区域', required: true },
-    { name: 'totalAmount', type: 'number' as const, description: '销售额', required: true },
+    { name: 'region', type: 'string' as const, sourceLabel: '区域', required: true },
+    { name: 'totalAmount', type: 'number' as const, sourceLabel: '销售额', required: true },
   ],
   reportingPrompt: '生成区域销售概览',
   userRequirement: '使用柱状图',

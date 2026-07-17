@@ -173,7 +173,8 @@ datasetRoutes.put('/:versionId/mapping', async (context) => {
   }
 
   const version = await context.env.DB.prepare(
-    `SELECT dv.schema_object_key, dv.validation_status, d.template_id, at.input_schema_json
+    `SELECT dv.schema_object_key, dv.validation_status, at.input_schema_json,
+            at.processing_prompt_version_id
      FROM dataset_versions dv
      JOIN datasets d ON d.id = dv.dataset_id
      JOIN analysis_templates at ON at.id = d.template_id
@@ -183,8 +184,8 @@ datasetRoutes.put('/:versionId/mapping', async (context) => {
     .first<{
       schema_object_key: string | null
       validation_status: string
-      template_id: string
       input_schema_json: string
+      processing_prompt_version_id: string | null
     }>()
   if (!version) {
     return context.json({ code: 'DATASET_VERSION_NOT_FOUND', message: '数据集版本不存在' }, 404)
@@ -205,6 +206,9 @@ datasetRoutes.put('/:versionId/mapping', async (context) => {
   if (!inspection.success || !templateFields.success) {
     return context.json({ code: 'INVALID_CONTROL_DATA', message: '控制面结构数据无效' }, 500)
   }
+  if (!version.processing_prompt_version_id) {
+    return context.json({ code: 'PROCESSING_PROMPT_MISSING', message: '模板缺少加工 Prompt' }, 409)
+  }
 
   const validation = validateMapping(
     inspection.data.sourceFields,
@@ -220,6 +224,8 @@ datasetRoutes.put('/:versionId/mapping', async (context) => {
   }
 
   const now = new Date().toISOString()
+  const baselinePlanId = crypto.randomUUID()
+  const baselineTaskId = crypto.randomUUID()
   const templateByName = new Map(templateFields.data.map((field) => [field.name, field]))
   const insertStatements = mappings.data.map((mapping) => {
     // 目标字段已通过 validateMapping 校验，因此此处取值失败属于控制面损坏而非可兜底场景。
@@ -229,11 +235,11 @@ datasetRoutes.put('/:versionId/mapping', async (context) => {
     }
     return context.env.DB.prepare(
       `INSERT INTO field_mappings
-        (id, template_id, source_field, target_field, target_type, required, created_at)
+        (id, dataset_version_id, source_field, target_field, target_type, required, created_at)
        VALUES (?, ?, ?, ?, ?, ?, ?)`,
     ).bind(
       crypto.randomUUID(),
-      version.template_id,
+      context.req.param('versionId'),
       mapping.sourceField,
       mapping.targetField,
       targetField.type,
@@ -242,18 +248,58 @@ datasetRoutes.put('/:versionId/mapping', async (context) => {
     )
   })
 
-  // D1 batch 原子替换模板映射并推进当前数据集版本状态，避免读取到半套映射。
+  // 映射、基础任务与状态在同一事务提交，确保任务只读取完整的当前版本映射。
   await context.env.DB.batch([
-    context.env.DB.prepare('DELETE FROM field_mappings WHERE template_id = ?').bind(
-      version.template_id,
+    context.env.DB.prepare('DELETE FROM field_mappings WHERE dataset_version_id = ?').bind(
+      context.req.param('versionId'),
     ),
     ...insertStatements,
     context.env.DB.prepare(
       "UPDATE dataset_versions SET validation_status = 'mapped' WHERE id = ?",
     ).bind(context.req.param('versionId')),
+    context.env.DB.prepare(
+      `INSERT INTO execution_plans
+        (id, dataset_version_id, model_name, prompt_version_id, user_requirement,
+         decision_json, confirmation_status, confirmed_at, created_at, execution_mode)
+       VALUES (?, ?, 'system', ?, '生成基础标准化数据', '{}', 'confirmed', ?, ?, 'baseline')`,
+    ).bind(
+      baselinePlanId,
+      context.req.param('versionId'),
+      version.processing_prompt_version_id,
+      now,
+      now,
+    ),
+    context.env.DB.prepare(
+      `INSERT INTO processing_tasks
+        (id, plan_id, status, retry_count, created_at, updated_at)
+       VALUES (?, ?, 'queued', 0, ?, ?)`,
+    ).bind(baselineTaskId, baselinePlanId, now, now),
   ])
 
-  return context.json({ status: 'mapped' as const, mappingCount: mappings.data.length })
+  try {
+    await context.env.TASK_QUEUE.send({ taskId: baselineTaskId })
+  } catch {
+    const errorObjectKey = `data-analyze/tasks/${baselineTaskId}/errors/queue.json`
+    await context.env.DATA_BUCKET.put(
+      errorObjectKey,
+      JSON.stringify({ code: 'QUEUE_PUBLISH_FAILED', message: '基础数据任务投递失败' }),
+      { httpMetadata: { contentType: 'application/json' } },
+    )
+    await context.env.DB.prepare(
+      `UPDATE processing_tasks
+       SET status = 'failed', error_object_key = ?, completed_at = ?, updated_at = ?
+       WHERE id = ?`,
+    )
+      .bind(errorObjectKey, new Date().toISOString(), new Date().toISOString(), baselineTaskId)
+      .run()
+    return context.json({ code: 'QUEUE_PUBLISH_FAILED', message: '基础数据任务投递失败' }, 503)
+  }
+
+  return context.json({
+    status: 'mapped' as const,
+    mappingCount: mappings.data.length,
+    baselineTaskId,
+  })
 })
 
 datasetRoutes.get('/:id', async (context) => {

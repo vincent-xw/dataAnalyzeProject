@@ -4,8 +4,8 @@ import type { ReportConfig } from './index'
 import { validateReportReferences } from './validate-fields'
 
 const resultSchema = [
-  { name: 'region', type: 'string' as const, description: '区域', required: true },
-  { name: 'totalAmount', type: 'number' as const, description: '销售额', required: true },
+  { name: 'region', type: 'string' as const, sourceLabel: '区域', required: true },
+  { name: 'totalAmount', type: 'number' as const, sourceLabel: '销售额', required: true },
 ]
 
 function barReport(metric: string): ReportConfig {

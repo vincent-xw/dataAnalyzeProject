@@ -20,11 +20,11 @@ import {
 type TaskRow = {
   status: 'queued' | 'running' | 'succeeded' | 'failed'
   confirmation_status: string
+  execution_mode: 'baseline' | 'script'
   decision_json: string
   parameters_json: string | null
   dataset_id: string
   dataset_version_id: string
-  template_id: string
   source_object_key: string
   file_type: 'csv' | 'xlsx'
   csv_encoding: 'utf-8' | 'utf-8-bom' | 'gb18030' | null
@@ -34,8 +34,8 @@ type TaskRow = {
 
 export async function executeTask(taskId: string, env: Env['Bindings']) {
   const task = await env.DB.prepare(
-    `SELECT pt.status, ep.confirmation_status, ep.decision_json, ep.parameters_json,
-            d.id AS dataset_id, dv.id AS dataset_version_id, d.template_id,
+    `SELECT pt.status, ep.confirmation_status, ep.execution_mode, ep.decision_json, ep.parameters_json,
+            d.id AS dataset_id, dv.id AS dataset_version_id,
             dv.source_object_key, dv.file_type, dv.csv_encoding, dv.csv_delimiter,
             dv.selected_sheet
      FROM processing_tasks pt
@@ -53,6 +53,7 @@ export async function executeTask(taskId: string, env: Env['Bindings']) {
   if (task.confirmation_status !== 'confirmed') {
     throw new TaskExecutionError('PLAN_NOT_CONFIRMED', '执行计划尚未确认', false)
   }
+  if (task.execution_mode === 'baseline') return executeBaselineTask(task, env, taskId)
 
   const decision = ScriptDecisionSchema.parse(JSON.parse(task.decision_json))
   if (!decision.supported || !task.parameters_json) {
@@ -70,9 +71,9 @@ export async function executeTask(taskId: string, env: Env['Bindings']) {
 
   const mappingRows = await env.DB.prepare(
     `SELECT source_field, target_field, target_type
-     FROM field_mappings WHERE template_id = ? ORDER BY source_field`,
+     FROM field_mappings WHERE dataset_version_id = ? ORDER BY source_field`,
   )
-    .bind(task.template_id)
+    .bind(task.dataset_version_id)
     .all<{ source_field: string; target_field: string; target_type: RuntimeFieldMapping['targetType'] }>()
   const mappings = mappingRows.results.map((row) => ({
     sourceField: row.source_field,
@@ -187,6 +188,95 @@ export async function executeTask(taskId: string, env: Env['Bindings']) {
     if (!normalizedCompleted) {
       await normalizedSink.abort()
     }
+    throw error
+  }
+}
+
+/**
+ * 基础任务只执行经用户确认的映射和严格类型转换，不调用 LLM 或可变脚本。
+ * 结果同时作为后续报表的首份可查询数据集。
+ */
+async function executeBaselineTask(task: TaskRow, env: Env['Bindings'], taskId: string) {
+  const mappingRows = await env.DB.prepare(
+    `SELECT source_field, target_field, target_type, required
+     FROM field_mappings WHERE dataset_version_id = ? ORDER BY source_field`,
+  )
+    .bind(task.dataset_version_id)
+    .all<{
+      source_field: string
+      target_field: string
+      target_type: RuntimeFieldMapping['targetType']
+      required: number
+    }>()
+  if (mappingRows.results.length === 0) {
+    throw new TaskExecutionError('FIELD_MAPPING_MISSING', '字段映射不存在', false)
+  }
+  const sourceObject = await env.DATA_BUCKET.get(task.source_object_key)
+  if (!sourceObject) throw new TaskExecutionError('SOURCE_FILE_NOT_FOUND', '原始文件不存在', false)
+
+  const now = new Date().toISOString()
+  await env.DB.prepare(
+    `UPDATE processing_tasks
+     SET status = 'running', retry_count = retry_count + 1,
+         started_at = COALESCE(started_at, ?), updated_at = ?
+     WHERE id = ?`,
+  )
+    .bind(now, now, taskId)
+    .run()
+
+  const baseKey = `data-analyze/datasets/${task.dataset_id}/${task.dataset_version_id}`
+  const resultKey = `${baseKey}/normalized/data.ndjson`
+  const resultSchemaKey = `${baseKey}/result/schema.json`
+  const resultSummaryKey = `${baseKey}/result/summary.json`
+  const sink = createR2NdjsonSink(env.DATA_BUCKET, resultKey)
+  const mappings = mappingRows.results.map((mapping) => ({
+    sourceField: mapping.source_field,
+    targetField: mapping.target_field,
+    targetType: mapping.target_type,
+  }))
+  let rowCount = 0
+
+  try {
+    const sourceRecords = readSourceRecords(
+      await sourceObject.arrayBuffer(),
+      resolveSourceOptions(task),
+    )
+    for await (const sourceRecord of sourceRecords) {
+      await sink.write(normalizeRecord(sourceRecord, mappings))
+      rowCount += 1
+    }
+    await sink.close()
+    await Promise.all([
+      env.DATA_BUCKET.put(
+        resultSchemaKey,
+        JSON.stringify(
+          mappingRows.results.map((mapping) => ({
+            sourceLabel: mapping.source_field,
+            name: mapping.target_field,
+            type: mapping.target_type,
+            required: mapping.required === 1,
+          })),
+        ),
+        { httpMetadata: { contentType: 'application/json' } },
+      ),
+      env.DATA_BUCKET.put(
+        resultSummaryKey,
+        JSON.stringify({ rowCount, mode: 'baseline' }),
+        { httpMetadata: { contentType: 'application/json' } },
+      ),
+    ])
+    const completedAt = new Date().toISOString()
+    await env.DB.prepare(
+      `UPDATE processing_tasks
+       SET status = 'succeeded', result_object_key = ?, result_schema_object_key = ?,
+           result_summary_object_key = ?, completed_at = ?, updated_at = ?
+       WHERE id = ?`,
+    )
+      .bind(resultKey, resultSchemaKey, resultSummaryKey, completedAt, completedAt, taskId)
+      .run()
+    return { status: 'succeeded' as const, resultObjectKey: resultKey }
+  } catch (error) {
+    await sink.abort()
     throw error
   }
 }
