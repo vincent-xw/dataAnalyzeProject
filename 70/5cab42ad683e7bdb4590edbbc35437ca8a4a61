@@ -1,0 +1,119 @@
+apps/web/src/features/datasets/field-mapping.ts
+  s_edbf29209c8443::t_ec19747e297ce5 1-22,24-40
+  s_edbf29209c8443::t_f54b5678c44243 23
+docs/superpowers/plans/2026-07-17-baseline-data-and-reviewed-custom-script.md
+  s_edbf29209c8443::t_520d0321c0eae4 1-259
+apps/worker/src/features/llm/prompt.test.ts
+  s_edbf29209c8443::t_beae3da9e1c174 12-13,27
+apps/web/src/features/datasets/FieldMappingPage.test.tsx
+  s_edbf29209c8443::t_3bcc6f08f37eb9 34-45
+  s_edbf29209c8443::t_f928fd7dab8eb9 10
+packages/report-schema/src/validate-fields.test.ts
+  s_edbf29209c8443::t_beae3da9e1c174 7-8
+docs/superpowers/plans/2026-07-17-dataset-auto-field-mapping.md
+  s_edbf29209c8443::t_35ad6a4a01198b 166,174-181
+  s_edbf29209c8443::t_428a6bbdaf03cb 1-165,167-173,182-225
+apps/web/src/features/datasets/DatasetUploadPage.test.tsx
+  s_edbf29209c8443::t_f928fd7dab8eb9 11
+  s_edbf29209c8443::t_0cb8fb9abaf6bc 2-10,12-37,43,48-55
+  s_edbf29209c8443::t_8159e7403513d1 1,47
+  s_edbf29209c8443::t_e30e404cb28757 38-42,44-46
+apps/web/src/features/datasets/field-mapping.test.ts
+  s_edbf29209c8443::t_ec19747e297ce5 22,25
+  s_edbf29209c8443::t_94249a150f7a61 1-5,8-10,12-19,21,26-27
+  s_edbf29209c8443::t_f54b5678c44243 6-7,11,20,23-24
+apps/worker/src/features/datasets/routes.ts
+  s_edbf29209c8443::t_93d441e4ccd08c 238,242,253-254
+  s_edbf29209c8443::t_b43a28fc4b026e 176-177,188,209-211,227-228,251,260-276,279-302
+apps/worker/src/testing/fake-llm.ts
+  s_edbf29209c8443::t_beae3da9e1c174 32
+apps/worker/src/features/script-admin/routes.ts
+  s_edbf29209c8443::t_5f41bdf2b122e4 4,15
+  s_edbf29209c8443::t_5636e20269f332 14,28-41
+  s_edbf29209c8443::t_95cf0c5f8419fc 42
+apps/worker/src/features/datasets/mapping.test.ts
+  s_edbf29209c8443::t_beae3da9e1c174 6-7
+apps/worker/src/features/tasks/executor.test.ts
+  s_edbf29209c8443::t_43308b854c3551 18-22,70,72,88,171-182
+  s_edbf29209c8443::t_f928fd7dab8eb9 34-36
+  s_edbf29209c8443::t_79bb4a14da89d9 62,64
+  s_edbf29209c8443::t_4d9d8d781be170 183-184
+apps/web/src/features/datasets/FieldMappingPage.tsx
+  s_edbf29209c8443::t_8859794b776c8a 71
+  s_edbf29209c8443::t_57f96923da3396 7,28-30
+apps/worker/src/features/reports/routes.test.ts
+  s_edbf29209c8443::t_f928fd7dab8eb9 121-122
+apps/web/src/features/datasets/DatasetUploadPage.tsx
+  s_edbf29209c8443::t_3b4b7e63bb465f 41-42,45-47
+packages/contracts/src/dataset.ts
+  s_edbf29209c8443::t_9c854ac3225bc1 6-7
+apps/worker/src/db/schema.ts
+  s_edbf29209c8443::t_93d441e4ccd08c 77,79,89-90
+apps/worker/src/features/templates/routes.test.ts
+  s_edbf29209c8443::t_f928fd7dab8eb9 13-14
+apps/worker/src/features/datasets/routes.test.ts
+  s_edbf29209c8443::t_beae3da9e1c174 18
+apps/worker/src/features/plans/routes.test.ts
+  s_edbf29209c8443::t_115b39e35e29c5 134-149
+  s_edbf29209c8443::t_f928fd7dab8eb9 89-91
+  s_edbf29209c8443::t_79bb4a14da89d9 117,119
+apps/web/src/features/analysis/PlanConfirmationPage.test.tsx
+  s_edbf29209c8443::t_f928fd7dab8eb9 21-22
+apps/worker/migrations/0004_version_mapping_and_baseline.sql
+  s_edbf29209c8443::t_93d441e4ccd08c 1-27
+apps/worker/src/features/tasks/executor.ts
+  s_edbf29209c8443::t_79bb4a14da89d9 38,74,76
+  s_edbf29209c8443::t_a27c6e5de4cbfa 23,37,56,195-279,281
+  s_edbf29209c8443::t_7b11679f377778 280
+  s_edbf29209c8443::t_690588586c4dba 282-283
+apps/worker/src/features/llm/client.test.ts
+  s_edbf29209c8443::t_0a135665d7a363 90,93,109-110,119
+  s_edbf29209c8443::t_3c33c914c9f104 92
+apps/worker/src/features/llm/client.ts
+  s_edbf29209c8443::t_5636e20269f332 119-155,193
+  s_edbf29209c8443::t_8859794b776c8a 37,59-60,62,105,157-160,186-192
+packages/contracts/src/template.test.ts
+  s_edbf29209c8443::t_20359515952a87 6-34
+  s_edbf29209c8443::t_9c854ac3225bc1 41-42
+packages/scripts/src/sales-region-summary.ts
+  s_edbf29209c8443::t_beae3da9e1c174 36-38,41-44
+apps/web/src/features/templates/TemplateEditorPage.tsx
+  s_edbf29209c8443::t_8859794b776c8a 13,164
+apps/worker/src/features/reports/service.ts
+  s_edbf29209c8443::t_5efebff862a8aa 52,65,78-83,90-94
+apps/worker/src/features/script-admin/generation.ts
+  s_edbf29209c8443::t_5636e20269f332 1-45
+apps/worker/src/features/datasets/mapping-routes.test.ts
+  s_edbf29209c8443::t_b0bfe09c284a63 10,29-30,99-150
+  s_edbf29209c8443::t_1c007f056c31b3 7,24-25,32,36-39
+  s_edbf29209c8443::t_71eca82ea2f689 151
+apps/worker/src/features/plans/service.ts
+  s_edbf29209c8443::t_79bb4a14da89d9 202,209,234,236
+  s_edbf29209c8443::t_3b5afc59e5d541 180-185,192-196
+apps/web/src/features/analysis/AnalysisRequestPage.tsx
+  s_edbf29209c8443::t_60d59fa8e4a693 27-28,74-112,140-142,144-151
+  s_edbf29209c8443::t_3b5afc59e5d541 12-16,119-126
+apps/worker/src/features/reports/llm.test.ts
+  s_edbf29209c8443::t_f928fd7dab8eb9 7-8
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.14",
+  "base_commit_sha": "705cab42ad683e7bdb4590edbbc35437ca8a4a61",
+  "prompts": {},
+  "humans": {
+    "h_c3a612a540ca0b": {
+      "author": "xuewen.jia <xuewen.jia@ly.com>"
+    }
+  },
+  "sessions": {
+    "s_edbf29209c8443": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019f650a-a789-7b51-899b-e27b3fb6cc98",
+        "model": "gpt-5.6-terra"
+      },
+      "human_author": "xuewen.jia <xuewen.jia@ly.com>"
+    }
+  }
+}
