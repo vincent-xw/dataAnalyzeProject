@@ -1,0 +1,24 @@
+docs/superpowers/specs/2026-07-17-baseline-data-and-reviewed-custom-script-design.md
+  s_edbf29209c8443::t_239b053af94ec3 1-31
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.14",
+  "base_commit_sha": "d853b8244b59ad39d1b0bcd75356020822693c9d",
+  "prompts": {},
+  "humans": {
+    "h_c3a612a540ca0b": {
+      "author": "xuewen.jia <xuewen.jia@ly.com>"
+    }
+  },
+  "sessions": {
+    "s_edbf29209c8443": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019f650a-a789-7b51-899b-e27b3fb6cc98",
+        "model": "gpt-5.6-terra"
+      },
+      "human_author": "xuewen.jia <xuewen.jia@ly.com>"
+    }
+  }
+}
