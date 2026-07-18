@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from 'vitest'
 
-import { requestCandidateScript, requestFieldDefinitions, requestScriptDecision } from './client'
+import { requestAssetAnalysisConfig, requestCandidateScript, requestFieldDefinitions, requestScriptDecision } from './client'
 
 const context = {
   platformRules: '严格规则',
@@ -98,6 +98,19 @@ describe('requestScriptDecision', () => {
     await expect(requestScriptDecision(context, llmEnv, fetcher)).resolves.toMatchObject({
       supported: false,
     })
+  })
+})
+
+describe('requestAssetAnalysisConfig', () => {
+  it('在本地诊断中保留无法解析的模型原文', async () => {
+    const diagnostic = { info: vi.fn() }
+    await expect(requestAssetAnalysisConfig(
+      { requirement: '看趋势', assetName: '招聘表', fields: [{ name: '负责人', type: 'string' }], rowCount: 1 },
+      llmEnv,
+      vi.fn<typeof fetch>().mockResolvedValue(new Response('<html>upstream error</html>', { status: 200 })),
+      diagnostic,
+    )).rejects.toMatchObject({ code: 'LLM_INVALID_RESPONSE' })
+    expect(diagnostic.info).toHaveBeenCalledWith('模型原始响应文本', '<html>upstream error</html>')
   })
 })
 
