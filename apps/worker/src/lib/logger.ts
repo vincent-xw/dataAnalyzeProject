@@ -17,6 +17,13 @@ const allowedFieldNames = [
   'rowCount',
   'columnCount',
   'sheetCount',
+  'category',
+  'status',
+  'method',
+  'assetCount',
+  'widgetCount',
+  'filterCount',
+  'modelName',
 ] as const
 
 type AllowedFieldName = (typeof allowedFieldNames)[number]

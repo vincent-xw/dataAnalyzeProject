@@ -29,13 +29,13 @@ describe('安全结构化日志', () => {
     const logger = createLogger({ requestId: 'request-1' }, { write: (entry) => entries.push(entry) })
 
     logger.info('数据上传阶段完成', {
-      operation: 'asset_upload', stage: 'r2_data_write', fileType: 'xlsx',
-      byteSize: 3_000_000, rowCount: 3_000, columnCount: 12, durationMs: 850,
+      category: 'storage', operation: 'asset_upload', stage: 'r2_data_write', fileType: 'xlsx',
+      byteSize: 3_000_000, rowCount: 3_000, columnCount: 12, assetCount: 2, status: 201, durationMs: 850,
     })
 
     expect(entries[0]?.fields).toMatchObject({
-      operation: 'asset_upload', stage: 'r2_data_write', fileType: 'xlsx',
-      byteSize: 3_000_000, rowCount: 3_000, columnCount: 12, durationMs: 850,
+      category: 'storage', operation: 'asset_upload', stage: 'r2_data_write', fileType: 'xlsx',
+      byteSize: 3_000_000, rowCount: 3_000, columnCount: 12, assetCount: 2, status: 201, durationMs: 850,
     })
   })
 })

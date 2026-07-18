@@ -8,9 +8,15 @@ import { createLogger } from '../lib/logger'
 export function requestContext(): MiddlewareHandler<Env> {
   return async (context, next) => {
     const requestId = crypto.randomUUID()
+    const startedAt = Date.now()
     context.set('requestId', requestId)
     await next()
     context.header('x-request-id', requestId)
+    createLogger({ requestId, category: 'http', operation: 'request_complete' }).info('API 请求完成', {
+      method: context.req.method,
+      status: context.res.status,
+      durationMs: Date.now() - startedAt,
+    })
 
     if (context.res.status < 400 || !context.res.headers.get('content-type')?.includes('application/json')) return
     const body: unknown = await context.res.clone().json().catch(() => null)
@@ -30,7 +36,7 @@ export const handleError: ErrorHandler<Env> = (error, context) => {
   const appError = error instanceof AppError
     ? error
     : new AppError('INTERNAL_ERROR', '服务处理请求时发生错误', 500)
-  createLogger({ requestId }).error('请求处理失败', {
+  createLogger({ requestId, category: 'http', operation: 'request_unhandled_error' }).error('请求处理失败', {
     errorCode: appError.code,
     failureReason: describeFailure(error),
   })
