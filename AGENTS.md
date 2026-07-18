@@ -11,7 +11,7 @@
 
 ## 构建、测试与开发命令
 
-使用 Node `22.23.1` 和 pnpm `11.9.0`（先启用 Corepack）。在仓库根目录执行：
+使用 Node `24.18.0` 和 pnpm `11.9.0`（先启用 Corepack）。在仓库根目录执行：
 
 ```bash
 pnpm install --frozen-lockfile  # 按 lockfile 安装依赖

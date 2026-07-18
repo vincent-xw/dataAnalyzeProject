@@ -3,7 +3,7 @@
   "private": true,
   "packageManager": "pnpm@11.9.0",
   "engines": {
-    "node": "22.23.1"
+    "node": "24.18.0"
   },
   "scripts": {
     "dev:worker": "node --import tsx scripts/start-dev-worker.ts",

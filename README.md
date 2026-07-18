@@ -15,7 +15,7 @@
 
 ## 本地验证
 
-要求 Node.js `22.23.1`、pnpm `11.9.0`。
+要求 Node.js `24.18.0`、pnpm `11.9.0`。
 
 ```bash
 corepack enable
