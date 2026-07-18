@@ -108,6 +108,34 @@ templateRoutes.get('/', async (context) => {
   return context.json(await service.list())
 })
 
+templateRoutes.put('/:id', async (context) => {
+  const request = CreateTemplateRequestSchema.safeParse(await context.req.json().catch(() => null))
+  if (!request.success) {
+    return context.json(
+      { code: 'INVALID_REQUEST', message: '请求参数不符合模板协议', details: request.error.issues },
+      400,
+    )
+  }
+
+  const template = await new TemplateService(context.env.DB).update(context.req.param('id'), request.data)
+  if (!template) return context.json({ code: 'TEMPLATE_NOT_FOUND', message: '分析模板不存在' }, 404)
+  return context.json(template)
+})
+
+templateRoutes.delete('/:id', async (context) => {
+  const result = await new TemplateService(context.env.DB).remove(context.req.param('id'))
+  if (result === 'in_use') {
+    return context.json(
+      { code: 'TEMPLATE_IN_USE', message: '模板已被数据集、字段映射或数据资产引用，不能删除' },
+      409,
+    )
+  }
+  if (result === 'not_found') {
+    return context.json({ code: 'TEMPLATE_NOT_FOUND', message: '分析模板不存在' }, 404)
+  }
+  return context.body(null, 204)
+})
+
 templateRoutes.post('/:id/prompts', async (context) => {
   const request = CreatePromptRequestSchema.safeParse(await context.req.json().catch(() => null))
   if (!request.success) {

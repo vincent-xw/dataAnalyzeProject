@@ -125,6 +125,94 @@ export class TemplateService {
     }
   }
 
+  async update(id: string, input: CreateTemplateInput) {
+    const row = await this.database
+      .prepare('SELECT * FROM analysis_templates WHERE id = ?')
+      .bind(id)
+      .first<TemplateRow>()
+
+    if (!row) return null
+    if (!row.processing_prompt_version_id || !row.reporting_prompt_version_id) {
+      throw new Error('TEMPLATE_PROMPT_VERSION_MISSING')
+    }
+
+    const [processingPrompt, reportingPrompt] = await Promise.all([
+      this.getPrompt(row.processing_prompt_version_id),
+      this.getPrompt(row.reporting_prompt_version_id),
+    ])
+    const processingPromptId = crypto.randomUUID()
+    const reportingPromptId = crypto.randomUUID()
+    const now = new Date().toISOString()
+
+    await this.database.batch([
+      this.database
+        .prepare(
+          `INSERT INTO prompt_versions
+            (id, template_id, type, version, content, created_at)
+           VALUES (?, ?, 'processing', ?, ?, ?)`,
+        )
+        .bind(processingPromptId, id, processingPrompt.version + 1, input.processingPrompt, now),
+      this.database
+        .prepare(
+          `INSERT INTO prompt_versions
+            (id, template_id, type, version, content, created_at)
+           VALUES (?, ?, 'reporting', ?, ?, ?)`,
+        )
+        .bind(reportingPromptId, id, reportingPrompt.version + 1, input.reportingPrompt, now),
+      this.database
+        .prepare(
+          `UPDATE analysis_templates
+           SET name = ?, description = ?, input_schema_json = ?, processing_prompt_version_id = ?,
+               reporting_prompt_version_id = ?, updated_at = ?
+           WHERE id = ?`,
+        )
+        .bind(
+          input.name,
+          input.description,
+          JSON.stringify(input.fields),
+          processingPromptId,
+          reportingPromptId,
+          now,
+          id,
+        ),
+    ])
+
+    return this.get(id)
+  }
+
+  async remove(id: string): Promise<'deleted' | 'not_found' | 'in_use'> {
+    const [dataset, fieldMapping, dataAsset] = await Promise.all([
+      this.database
+        .prepare('SELECT id FROM datasets WHERE template_id = ? LIMIT 1')
+        .bind(id)
+        .first<{ id: string }>(),
+      this.database
+        .prepare(
+          `SELECT field_mappings.id
+           FROM field_mappings
+           JOIN dataset_versions ON dataset_versions.id = field_mappings.dataset_version_id
+           JOIN datasets ON datasets.id = dataset_versions.dataset_id
+           WHERE datasets.template_id = ?
+           LIMIT 1`,
+        )
+        .bind(id)
+        .first<{ id: string }>(),
+      this.database
+        .prepare('SELECT id FROM data_assets WHERE template_id = ? LIMIT 1')
+        .bind(id)
+        .first<{ id: string }>(),
+    ])
+
+    if (dataset || fieldMapping || dataAsset) return 'in_use'
+
+    const [, deletedTemplate] = await this.database.batch([
+      this.database.prepare('DELETE FROM prompt_versions WHERE template_id = ?').bind(id),
+      this.database.prepare('DELETE FROM analysis_templates WHERE id = ?').bind(id),
+    ])
+
+    return deletedTemplate.meta.changes === 0 ? 'not_found' : 'deleted'
+  }
+
   async createPromptVersion(templateId: string, type: PromptType, content: string) {
     const template = await this.database
       .prepare('SELECT id FROM analysis_templates WHERE id = ?')

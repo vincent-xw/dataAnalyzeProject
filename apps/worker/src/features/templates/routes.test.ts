@@ -34,6 +34,9 @@ describe('分析模板 API', () => {
     // Cloudflare 测试池会在同一测试文件内复用 D1，逐用例清理可避免数据相互污染。
     await env.DB.batch([
       env.DB.prepare('DELETE FROM data_assets'),
+      env.DB.prepare('DELETE FROM field_mappings'),
+      env.DB.prepare('DELETE FROM dataset_versions'),
+      env.DB.prepare('DELETE FROM datasets'),
       env.DB.prepare('DELETE FROM prompt_versions'),
       env.DB.prepare('DELETE FROM analysis_templates'),
     ])
@@ -88,6 +91,66 @@ describe('分析模板 API', () => {
       processingPrompt: { version: 2, content: '更新后的加工约束' },
       reportingPrompt: { version: 1 },
     })
+  })
+
+  it('更新模板时为两个 Prompt 创建 v2 并更新当前版本', async () => {
+    const created = (await (await createTemplate()).json()) as { id: string }
+    const response = await authenticatedRequest(
+      `/api/templates/${created.id}`,
+      {
+        method: 'PUT',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({
+          name: '更新后的销售分析',
+          description: '更新后的销售数据模板',
+          fields: [{ name: 'salesTotal', type: 'number', sourceLabel: '销售总额', required: true }],
+          processingPrompt: '新版加工 Prompt',
+          reportingPrompt: '新版报表 Prompt',
+        }),
+      },
+      env,
+    )
+
+    expect(response.status).toBe(200)
+    expect(await response.json()).toMatchObject({
+      name: '更新后的销售分析',
+      fields: [{ name: 'salesTotal', type: 'number', sourceLabel: '销售总额', required: true }],
+      processingPrompt: { version: 2, content: '新版加工 Prompt' },
+      reportingPrompt: { version: 2, content: '新版报表 Prompt' },
+    })
+  })
+
+  it('删除未被引用的模板后无法再获取', async () => {
+    const created = (await (await createTemplate()).json()) as { id: string }
+
+    const response = await authenticatedRequest(`/api/templates/${created.id}`, { method: 'DELETE' }, env)
+
+    expect(response.status).toBe(204)
+    const detail = await authenticatedRequest(`/api/templates/${created.id}`, {}, env)
+    expect(detail.status).toBe(404)
+  })
+
+  it('删除不存在的模板返回 404', async () => {
+    const response = await authenticatedRequest(
+      '/api/templates/00000000-0000-4000-8000-000000000000',
+      { method: 'DELETE' },
+      env,
+    )
+
+    expect(response.status).toBe(404)
+    expect(await response.json()).toMatchObject({ code: 'TEMPLATE_NOT_FOUND' })
+  })
+
+  it('删除被数据集引用的模板返回 TEMPLATE_IN_USE', async () => {
+    const created = (await (await createTemplate()).json()) as { id: string }
+    await env.DB.prepare(
+      "INSERT INTO datasets (id, template_id, name, created_at) VALUES (?, ?, 'sales.csv', ?)",
+    ).bind('00000000-0000-4000-8000-000000000001', created.id, new Date().toISOString()).run()
+
+    const response = await authenticatedRequest(`/api/templates/${created.id}`, { method: 'DELETE' }, env)
+
+    expect(response.status).toBe(409)
+    expect(await response.json()).toMatchObject({ code: 'TEMPLATE_IN_USE' })
   })
 
   it('返回模板列表', async () => {
