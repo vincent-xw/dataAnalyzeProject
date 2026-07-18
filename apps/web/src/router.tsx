@@ -4,6 +4,8 @@ import { App } from './App'
 import { AssetListPage } from './features/assets/AssetListPage'
 import { AssetDetailPage } from './features/assets/AssetDetailPage'
 import { AssetUploadPage } from './features/assets/AssetUploadPage'
+import { AnalysisListPage } from './features/analyses/AnalysisListPage'
+import { AnalysisDetailPage } from './features/analyses/AnalysisDetailPage'
 
 export const router = createBrowserRouter([
   {
@@ -14,6 +16,8 @@ export const router = createBrowserRouter([
       { path: 'assets', element: <AssetListPage /> },
       { path: 'assets/upload', element: <AssetUploadPage /> },
       { path: 'assets/:assetId', element: <AssetDetailPage /> },
+      { path: 'assets/:assetId/analyses', element: <AnalysisListPage /> },
+      { path: 'assets/:assetId/analyses/:analysisId', element: <AnalysisDetailPage /> },
     ],
   },
 ])

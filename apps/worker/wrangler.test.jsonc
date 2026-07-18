@@ -1,0 +1,14 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "data-analyze-worker-test",
+  "main": "src/index.ts",
+  "compatibility_date": "2026-07-14",
+  "compatibility_flags": ["nodejs_compat"],
+  "r2_buckets": [{ "binding": "DATA_BUCKET", "bucket_name": "data-analyze-data-test" }],
+  "d1_databases": [{
+    "binding": "DB",
+    "database_name": "data-analyze-db-test",
+    "database_id": "00000000-0000-0000-0000-000000000000",
+    "migrations_dir": "migrations"
+  }]
+}

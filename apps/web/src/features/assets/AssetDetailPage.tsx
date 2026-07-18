@@ -69,7 +69,7 @@ export function AssetDetailPage() {
   return (
     <section className="stack asset-page">
       <div className="breadcrumb"><Link to="/assets">我的数据</Link><span>/</span><span>{asset.name}</span></div>
-      <div className="page-heading"><div><p className="eyebrow">{asset.rowCount} 行</p><h2>{asset.name}</h2><p>{asset.description || '为这份数据添加说明和标签，方便以后快速识别。'}</p></div><span className="status-chip">可用</span></div>
+      <div className="page-heading"><div><p className="eyebrow">{asset.rowCount} 行</p><h2>{asset.name}</h2><p>{asset.description || '为这份数据添加说明和标签，方便以后快速识别。'}</p></div><Link className="secondary-button" to={`/assets/${assetId}/analyses`}>数据分析</Link><span className="status-chip">可用</span></div>
       <div className="asset-detail-layout">
         <div className="panel preview-panel"><div className="section-heading"><div><h3>数据预览</h3><p>仅展示前 {Math.min(50, preview.rows.length)} 行标准化数据。</p></div></div>
           {preview.rows.length ? <div className="preview-table-wrap"><table><thead><tr>{columns.map((column) => <th key={column}>{column}</th>)}</tr></thead><tbody>{preview.rows.map((row, index) => <tr key={index}>{columns.map((column) => <td key={column}>{String(row[column] ?? '')}</td>)}</tr>)}</tbody></table></div> : <p className="muted">这份数据暂时没有可预览的行。</p>}

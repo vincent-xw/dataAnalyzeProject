@@ -1,6 +1,7 @@
 import { Hono } from 'hono'
 
 import { assetRoutes } from './features/assets/routes'
+import { analysisRoutes } from './features/analyses/routes'
 import { requireAccess, type AuthenticatedUser } from './middleware/access-auth'
 import { handleError, requestContext } from './middleware/error-handler'
 
@@ -34,6 +35,7 @@ app.get('/health', (context) => context.json({ status: 'ok' as const }))
 app.use('/api/*', requireAccess())
 app.use('/internal/*', requireAccess())
 app.route('/api/assets', assetRoutes)
+app.route('/api/assets', analysisRoutes)
 
 export default {
   fetch: app.fetch,

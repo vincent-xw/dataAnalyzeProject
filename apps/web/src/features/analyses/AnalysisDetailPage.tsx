@@ -1,0 +1,7 @@
+import { useEffect, useState } from 'react'
+import { Link, useParams } from 'react-router-dom'
+import type { ReportConfig } from '@data-analyze/report-schema'
+import { apiRequest } from '../../api/client'
+import { AnalysisChart } from './AnalysisChart'
+type Detail = { title: string | null; requirement: string; status: 'ready' | 'failed'; failureReason: string | null; config: ReportConfig | null; rows: Array<Record<string, unknown>> }
+export function AnalysisDetailPage() { const { assetId, analysisId } = useParams(); const [detail, setDetail] = useState<Detail | null>(null); useEffect(() => { if (assetId && analysisId) apiRequest<Detail>(`/api/assets/${assetId}/analyses/${analysisId}`).then(setDetail) }, [assetId, analysisId]); if (!detail) return <p>正在加载分析…</p>; return <section className="stack"><div className="breadcrumb"><Link to={`/assets/${assetId}/analyses`}>历史分析</Link></div><h2>{detail.title || '分析记录'}</h2><p>{detail.requirement}</p>{detail.status === 'failed' ? <p className="error">{detail.failureReason}</p> : <>{detail.config?.widgets.map((widget) => <div className="panel" key={widget.id}><h3>{widget.title}</h3>{'dimension' in widget ? <AnalysisChart widget={widget} rows={detail.rows} /> : widget.type === 'table' ? <pre>{JSON.stringify(detail.rows.slice(0, 50), null, 2)}</pre> : <p>{detail.rows.reduce((sum, row) => sum + Number(row[widget.metric] || 0), 0)}</p>}</div>)}<details className="panel"><summary>分析规则</summary><pre>{JSON.stringify(detail.config, null, 2)}</pre></details></>}</section> }

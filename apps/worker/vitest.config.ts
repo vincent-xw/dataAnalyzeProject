@@ -7,7 +7,8 @@ export default defineConfig({
   plugins: [
     cloudflareTest({
       wrangler: {
-        configPath: './wrangler.jsonc',
+        // 测试必须使用本地模拟资源，不能继承开发时的远程 D1/R2 绑定。
+        configPath: './wrangler.test.jsonc',
       },
       miniflare: {
         bindings: {
