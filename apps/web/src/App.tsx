@@ -18,12 +18,13 @@ function getSelectedNavigationKeys(pathname: string) {
 
 export function App() {
   const location = useLocation()
+  const currentYear = new Date().getFullYear()
 
   return (
     <Layout className="app-shell">
       <Layout.Header className="app-header">
         <div className="app-header-inner">
-          <h1 className="app-brand">数据分析 Agent</h1>
+          <h1 className="app-brand">NEXUS 数据智能平台</h1>
           <nav className="app-navigation" aria-label="主导航">
             <Menu
               items={navigationItems}
@@ -39,7 +40,9 @@ export function App() {
           <Outlet />
         </div>
       </Layout.Content>
-      <Layout.Footer className="app-footer">数据分析 Agent</Layout.Footer>
+      <Layout.Footer className="app-footer">
+        © {currentYear} NEXUS 数据智能平台 · Created by vincent-xw · All Rights Reserved.
+      </Layout.Footer>
     </Layout>
   )
 }
