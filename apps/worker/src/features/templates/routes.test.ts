@@ -118,6 +118,17 @@ describe('分析模板 API', () => {
       processingPrompt: { version: 2, content: '新版加工 Prompt' },
       reportingPrompt: { version: 2, content: '新版报表 Prompt' },
     })
+
+    const promptVersions = await env.DB.prepare(
+      'SELECT type, version, content FROM prompt_versions WHERE template_id = ? ORDER BY type, version',
+    ).bind(created.id).all<{ type: 'processing' | 'reporting'; version: number; content: string }>()
+
+    expect(promptVersions.results).toEqual([
+      { type: 'processing', version: 1, content: validTemplateRequest.processingPrompt },
+      { type: 'processing', version: 2, content: '新版加工 Prompt' },
+      { type: 'reporting', version: 1, content: validTemplateRequest.reportingPrompt },
+      { type: 'reporting', version: 2, content: '新版报表 Prompt' },
+    ])
   })
 
   it('删除未被引用的模板后无法再获取', async () => {
@@ -146,6 +157,30 @@ describe('分析模板 API', () => {
     await env.DB.prepare(
       "INSERT INTO datasets (id, template_id, name, created_at) VALUES (?, ?, 'sales.csv', ?)",
     ).bind('00000000-0000-4000-8000-000000000001', created.id, new Date().toISOString()).run()
+
+    const response = await authenticatedRequest(`/api/templates/${created.id}`, { method: 'DELETE' }, env)
+
+    expect(response.status).toBe(409)
+    expect(await response.json()).toMatchObject({ code: 'TEMPLATE_IN_USE' })
+  })
+
+  it('删除被数据资产引用的模板返回 TEMPLATE_IN_USE', async () => {
+    const created = (await (await createTemplate()).json()) as { id: string }
+    const assetId = '00000000-0000-4000-8000-000000000002'
+    const now = new Date().toISOString()
+    await env.DB.prepare(
+      `INSERT INTO data_assets
+        (id, kind, template_id, name, description, tags_json, data_object_key, schema_object_key,
+         row_count, status, created_by, created_at, updated_at)
+       VALUES (?, 'source', ?, '销售资产', NULL, '[]', ?, ?, 1, 'ready', 'user@example.com', ?, ?)`,
+    ).bind(
+      assetId,
+      created.id,
+      `data-analyze/assets/${assetId}/data.ndjson`,
+      `data-analyze/assets/${assetId}/schema.json`,
+      now,
+      now,
+    ).run()
 
     const response = await authenticatedRequest(`/api/templates/${created.id}`, { method: 'DELETE' }, env)
 
