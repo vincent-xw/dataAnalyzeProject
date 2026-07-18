@@ -51,9 +51,7 @@ export function AssetListPage() {
         <Button type="primary" onClick={() => navigate('/assets/upload')}>上传新数据</Button>
       </div>
       {error ? <p className="error">{error}</p> : null}
-      {loading ? <p className="muted" role="status">正在加载数据资产…</p> : null}
-      {assets.length === 0 && !error && !loading ? <div className="panel empty-state"><h3>还没有可用数据</h3><p>上传一份表格后，它会直接成为可预览的数据资产。</p><Link to="/assets/upload">开始上传</Link></div> : null}
-      {assets.length > 0 ? <Table columns={assetColumns} dataSource={assets} pagination={false} rowKey="id" /> : null}
+      <Table columns={assetColumns} dataSource={assets} loading={loading} pagination={false} rowKey="id" />
     </section>
   )
 }
