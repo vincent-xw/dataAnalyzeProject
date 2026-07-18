@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 
-import { createLogger, type LogEntry } from './logger'
+import { createLogger, createSensitiveDebugLogger, type LogEntry } from './logger'
 
 describe('安全结构化日志', () => {
   it('只保留白名单字段并移除敏感内容', () => {
@@ -37,5 +37,15 @@ describe('安全结构化日志', () => {
       category: 'storage', operation: 'asset_upload', stage: 'r2_data_write', fileType: 'xlsx',
       byteSize: 3_000_000, rowCount: 3_000, columnCount: 12, assetCount: 2, status: 201, durationMs: 850,
     })
+  })
+
+  it('敏感诊断仅在本地开发开启，并递归隐藏凭据字段', () => {
+    const entries: unknown[] = []
+    const logger = createSensitiveDebugLogger({ ENVIRONMENT: 'development', LOG_SENSITIVE_DEBUG: 'true' }, { write: (entry) => entries.push(entry) })
+    logger?.info('原始请求', { requirement: '统计张三成绩', token: 'hidden', nested: { apiKey: 'hidden', row: { name: '张三' } } })
+    expect(JSON.stringify(entries)).toContain('统计张三成绩')
+    expect(JSON.stringify(entries)).toContain('张三')
+    expect(JSON.stringify(entries)).not.toContain('hidden')
+    expect(createSensitiveDebugLogger({ ENVIRONMENT: 'production', LOG_SENSITIVE_DEBUG: 'true' })).toBeNull()
   })
 })

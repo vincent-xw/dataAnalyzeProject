@@ -19,6 +19,7 @@ export type Env = {
     GITHUB_REPO: string
     GITHUB_BASE_BRANCH: string
     ENVIRONMENT: string
+    LOG_SENSITIVE_DEBUG?: string
     ACCESS_TEST_PUBLIC_JWK?: string
   }
   Variables: {

@@ -19,7 +19,7 @@ describe('start-dev-worker', () => {
     expect(spawnSync).not.toHaveBeenCalled()
     expect(spawn).toHaveBeenCalledWith(
       'pnpm',
-      ['--filter', '@data-analyze/worker', 'exec', 'wrangler', 'dev', '--port', '8787', '--var', 'ENVIRONMENT:development'],
+      ['--filter', '@data-analyze/worker', 'exec', 'wrangler', 'dev', '--port', '8787', '--var', 'ENVIRONMENT:development', '--var', 'LOG_SENSITIVE_DEBUG:true'],
       { stdio: 'inherit' },
     )
 

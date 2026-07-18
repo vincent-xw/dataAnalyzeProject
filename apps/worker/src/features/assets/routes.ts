@@ -5,7 +5,7 @@ import iconv from 'iconv-lite'
 import * as XLSX from 'xlsx'
 
 import type { Env } from '../../index'
-import { createLogger } from '../../lib/logger'
+import { createLogger, createSensitiveDebugLogger } from '../../lib/logger'
 import { LlmClientError, requestAssetMetadataSuggestion } from '../llm/client'
 import { AssetService, AssetServiceError } from './service'
 
@@ -31,6 +31,7 @@ assetRoutes.post('/upload', async (context) => {
     return context.json({ code: 'INVALID_UPLOAD', message: 'CSV 上传参数不完整' }, 400)
   }
   const logger = createLogger({ requestId: context.get('requestId'), operation: 'asset_upload', fileType: isXlsx ? 'xlsx' : 'csv' })
+  const diagnostic = createSensitiveDebugLogger(context.env, undefined, { requestId: context.get('requestId'), category: 'asset', operation: 'asset_upload_debug' })
   const content = await context.req.arrayBuffer()
   logger.info('数据上传阶段完成', { stage: 'request_body_read', byteSize: content.byteLength, durationMs: Date.now() - startedAt })
   const selectedSheet = context.req.header('x-selected-sheet') ? decodeURIComponent(context.req.header('x-selected-sheet')!) : undefined
@@ -49,6 +50,7 @@ assetRoutes.post('/upload', async (context) => {
   const sourceFields = header.map((field) => field.trim())
   const records = values.map((row) => Object.fromEntries(sourceFields.map((field, index) => [field, row[index] ?? ''])))
   const ndjson = records.map((record) => JSON.stringify(record)).join('\n') + (records.length ? '\n' : '')
+  diagnostic?.info('上传解析后的表结构与数据样本', { sourceFields, rows: records.slice(0, 10) })
   logger.info('数据上传阶段完成', { stage: 'parse_and_convert', rowCount: records.length, columnCount: sourceFields.length, byteSize: ndjson.length, durationMs: Date.now() - parseStartedAt })
   const assetId = crypto.randomUUID()
   const prefix = `data-analyze/assets/${assetId}`
@@ -92,6 +94,7 @@ assetRoutes.get('/:id/preview', async (context) => {
   try {
     const preview = await new AssetService(context.env).preview(context.req.param('id'))
     if (!preview) return context.json({ code: 'ASSET_NOT_FOUND', message: '数据资产不存在' }, 404)
+    createSensitiveDebugLogger(context.env, undefined, { requestId: context.get('requestId'), category: 'asset', operation: 'asset_preview_debug' })?.info('资产预览原始响应', preview)
     return context.json(preview)
   } catch (error) {
     if (error instanceof AssetServiceError) return context.json({ code: error.code, message: error.message }, error.status)
@@ -119,12 +122,14 @@ assetRoutes.post('/:id/metadata-suggestions', async (context) => {
   const asset = await new AssetService(context.env).get(context.req.param('id'))
   if (!asset) return context.json({ code: 'ASSET_NOT_FOUND', message: '数据资产不存在' }, 404)
   try {
+    const diagnostic = createSensitiveDebugLogger(context.env, undefined, { requestId: context.get('requestId'), category: 'asset', operation: 'metadata_suggestion_debug' })
+    diagnostic?.info('元数据建议模型输入', { asset, description: request.data.description })
     // 模型仅接收控制面信息与用户描述，不接触 R2 中的任意数据行。
     return context.json(await requestAssetMetadataSuggestion({
       name: asset.name,
       rowCount: asset.rowCount,
       description: request.data.description,
-    }, context.env))
+    }, context.env, undefined, undefined, undefined, diagnostic ?? undefined))
   } catch (error) {
     if (error instanceof LlmClientError) return context.json({ code: error.code, message: error.message }, 502)
     throw error

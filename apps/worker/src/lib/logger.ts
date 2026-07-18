@@ -43,6 +43,7 @@ export type SafeLogger = {
   info(message: string, fields?: Record<string, unknown>): void
   error(message: string, fields?: Record<string, unknown>): void
 }
+export type SensitiveDebugLogger = { info(message: string, payload: unknown): void }
 
 const consoleSink: LogSink = {
   write(entry) {
@@ -81,4 +82,20 @@ export function createLogger(
     info: (message, fields) => write('info', message, fields),
     error: (message, fields) => write('error', message, fields),
   }
+}
+
+/** 仅供本机开发排障，生产环境始终禁用；递归删除常见凭据键后才输出原文诊断。 */
+export function createSensitiveDebugLogger(
+  env: { ENVIRONMENT?: string; LOG_SENSITIVE_DEBUG?: string },
+  sink: LogSink = consoleSink,
+  baseFields: Record<string, unknown> = {},
+): SensitiveDebugLogger | null {
+  if (env.ENVIRONMENT !== 'development' || env.LOG_SENSITIVE_DEBUG !== 'true') return null
+  return { info(message, payload) { sink.write({ timestamp: new Date().toISOString(), level: 'info', message, fields: { ...sanitizeFields(baseFields), failureReason: JSON.stringify(redactCredentials(payload)).slice(0, 20_000) } }) } }
+}
+
+function redactCredentials(value: unknown): unknown {
+  if (Array.isArray(value)) return value.map(redactCredentials)
+  if (!value || typeof value !== 'object') return value
+  return Object.fromEntries(Object.entries(value as Record<string, unknown>).map(([key, nested]) => [key, /token|secret|api.?key|authorization|cookie|password/i.test(key) ? '[REDACTED]' : redactCredentials(nested)]))
 }

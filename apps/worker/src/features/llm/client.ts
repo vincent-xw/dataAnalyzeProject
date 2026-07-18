@@ -11,6 +11,7 @@ import { ReportConfigSchema, type ReportConfig } from '@data-analyze/report-sche
 
 import type { ProcessingContext } from './prompt'
 import { createLogger, type SafeLogger } from '../../lib/logger'
+import type { SensitiveDebugLogger } from '../../lib/logger'
 import { createFakeFieldDefinitions, createFakeScriptDecision } from '../../testing/fake-llm'
 
 export type LlmBindings = {
@@ -29,7 +30,7 @@ export class LlmClientError extends Error {
   }
 }
 
-export async function requestAssetAnalysisConfig(context: { requirement: string; assetName: string; fields: Array<{ name: string; type: string }>; rowCount: number }, bindings: LlmBindings, fetcher: typeof fetch = fetch): Promise<ReportConfig> {
+export async function requestAssetAnalysisConfig(context: { requirement: string; assetName: string; fields: Array<{ name: string; type: string }>; rowCount: number }, bindings: LlmBindings, fetcher: typeof fetch = fetch, diagnostic?: SensitiveDebugLogger): Promise<ReportConfig> {
   if (bindings.ENVIRONMENT === 'test' || bindings.ENVIRONMENT === 'unit-test') {
     if (context.requirement.includes('不支持')) throw new LlmClientError('LLM_INVALID_RESPONSE', '分析规则不符合字段约束')
     const [dimension, metric = dimension] = context.fields
@@ -40,7 +41,7 @@ export async function requestAssetAnalysisConfig(context: { requirement: string;
   let response: Response
   try { response = await fetcher(`${bindings.LLM_BASE_URL.replace(/\/$/, '')}/chat/completions`, { method: 'POST', headers: { authorization: `Bearer ${bindings.LLM_API_KEY}`, 'content-type': 'application/json' }, body: JSON.stringify({ model: bindings.LLM_MODEL, messages: [{ role: 'system', content: rules }, { role: 'user', content: JSON.stringify(context) }], response_format: { type: 'json_object' }, }), signal: AbortSignal.timeout(15_000) }) } catch { throw new LlmClientError('LLM_REQUEST_FAILED', '分析规则生成请求失败') }
   if (!response.ok) throw new LlmClientError('LLM_REQUEST_FAILED', `LLM HTTP 状态异常: ${response.status}`)
-  try { const body = await response.json() as { choices?: Array<{ message?: { content?: string } }> }; return ReportConfigSchema.parse(JSON.parse(body.choices?.[0]?.message?.content || '')) } catch { throw new LlmClientError('LLM_INVALID_RESPONSE', '分析规则响应不符合协议') }
+  try { const body = await response.json() as { choices?: Array<{ message?: { content?: string } }> }; diagnostic?.info('模型完整响应', body); return ReportConfigSchema.parse(JSON.parse(body.choices?.[0]?.message?.content || '')) } catch { throw new LlmClientError('LLM_INVALID_RESPONSE', '分析规则响应不符合协议') }
 }
 
 const AssetMetadataSuggestionSchema = z.object({
@@ -58,6 +59,7 @@ export async function requestAssetMetadataSuggestion(
   fetcher: typeof fetch = fetch,
   timeoutMs = 15_000,
   logger: SafeLogger = createLogger(),
+  diagnostic?: SensitiveDebugLogger,
 ) {
   if (bindings.ENVIRONMENT === 'test' || bindings.ENVIRONMENT === 'unit-test') {
     // 测试环境不访问外部模型，返回仍需由页面人工确认的确定性建议。
@@ -92,6 +94,7 @@ export async function requestAssetMetadataSuggestion(
   }
   try {
     const payload = (await response.json()) as { choices?: Array<{ message?: { content?: string } }> }
+    diagnostic?.info('元数据建议模型完整响应', payload)
     const suggestion = AssetMetadataSuggestionSchema.parse(JSON.parse(payload.choices?.[0]?.message?.content || ''))
     logger.info('LLM 元数据建议生成完成', { durationMs: Date.now() - startedAt, tagCount: suggestion.tags.length })
     return suggestion
