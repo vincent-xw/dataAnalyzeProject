@@ -43,4 +43,4 @@ export type DataAsset = {
 }
 
 export type DataAssetPreview = { rowCount: number; rows: Array<Record<string, unknown>> }
-export type AnalysisSummary = { id: string; assetId: string; requirement: string; title: string | null; status: 'ready' | 'failed'; failureReason: string | null; createdAt: string }
+export type AnalysisSummary = { id: string; requirement: string; title: string | null; status: 'ready' | 'failed'; failureReason: string | null; createdAt: string; assets?: Array<{ id: string; name: string; role: 'primary' | 'reference' }> }

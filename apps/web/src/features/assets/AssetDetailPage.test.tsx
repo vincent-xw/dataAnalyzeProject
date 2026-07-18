@@ -32,7 +32,6 @@ describe('AssetDetailPage', () => {
     )
 
     expect(await screen.findByText('张三')).toBeInTheDocument()
-    expect(screen.getByRole('link', { name: '数据分析' })).toHaveAttribute('href', '/assets/asset-1/analyses')
     fireEvent.change(screen.getByLabelText('资产名称'), { target: { value: '2026 春季三年二班期中成绩' } })
     fireEvent.click(screen.getByRole('button', { name: '保存元数据' }))
     expect(apiRequest).toHaveBeenCalledWith('/api/assets/asset-1/metadata', expect.objectContaining({ method: 'PUT' }))

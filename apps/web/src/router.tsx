@@ -16,8 +16,8 @@ export const router = createBrowserRouter([
       { path: 'assets', element: <AssetListPage /> },
       { path: 'assets/upload', element: <AssetUploadPage /> },
       { path: 'assets/:assetId', element: <AssetDetailPage /> },
-      { path: 'assets/:assetId/analyses', element: <AnalysisListPage /> },
-      { path: 'assets/:assetId/analyses/:analysisId', element: <AnalysisDetailPage /> },
+      { path: 'analyses', element: <AnalysisListPage /> },
+      { path: 'analyses/:analysisId', element: <AnalysisDetailPage /> },
     ],
   },
 ])

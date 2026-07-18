@@ -35,7 +35,7 @@ app.get('/health', (context) => context.json({ status: 'ok' as const }))
 app.use('/api/*', requireAccess())
 app.use('/internal/*', requireAccess())
 app.route('/api/assets', assetRoutes)
-app.route('/api/assets', analysisRoutes)
+app.route('/api/analyses', analysisRoutes)
 
 export default {
   fetch: app.fetch,
