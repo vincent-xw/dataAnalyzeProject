@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from 'vitest'
 
-import { requestAssetAnalysisConfig, requestCandidateScript, requestFieldDefinitions, requestScriptDecision } from './client'
+import { ANALYSIS_LLM_TIMEOUT_MS, requestAssetAnalysisConfig, requestCandidateScript, requestFieldDefinitions, requestScriptDecision } from './client'
 
 const context = {
   platformRules: '严格规则',
@@ -102,6 +102,18 @@ describe('requestScriptDecision', () => {
 })
 
 describe('requestAssetAnalysisConfig', () => {
+  it('为复杂分析保留三分钟模型响应窗口', () => {
+    expect(ANALYSIS_LLM_TIMEOUT_MS).toBe(180_000)
+  })
+
+  it('将分析请求中止标记为超时', async () => {
+    await expect(requestAssetAnalysisConfig(
+      { requirement: '看趋势', assetName: '招聘表', fields: [{ name: '负责人', type: 'string' }], rowCount: 1 },
+      llmEnv,
+      vi.fn<typeof fetch>().mockRejectedValue(new DOMException('timeout', 'AbortError')),
+    )).rejects.toMatchObject({ code: 'LLM_REQUEST_TIMEOUT' })
+  })
+
   it('在本地诊断中保留无法解析的模型原文', async () => {
     const diagnostic = { info: vi.fn() }
     await expect(requestAssetAnalysisConfig(
