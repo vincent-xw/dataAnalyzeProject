@@ -79,7 +79,14 @@ describe('数据资产分析 API', () => {
     }, env)
 
     expect(response.status).toBe(422)
-    expect(await response.json()).toEqual(expect.objectContaining({ code: 'ANALYSIS_CONFIG_INVALID' }))
+    expect(await response.json()).toEqual(expect.objectContaining({
+      code: 'ANALYSIS_CONFIG_INVALID',
+      guidance: {
+        summary: expect.any(String),
+        suggestion: expect.any(String),
+        revisedRequirement: expect.any(String),
+      },
+    }))
     const listed = await authenticatedRequest('/api/analyses', {}, env)
     expect(await listed.json()).toEqual([expect.objectContaining({ status: 'failed', failureReason: expect.any(String) })])
   })

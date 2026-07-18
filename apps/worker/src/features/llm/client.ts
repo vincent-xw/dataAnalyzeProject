@@ -10,6 +10,7 @@ import { z } from 'zod'
 import { ReportConfigSchema, type ReportConfig } from '@data-analyze/report-schema'
 
 import type { ProcessingContext } from './prompt'
+import type { FailureGuidance } from '../analyses/service'
 import { createLogger, type SafeLogger } from '../../lib/logger'
 import type { SensitiveDebugLogger } from '../../lib/logger'
 import { createFakeFieldDefinitions, createFakeScriptDecision } from '../../testing/fake-llm'
@@ -32,6 +33,28 @@ export class LlmClientError extends Error {
 
 /** 分析规则生成可能包含多图布局，允许用户等待至多三分钟。 */
 export const ANALYSIS_LLM_TIMEOUT_MS = 180_000
+const FailureGuidanceSchema = z.object({ summary: z.string().trim().min(1).max(500), suggestion: z.string().trim().min(1).max(1_500), revisedRequirement: z.string().trim().min(1).max(1_000) }).strict()
+
+/** 仅对用户可修复的规则失败给出改写建议，绝不诊断基础设施错误。 */
+export async function requestAnalysisFailureGuidance(context: { requirement: string; assetName: string; fields: Array<{ name: string; type: string }>; failureReason: string }, bindings: LlmBindings, fetcher: typeof fetch = fetch, diagnostic?: SensitiveDebugLogger, timeoutMs = 30_000): Promise<FailureGuidance> {
+  if (bindings.ENVIRONMENT === 'test' || bindings.ENVIRONMENT === 'unit-test') return { summary: '当前需求与可用字段或图表能力不匹配。', suggestion: '请依据数据表中现有字段描述统计口径，并避免使用当前不支持的图表能力。', revisedRequirement: `请基于 ${context.assetName} 的现有字段完成：${context.requirement}` }
+  const rules = '你是数据分析失败诊断助手。只分析用户可修复的需求、字段和规则约束问题。根据输入返回严格 JSON：{"summary":"失败原因","suggestion":"用户可执行的修改建议","revisedRequirement":"可直接重新提交的改写需求"}。不得生成报表规则；不得把网络、数据库、超时或模型服务错误归因于用户；不得臆造字段。只输出 JSON。'
+  let response: Response
+  try {
+    response = await fetcher(`${bindings.LLM_BASE_URL.replace(/\/$/, '')}/chat/completions`, { method: 'POST', headers: { authorization: `Bearer ${bindings.LLM_API_KEY}`, 'content-type': 'application/json' }, body: JSON.stringify({ model: bindings.LLM_MODEL, messages: [{ role: 'system', content: rules }, { role: 'user', content: JSON.stringify(context) }], response_format: { type: 'json_object' } }), signal: AbortSignal.timeout(timeoutMs) })
+  } catch (error) {
+    if (isTimeoutError(error)) throw new LlmClientError('LLM_REQUEST_TIMEOUT', '失败原因诊断超时')
+    throw new LlmClientError('LLM_REQUEST_FAILED', '失败原因诊断请求失败')
+  }
+  if (!response.ok) throw new LlmClientError('LLM_REQUEST_FAILED', `失败原因诊断 HTTP 状态异常: ${response.status}`)
+  try {
+    const body = await response.json() as { choices?: Array<{ message?: { content?: string } }> }
+    diagnostic?.info('失败诊断模型完整响应', body)
+    return FailureGuidanceSchema.parse(JSON.parse(body.choices?.[0]?.message?.content || ''))
+  } catch {
+    throw new LlmClientError('LLM_INVALID_RESPONSE', '失败原因诊断响应不符合协议')
+  }
+}
 
 export async function requestAssetAnalysisConfig(context: { requirement: string; assetName: string; fields: Array<{ name: string; type: string }>; rowCount: number }, bindings: LlmBindings, fetcher: typeof fetch = fetch, diagnostic?: SensitiveDebugLogger, timeoutMs = ANALYSIS_LLM_TIMEOUT_MS, systemPrompt?: string): Promise<ReportConfig> {
   if (bindings.ENVIRONMENT === 'test' || bindings.ENVIRONMENT === 'unit-test') {
