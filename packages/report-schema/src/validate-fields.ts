@@ -34,7 +34,8 @@ export function validateReportReferences(
     }
     if ('dimension' in widget) {
       checkField(widget.dimension)
-      checkField(widget.metric)
+      if (widget.metric) checkField(widget.metric)
+      if (widget.series) checkField(widget.series)
       if (stats.rowCount > 5_000) {
         issues.push({ code: 'CHART_POINT_LIMIT_EXCEEDED', widgetId: widget.id })
       }

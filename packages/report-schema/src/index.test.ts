@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 
-import { ReportConfigSchema } from './index'
+import { ChartWidgetSchema, ReportConfigSchema } from './index'
 
 describe('ReportConfigSchema', () => {
   it('拒绝未注册组件类型', () => {
@@ -39,5 +39,11 @@ describe('ReportConfigSchema', () => {
   it('拒绝重复组件 ID', () => {
     const widget = { id: 'same', type: 'table', title: '明细', dataset: 'result', columns: ['region'], layout: { x: 0, y: 0, w: 12, h: 4 } }
     expect(ReportConfigSchema.safeParse({ title: '报表', description: '描述', filters: [], widgets: [widget, widget] }).success).toBe(false)
+  })
+})
+
+describe('ChartWidgetSchema', () => {
+  it('支持按行计数及可选分组系列', () => {
+    expect(ChartWidgetSchema.parse({ id: 'hiring-count', type: 'line', title: '候选人数', dataset: 'result', dimension: '职位名称', aggregation: 'count', series: '招聘负责人', layout: { x: 0, y: 0, w: 12, h: 5 } })).toMatchObject({ aggregation: 'count', series: '招聘负责人' })
   })
 })

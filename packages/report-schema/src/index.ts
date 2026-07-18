@@ -16,10 +16,17 @@ export const ChartWidgetSchema = z
     title: z.string().min(1),
     dataset: z.literal('result'),
     dimension: z.string().min(1),
-    metric: z.string().min(1),
+    metric: z.string().min(1).optional(),
+    aggregation: z.enum(['sum', 'count']).optional(),
+    series: z.string().min(1).optional(),
     layout: LayoutSchema,
   })
   .strict()
+  .superRefine((widget, context) => {
+    if (widget.aggregation !== 'count' && !widget.metric) {
+      context.addIssue({ code: 'custom', message: 'sum 图表必须提供 metric 字段', path: ['metric'] })
+    }
+  })
 
 export const MetricWidgetSchema = z
   .object({
