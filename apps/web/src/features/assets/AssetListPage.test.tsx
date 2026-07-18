@@ -35,4 +35,12 @@ describe('AssetListPage', () => {
     expect(screen.getByText('42 行')).toBeInTheDocument()
     expect(screen.getByRole('link', { name: '预览数据' })).toHaveAttribute('href', '/assets/asset-1')
   })
+
+  it('加载期间显示占位而非空状态', () => {
+    apiRequest.mockReturnValue(new Promise(() => undefined))
+    render(<MemoryRouter><AssetListPage /></MemoryRouter>)
+
+    expect(screen.getByText('正在加载数据资产…')).toBeInTheDocument()
+    expect(screen.queryByText('还没有可用数据')).not.toBeInTheDocument()
+  })
 })
