@@ -123,6 +123,8 @@ export const executionPlans = sqliteTable(
       enum: ['pending', 'confirmed'],
     }).notNull(),
     confirmedAt: text('confirmed_at'),
+    // 0005 为历史计划回填 legacy-system；新计划由创建接口写入当前 Access 用户。
+    createdBy: text('created_by').notNull(),
     createdAt: text('created_at').notNull(),
   },
   (table) => [index('execution_plans_dataset_version_created_at_idx').on(table.datasetVersionId, table.createdAt)],
@@ -148,6 +150,33 @@ export const processingTasks = sqliteTable(
     updatedAt: text('updated_at').notNull(),
   },
   (table) => [index('processing_tasks_status_created_at_idx').on(table.status, table.createdAt)],
+)
+
+/** 标准化 NDJSON 的可复用数据资产；元数据不参与任何脚本或报表计算。 */
+export const dataAssets = sqliteTable(
+  'data_assets',
+  {
+    id: text('id').primaryKey(),
+    kind: text('kind', { enum: ['source', 'derived'] }).notNull(),
+    templateId: text('template_id')
+      .notNull()
+      .references(() => analysisTemplates.id, { onDelete: 'restrict' }),
+    name: text('name').notNull(),
+    description: text('description'),
+    tagsJson: text('tags_json', { mode: 'json' }).notNull(),
+    dataObjectKey: text('data_object_key').notNull().unique(),
+    schemaObjectKey: text('schema_object_key').notNull().unique(),
+    previewObjectKey: text('preview_object_key'),
+    rowCount: integer('row_count').notNull(),
+    status: text('status', { enum: ['ready', 'processing', 'failed'] }).notNull(),
+    createdBy: text('created_by').notNull(),
+    createdAt: text('created_at').notNull(),
+    updatedAt: text('updated_at').notNull(),
+  },
+  (table) => [
+    index('data_assets_template_created_at_idx').on(table.templateId, table.createdAt),
+    index('data_assets_created_at_idx').on(table.createdAt),
+  ],
 )
 
 export const ProcessingTaskInsertSchema = z

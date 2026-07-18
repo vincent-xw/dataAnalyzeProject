@@ -260,14 +260,15 @@ datasetRoutes.put('/:versionId/mapping', async (context) => {
     context.env.DB.prepare(
       `INSERT INTO execution_plans
         (id, dataset_version_id, model_name, prompt_version_id, user_requirement,
-         decision_json, confirmation_status, confirmed_at, created_at, execution_mode)
-       VALUES (?, ?, 'system', ?, '生成基础标准化数据', '{}', 'confirmed', ?, ?, 'baseline')`,
+         decision_json, confirmation_status, confirmed_at, created_at, execution_mode, created_by)
+       VALUES (?, ?, 'system', ?, '生成基础标准化数据', '{}', 'confirmed', ?, ?, 'baseline', ?)`,
     ).bind(
       baselinePlanId,
       context.req.param('versionId'),
       version.processing_prompt_version_id,
       now,
       now,
+      context.get('authenticatedUser').email,
     ),
     context.env.DB.prepare(
       `INSERT INTO processing_tasks

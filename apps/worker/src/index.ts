@@ -8,6 +8,7 @@ import { consumeTaskBatch } from './features/tasks/consumer'
 import { taskRoutes } from './features/tasks/routes'
 import { reportVersionRoutes, taskReportRoutes } from './features/reports/routes'
 import { scriptAdminRoutes } from './features/script-admin/routes'
+import { assetRoutes } from './features/assets/routes'
 import { requireAccess, type AuthenticatedUser } from './middleware/access-auth'
 import { handleError, requestContext } from './middleware/error-handler'
 
@@ -48,6 +49,7 @@ app.route('/api/plans', planRoutes)
 app.route('/api/tasks', taskRoutes)
 app.route('/api/tasks', taskReportRoutes)
 app.route('/api/report-versions', reportVersionRoutes)
+app.route('/api/assets', assetRoutes)
 app.route('/internal/scripts', scriptAdminRoutes)
 
 export default {

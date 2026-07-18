@@ -26,8 +26,33 @@ export async function apiRequest<T>(path: string, init?: RequestInit): Promise<T
   return payload as T
 }
 
+export type FieldMappingSaveResult = {
+  status: 'mapped'
+  mappingCount: number
+  baselineTaskId: string
+}
+
+export type DataAsset = {
+  id: string
+  kind: 'source' | 'derived'
+  templateId: string
+  templateName: string
+  name: string
+  description: string | null
+  tags: string[]
+  dataObjectKey: string
+  schemaObjectKey: string
+  rowCount: number
+  status: 'ready' | 'processing' | 'failed'
+  createdBy: string
+  createdAt: string
+  updatedAt: string
+}
+
+export type DataAssetPreview = { rowCount: number; rows: Array<Record<string, unknown>> }
+
 export function saveFieldMapping(versionId: string, mappings: FieldMapping[]) {
-  return apiRequest<{ status: 'mapped'; mappingCount: number }>(
+  return apiRequest<FieldMappingSaveResult>(
     `/api/datasets/${versionId}/mapping`,
     {
       method: 'PUT',

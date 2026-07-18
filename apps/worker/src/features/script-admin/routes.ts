@@ -1,28 +1,15 @@
-import { ScriptUploadRequestSchema, type ScriptUploadRequest } from '@data-analyze/contracts'
+import { ScriptUploadRequestSchema } from '@data-analyze/contracts'
 import { listScriptMetadata } from '@data-analyze/scripts'
 import { Hono } from 'hono'
 import { z } from 'zod'
 
 import type { Env } from '../../index'
-import {
-  createScriptPullRequest,
-  GitHubApiError,
-  type GitHubBindings,
-  type ScriptPullRequestResult,
-} from './github'
 import { syncScriptCatalog } from './sync'
 import { generateCandidateDraft } from './generation'
 import { LlmClientError } from '../llm/client'
 
-type PullRequestCreator = (
-  upload: ScriptUploadRequest,
-  bindings: GitHubBindings,
-) => Promise<ScriptPullRequestResult>
-
-/** 创建隐藏脚本管理路由；依赖参数只用于测试真实业务分支，不绕过身份认证。 */
-export function createScriptAdminRoutes(
-  createPullRequest: PullRequestCreator = createScriptPullRequest,
-): Hono<Env> {
+/** 创建隐藏脚本管理路由；候选源码只保存为 R2 草稿，不能作为动态代码执行。 */
+export function createScriptAdminRoutes(): Hono<Env> {
   const routes = new Hono<Env>()
 
   routes.post('/drafts', async (context) => {
@@ -49,24 +36,19 @@ export function createScriptAdminRoutes(
       )
     }
 
-    // 构建期注册表是事实来源；已有精确 ID 与版本绝不允许被候选上传覆盖。
+    // 构建期注册表仍是已发布脚本的事实来源，草稿不能伪装为已发布版本。
     const exists = listScriptMetadata().some(
       (metadata) => metadata.id === request.data.id && metadata.version === request.data.version,
     )
     if (exists) return context.json({ code: 'SCRIPT_VERSION_EXISTS', message: '脚本版本已存在' }, 409)
 
-    try {
-      const result = await createPullRequest(request.data, context.env)
-      return context.json(
-        { branch: result.branch, pullRequestUrl: result.pullRequestUrl, status: 'awaiting_ci' as const },
-        201,
-      )
-    } catch (error) {
-      if (error instanceof GitHubApiError) {
-        return context.json({ code: error.code, message: error.message }, 502)
-      }
-      throw error
-    }
+    const id = crypto.randomUUID()
+    const objectKey = `data-analyze/script-drafts/${id}/source.ts`
+    await context.env.DATA_BUCKET.put(objectKey, request.data.source, {
+      httpMetadata: { contentType: 'text/typescript; charset=utf-8' },
+      customMetadata: { scriptId: request.data.id, scriptVersion: request.data.version },
+    })
+    return context.json({ id, objectKey, status: 'stored' as const }, 201)
   })
 
   routes.post('/sync', async (context) => {

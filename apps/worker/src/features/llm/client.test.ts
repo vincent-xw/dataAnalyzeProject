@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from 'vitest'
 
-import { requestFieldDefinitions, requestScriptDecision } from './client'
+import { requestCandidateScript, requestFieldDefinitions, requestScriptDecision } from './client'
 
 const context = {
   platformRules: '严格规则',
@@ -53,6 +53,23 @@ describe('requestScriptDecision', () => {
     await expect(
       requestScriptDecision(context, llmEnv, vi.fn<typeof fetch>().mockResolvedValue(completion({ supported: true }))),
     ).rejects.toMatchObject({ code: 'LLM_INVALID_RESPONSE' })
+  })
+
+  it('协议错误只记录安全失败原因，不记录模型原文', async () => {
+    const logger = { info: vi.fn(), error: vi.fn() }
+    await expect(
+      requestScriptDecision(
+        context,
+        llmEnv,
+        vi.fn<typeof fetch>().mockResolvedValue(completion('不是 JSON')),
+        15_000,
+        logger,
+      ),
+    ).rejects.toMatchObject({ code: 'LLM_INVALID_RESPONSE' })
+    expect(logger.error).toHaveBeenCalledWith(
+      'LLM 脚本决策协议无效',
+      expect.objectContaining({ failureReason: 'LLM_CONTENT_NOT_JSON' }),
+    )
   })
 
   it('区分超时和 HTTP 失败', async () => {
@@ -155,6 +172,27 @@ describe('requestFieldDefinitions', () => {
     expect(logger.error).toHaveBeenCalledWith(
       'LLM 标准字段状态异常',
       expect.objectContaining({ errorCode: 'LLM_REQUEST_FAILED', upstreamStatus: 403 }),
+    )
+  })
+})
+
+describe('requestCandidateScript', () => {
+  it('记录候选代码上游失败的安全状态，不记录需求或模型原文', async () => {
+    const logger = { info: vi.fn(), error: vi.fn() }
+    const fetcher = vi.fn<typeof fetch>().mockResolvedValue(new Response('rate limited', { status: 429 }))
+
+    await expect(
+      requestCandidateScript(
+        { id: 'custom-report', version: '0.1.0', requirement: '敏感需求', fields: [] },
+        llmEnv,
+        fetcher,
+        30_000,
+        logger,
+      ),
+    ).rejects.toMatchObject({ code: 'LLM_REQUEST_FAILED', message: 'LLM HTTP 状态异常: 429' })
+    expect(logger.error).toHaveBeenCalledWith(
+      'LLM 候选代码状态异常',
+      expect.objectContaining({ errorCode: 'LLM_REQUEST_FAILED', upstreamStatus: 429 }),
     )
   })
 })

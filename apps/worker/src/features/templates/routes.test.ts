@@ -33,6 +33,7 @@ describe('分析模板 API', () => {
   beforeEach(async () => {
     // Cloudflare 测试池会在同一测试文件内复用 D1，逐用例清理可避免数据相互污染。
     await env.DB.batch([
+      env.DB.prepare('DELETE FROM data_assets'),
       env.DB.prepare('DELETE FROM prompt_versions'),
       env.DB.prepare('DELETE FROM analysis_templates'),
     ])

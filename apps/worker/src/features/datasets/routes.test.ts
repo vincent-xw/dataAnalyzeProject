@@ -52,6 +52,7 @@ describe('数据集上传和结构检查 API', () => {
   beforeEach(async () => {
     // 按外键依赖的逆序清理控制面数据，保证每个用例拥有独立状态。
     await env.DB.batch([
+      env.DB.prepare('DELETE FROM data_assets'),
       env.DB.prepare('DELETE FROM field_mappings'),
       env.DB.prepare('DELETE FROM dataset_versions'),
       env.DB.prepare('DELETE FROM datasets'),

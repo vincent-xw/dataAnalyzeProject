@@ -25,6 +25,9 @@ type TaskRow = {
   parameters_json: string | null
   dataset_id: string
   dataset_version_id: string
+  template_id: string
+  dataset_name: string
+  created_by: string
   source_object_key: string
   file_type: 'csv' | 'xlsx'
   csv_encoding: 'utf-8' | 'utf-8-bom' | 'gb18030' | null
@@ -35,7 +38,7 @@ type TaskRow = {
 export async function executeTask(taskId: string, env: Env['Bindings']) {
   const task = await env.DB.prepare(
     `SELECT pt.status, ep.confirmation_status, ep.execution_mode, ep.decision_json, ep.parameters_json,
-            d.id AS dataset_id, dv.id AS dataset_version_id,
+            ep.created_by, d.id AS dataset_id, d.template_id, d.name AS dataset_name, dv.id AS dataset_version_id,
             dv.source_object_key, dv.file_type, dv.csv_encoding, dv.csv_delimiter,
             dv.selected_sheet
      FROM processing_tasks pt
@@ -266,14 +269,32 @@ async function executeBaselineTask(task: TaskRow, env: Env['Bindings'], taskId: 
       ),
     ])
     const completedAt = new Date().toISOString()
-    await env.DB.prepare(
-      `UPDATE processing_tasks
-       SET status = 'succeeded', result_object_key = ?, result_schema_object_key = ?,
-           result_summary_object_key = ?, completed_at = ?, updated_at = ?
-       WHERE id = ?`,
-    )
-      .bind(resultKey, resultSchemaKey, resultSummaryKey, completedAt, completedAt, taskId)
-      .run()
+    // 原始文件名是用户已确认的上传信息，移除扩展名后作为原始数据资产的初始名称。
+    const assetName = task.dataset_name.replace(/\.[^.]+$/, '')
+    await env.DB.batch([
+      env.DB.prepare(
+        `INSERT OR IGNORE INTO data_assets
+          (id, kind, template_id, name, description, tags_json, data_object_key, schema_object_key,
+           row_count, status, created_by, created_at, updated_at)
+         VALUES (?, 'source', ?, ?, NULL, '[]', ?, ?, ?, 'ready', ?, ?, ?)`,
+      ).bind(
+        crypto.randomUUID(),
+        task.template_id,
+        assetName,
+        resultKey,
+        resultSchemaKey,
+        rowCount,
+        task.created_by,
+        completedAt,
+        completedAt,
+      ),
+      env.DB.prepare(
+        `UPDATE processing_tasks
+         SET status = 'succeeded', result_object_key = ?, result_schema_object_key = ?,
+             result_summary_object_key = ?, completed_at = ?, updated_at = ?
+         WHERE id = ?`,
+      ).bind(resultKey, resultSchemaKey, resultSummaryKey, completedAt, completedAt, taskId),
+    ])
     return { status: 'succeeded' as const, resultObjectKey: resultKey }
   } catch (error) {
     await sink.abort()

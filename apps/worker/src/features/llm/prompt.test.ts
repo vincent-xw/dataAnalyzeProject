@@ -41,5 +41,7 @@ describe('buildProcessingContext', () => {
     expect(PROCESSING_PLATFORM_RULES).toContain('不得组合脚本')
     expect(PROCESSING_PLATFORM_RULES).toContain('不得发明字段或参数')
     expect(PROCESSING_PLATFORM_RULES).toContain('supported:false')
+    expect(PROCESSING_PLATFORM_RULES).toContain('"supported":true')
+    expect(PROCESSING_PLATFORM_RULES).toContain('"limitations"')
   })
 })

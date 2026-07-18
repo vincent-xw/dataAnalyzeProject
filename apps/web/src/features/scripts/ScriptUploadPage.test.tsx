@@ -14,12 +14,12 @@ export const script = { metadata }
 describe('ScriptUploadPage', () => {
   afterEach(() => vi.unstubAllGlobals())
 
-  it('提交前显示完整源码和目标仓库路径，提交后显示 PR 地址', async () => {
+  it('提交前显示完整源码和目标路径，提交后显示 R2 草稿位置', async () => {
     const fetchMock = vi.fn<typeof fetch>().mockResolvedValue(
       new Response(JSON.stringify({
-        branch: 'script-candidate/regional-sales-1.1.0',
-        pullRequestUrl: 'https://github.com/owner/repo/pull/12',
-        status: 'awaiting_ci',
+        id: 'draft-1',
+        objectKey: 'data-analyze/script-drafts/draft-1/source.ts',
+        status: 'stored',
       }), { status: 201 }),
     )
     vi.stubGlobal('fetch', fetchMock)
@@ -32,9 +32,9 @@ describe('ScriptUploadPage', () => {
 
     expect(screen.getByText('packages/scripts/src/regional-sales/1.1.0.ts')).toBeVisible()
     expect(screen.getByRole('code')).toHaveTextContent("export const metadata = { id: 'regional-sales', version: '1.1.0', }")
-    await user.click(screen.getByRole('button', { name: '创建候选 PR' }))
+    await user.click(screen.getByRole('button', { name: '保存候选源码' }))
     expect(fetchMock).toHaveBeenCalledOnce()
-    expect(await screen.findByRole('link', { name: '查看 Pull Request' })).toHaveAttribute('href', 'https://github.com/owner/repo/pull/12')
-    expect(screen.queryByRole('button', { name: /合并/ })).not.toBeInTheDocument()
+    expect(await screen.findByText('data-analyze/script-drafts/draft-1/source.ts')).toBeVisible()
+    expect(screen.queryByRole('link', { name: /Pull Request/ })).not.toBeInTheDocument()
   })
 })

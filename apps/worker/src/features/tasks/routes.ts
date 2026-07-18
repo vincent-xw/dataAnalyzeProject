@@ -4,6 +4,7 @@ import type { Env } from '../../index'
 
 type TaskStatusRow = {
   id: string
+  dataset_version_id: string
   status: 'queued' | 'running' | 'succeeded' | 'failed'
   retry_count: number
   result_summary_object_key: string | null
@@ -18,9 +19,11 @@ export const taskRoutes = new Hono<Env>()
 
 taskRoutes.get('/:id', async (context) => {
   const task = await context.env.DB.prepare(
-    `SELECT id, status, retry_count, result_summary_object_key, error_object_key,
-            created_at, started_at, completed_at, updated_at
-     FROM processing_tasks WHERE id = ?`,
+    `SELECT pt.id, ep.dataset_version_id, pt.status, pt.retry_count, pt.result_summary_object_key, pt.error_object_key,
+            pt.created_at, pt.started_at, pt.completed_at, pt.updated_at
+     FROM processing_tasks pt
+     JOIN execution_plans ep ON ep.id = pt.plan_id
+     WHERE pt.id = ?`,
   )
     .bind(context.req.param('id'))
     .first<TaskStatusRow>()
@@ -47,6 +50,7 @@ taskRoutes.get('/:id', async (context) => {
 
   return context.json({
     id: task.id,
+    datasetVersionId: task.dataset_version_id,
     status: task.status,
     retryCount: task.retry_count,
     summary,

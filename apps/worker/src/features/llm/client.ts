@@ -6,6 +6,7 @@ import {
   type FieldDefinition,
   type ScriptDecision,
 } from '@data-analyze/contracts'
+import { z } from 'zod'
 
 import type { ProcessingContext } from './prompt'
 import { createLogger, type SafeLogger } from '../../lib/logger'
@@ -27,6 +28,64 @@ export class LlmClientError extends Error {
   }
 }
 
+const AssetMetadataSuggestionSchema = z.object({
+  name: z.string().trim().min(1).max(120),
+  description: z.string().trim().min(1).max(1_000),
+  tags: z.array(z.string().trim().min(1).max(48)).max(12),
+}).strict()
+
+/**
+ * 仅根据用户说明和资产控制面信息生成可编辑建议；调用边界不包含 R2 数据行。
+ */
+export async function requestAssetMetadataSuggestion(
+  context: { name: string; templateName: string; rowCount: number; description: string },
+  bindings: LlmBindings,
+  fetcher: typeof fetch = fetch,
+  timeoutMs = 15_000,
+  logger: SafeLogger = createLogger(),
+) {
+  if (bindings.ENVIRONMENT === 'test' || bindings.ENVIRONMENT === 'unit-test') {
+    // 测试环境不访问外部模型，返回仍需由页面人工确认的确定性建议。
+    return { name: context.name, description: context.description, tags: [] }
+  }
+  const rules = [
+    '你是数据资产元数据助手。根据用户的说明生成可编辑的数据资产名称、说明与标签。',
+    '元数据只用于帮助用户识别和筛选资产，不得描述或改变任何数据计算逻辑。',
+    '不得臆造用户没有提供的人员、时间、班级等事实。',
+    '只返回 JSON：{"name":"不超过120字","description":"不超过1000字","tags":["不超过12个标签"]}。',
+  ].join('\n')
+  const startedAt = Date.now()
+  let response: Response
+  try {
+    response = await fetcher(`${bindings.LLM_BASE_URL.replace(/\/$/, '')}/chat/completions`, {
+      method: 'POST',
+      headers: { authorization: `Bearer ${bindings.LLM_API_KEY}`, 'content-type': 'application/json' },
+      body: JSON.stringify({
+        model: bindings.LLM_MODEL,
+        messages: [{ role: 'system', content: rules }, { role: 'user', content: JSON.stringify(context) }],
+        response_format: { type: 'json_object' },
+      }),
+      signal: AbortSignal.timeout(timeoutMs),
+    })
+  } catch {
+    logger.error('LLM 元数据建议请求失败', { errorCode: 'LLM_REQUEST_FAILED', durationMs: Date.now() - startedAt })
+    throw new LlmClientError('LLM_REQUEST_FAILED', 'LLM 元数据建议请求失败')
+  }
+  if (!response.ok) {
+    logger.error('LLM 元数据建议状态异常', { errorCode: 'LLM_REQUEST_FAILED', upstreamStatus: response.status, durationMs: Date.now() - startedAt })
+    throw new LlmClientError('LLM_REQUEST_FAILED', `LLM HTTP 状态异常: ${response.status}`)
+  }
+  try {
+    const payload = (await response.json()) as { choices?: Array<{ message?: { content?: string } }> }
+    const suggestion = AssetMetadataSuggestionSchema.parse(JSON.parse(payload.choices?.[0]?.message?.content || ''))
+    logger.info('LLM 元数据建议生成完成', { durationMs: Date.now() - startedAt, tagCount: suggestion.tags.length })
+    return suggestion
+  } catch {
+    logger.error('LLM 元数据建议协议无效', { errorCode: 'LLM_INVALID_RESPONSE', durationMs: Date.now() - startedAt })
+    throw new LlmClientError('LLM_INVALID_RESPONSE', 'LLM 元数据建议响应无效')
+  }
+}
+
 type FieldProtocolFailureReason =
   | 'LLM_CONTENT_MISSING'
   | 'LLM_CONTENT_NOT_JSON'
@@ -41,6 +100,11 @@ class FieldProtocolError extends Error {
     super(reason)
   }
 }
+
+type ScriptDecisionFailureReason =
+  | 'LLM_CONTENT_MISSING'
+  | 'LLM_CONTENT_NOT_JSON'
+  | 'SCRIPT_DECISION_INVALID'
 
 export async function requestFieldDefinitions(
   inspection: DatasetInspection,
@@ -121,6 +185,8 @@ export async function requestCandidateScript(
   context: { id: string; version: string; requirement: string; fields: unknown[] },
   bindings: LlmBindings,
   fetcher: typeof fetch = fetch,
+  timeoutMs = 30_000,
+  logger: SafeLogger = createLogger(),
 ): Promise<{ source: string; rationale: string }> {
   const rules = [
     '生成一个 TypeScript 候选脚本，只使用以下字段和 @data-analyze/script-sdk。',
@@ -128,6 +194,7 @@ export async function requestCandidateScript(
     '不要访问网络、环境变量、R2、D1，不要发明字段。',
     '只返回 JSON：{"source":"完整 TypeScript 源码","rationale":"中文简要说明"}。',
   ].join('\n')
+  const startedAt = Date.now()
   let response: Response
   try {
     response = await fetcher(`${bindings.LLM_BASE_URL.replace(/\/$/, '')}/chat/completions`, {
@@ -138,17 +205,40 @@ export async function requestCandidateScript(
         messages: [{ role: 'system', content: rules }, { role: 'user', content: JSON.stringify(context) }],
         response_format: { type: 'json_object' },
       }),
-      signal: AbortSignal.timeout(30_000),
+      signal: AbortSignal.timeout(timeoutMs),
     })
-  } catch {
+  } catch (error) {
+    if (error instanceof DOMException && error.name === 'AbortError') {
+      logger.error('LLM 候选代码请求超时', {
+        errorCode: 'LLM_REQUEST_TIMEOUT',
+        durationMs: Date.now() - startedAt,
+      })
+      throw new LlmClientError('LLM_REQUEST_TIMEOUT', 'LLM 候选代码请求超时')
+    }
+    logger.error('LLM 候选代码请求失败', {
+      errorCode: 'LLM_REQUEST_FAILED',
+      durationMs: Date.now() - startedAt,
+    })
     throw new LlmClientError('LLM_REQUEST_FAILED', 'LLM 候选脚本请求失败')
   }
-  if (!response.ok) throw new LlmClientError('LLM_REQUEST_FAILED', `LLM HTTP 状态异常: ${response.status}`)
-  const payload = (await response.json()) as { choices?: Array<{ message?: { content?: string } }> }
-  const content = payload.choices?.[0]?.message?.content
+  if (!response.ok) {
+    logger.error('LLM 候选代码状态异常', {
+      errorCode: 'LLM_REQUEST_FAILED',
+      upstreamStatus: response.status,
+      durationMs: Date.now() - startedAt,
+    })
+    throw new LlmClientError('LLM_REQUEST_FAILED', `LLM HTTP 状态异常: ${response.status}`)
+  }
   try {
+    const payload = (await response.json()) as { choices?: Array<{ message?: { content?: string } }> }
+    const content = payload.choices?.[0]?.message?.content
     return z.object({ source: z.string().min(1), rationale: z.string().min(1) }).parse(JSON.parse(content || ''))
   } catch {
+    logger.error('LLM 候选代码协议无效', {
+      errorCode: 'LLM_INVALID_RESPONSE',
+      failureReason: 'CANDIDATE_RESPONSE_INVALID',
+      durationMs: Date.now() - startedAt,
+    })
     throw new LlmClientError('LLM_INVALID_RESPONSE', 'LLM 候选脚本响应无效')
   }
 }
@@ -262,11 +352,40 @@ export async function requestScriptDecision(
     }
     const content = body.choices?.[0]?.message?.content
     if (!content) throw new Error('LLM_CONTENT_MISSING')
-    const decision = ScriptDecisionSchema.parse(JSON.parse(content))
+    const decision = parseScriptDecisionContent(content)
     logger.info('LLM 脚本决策完成', { durationMs: Date.now() - startedAt })
     return decision
-  } catch {
-    logger.error('LLM 脚本决策协议无效', { errorCode: 'LLM_INVALID_RESPONSE', durationMs: Date.now() - startedAt })
+  } catch (error) {
+    const failureReason = error instanceof ScriptDecisionProtocolError
+      ? error.reason
+      : 'SCRIPT_DECISION_INVALID'
+    logger.error('LLM 脚本决策协议无效', {
+      errorCode: 'LLM_INVALID_RESPONSE',
+      failureReason,
+      durationMs: Date.now() - startedAt,
+    })
     throw new LlmClientError('LLM_INVALID_RESPONSE', 'LLM 响应不符合脚本决策协议')
+  }
+}
+
+class ScriptDecisionProtocolError extends Error {
+  constructor(readonly reason: ScriptDecisionFailureReason) {
+    super(reason)
+  }
+}
+
+/** 仅输出枚举化失败原因，避免日志泄露模型回显的业务内容。 */
+function parseScriptDecisionContent(content: string | undefined): ScriptDecision {
+  if (!content) throw new ScriptDecisionProtocolError('LLM_CONTENT_MISSING')
+  let payload: unknown
+  try {
+    payload = JSON.parse(content)
+  } catch {
+    throw new ScriptDecisionProtocolError('LLM_CONTENT_NOT_JSON')
+  }
+  try {
+    return ScriptDecisionSchema.parse(payload)
+  } catch {
+    throw new ScriptDecisionProtocolError('SCRIPT_DECISION_INVALID')
   }
 }

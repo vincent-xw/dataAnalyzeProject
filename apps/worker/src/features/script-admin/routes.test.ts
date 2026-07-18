@@ -1,5 +1,5 @@
 import { env } from 'cloudflare:test'
-import { describe, expect, it, vi } from 'vitest'
+import { describe, expect, it } from 'vitest'
 
 import { app, type Env } from '../../index'
 import { authenticatedRequest } from '../../testing/request'
@@ -13,13 +13,8 @@ describe('候选脚本管理 API', () => {
     expect(response.status).toBe(401)
   })
 
-  it('返回候选分支与 PR 地址', async () => {
-    const createPullRequest = vi.fn().mockResolvedValue({
-      branch: 'script-candidate/regional-sales-1.1.0',
-      path: 'packages/scripts/src/regional-sales/1.1.0.ts',
-      pullRequestUrl: 'https://github.com/owner/repo/pull/12',
-    })
-    const routes = createScriptAdminRoutes(createPullRequest)
+  it('将候选源码直接保存到 R2，不创建分支或 Pull Request', async () => {
+    const routes = createScriptAdminRoutes()
     const bindings = env as Env['Bindings']
     const response = await routes.request('/candidates', {
       method: 'POST',
@@ -28,11 +23,7 @@ describe('候选脚本管理 API', () => {
     }, bindings)
 
     expect(response.status).toBe(201)
-    expect(await response.json()).toEqual({
-      branch: 'script-candidate/regional-sales-1.1.0',
-      pullRequestUrl: 'https://github.com/owner/repo/pull/12',
-      status: 'awaiting_ci',
-    })
+    expect(await response.json()).toEqual(expect.objectContaining({ status: 'stored', objectKey: expect.stringContaining('data-analyze/script-drafts/') }))
   })
 
   it('拒绝覆盖构建注册表中的精确版本', async () => {

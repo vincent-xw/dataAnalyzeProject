@@ -6,6 +6,7 @@ import { authenticatedRequest } from '../../testing/request'
 describe('任务状态 API', () => {
   beforeEach(async () => {
     await env.DB.batch([
+      env.DB.prepare('DELETE FROM data_assets'),
       env.DB.prepare('DELETE FROM processing_tasks'),
       env.DB.prepare('DELETE FROM execution_plans'),
       env.DB.prepare('DELETE FROM field_mappings'),

@@ -3,12 +3,12 @@ import { useState, type FormEvent } from 'react'
 import { apiRequest } from '../../api/client'
 
 type CandidateResponse = {
-  branch: string
-  pullRequestUrl: string
-  status: 'awaiting_ci'
+  id: string
+  objectKey: string
+  status: 'stored'
 }
 
-/** 隐藏管理页仅提交候选 PR，不提供自动合并或直接部署入口。 */
+/** 候选源码只写入 R2 草稿区，Worker 不会动态执行任意 TypeScript。 */
 export function ScriptUploadPage() {
   const [id, setId] = useState('')
   const [version, setVersion] = useState('')
@@ -34,14 +34,14 @@ export function ScriptUploadPage() {
         body: JSON.stringify({ id, version, source }),
       }))
     } catch {
-      setError('候选脚本提交失败，请检查源码和仓库配置')
+      setError('候选脚本保存失败，请检查源码和网络配置')
     }
   }
 
   return (
     <section>
       <h2>候选脚本上传</h2>
-      <p>脚本只会创建 Pull Request，需通过 CI 并人工审核后才能上线。</p>
+      <p>候选源码会直接保存到 R2 草稿区，不创建 Pull Request，也不会自动执行。</p>
       <form onSubmit={submitCandidate}>
         <label>
           脚本 ID
@@ -57,13 +57,12 @@ export function ScriptUploadPage() {
         </label>
         {targetPath && <p>目标路径：<strong>{targetPath}</strong></p>}
         {source && <pre><code>{source}</code></pre>}
-        <button type="submit" disabled={!id || !version || !source}>创建候选 PR</button>
+        <button type="submit" disabled={!id || !version || !source}>保存候选源码</button>
       </form>
       {error && <p role="alert">{error}</p>}
       {result && (
         <p>
-          候选分支 {result.branch} 已创建，
-          <a href={result.pullRequestUrl} target="_blank" rel="noreferrer">查看 Pull Request</a>
+          候选源码已保存：<code>{result.objectKey}</code>
         </p>
       )}
     </section>

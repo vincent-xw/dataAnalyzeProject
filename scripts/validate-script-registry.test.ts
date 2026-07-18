@@ -8,8 +8,8 @@ const metadata: ScriptMetadata = {
   version: '1.0.0',
   name: '区域销售',
   description: '汇总区域销售数据',
-  inputFields: [{ name: 'region', type: 'string', description: '区域', required: true }],
-  outputFields: [{ name: 'total', type: 'number', description: '金额', required: true }],
+  inputFields: [{ name: 'region', type: 'string', sourceLabel: '区域', required: true }],
+  outputFields: [{ name: 'total', type: 'number', sourceLabel: '金额', required: true }],
   parameterSchema: { type: 'object', properties: {}, required: [], additionalProperties: false },
 }
 

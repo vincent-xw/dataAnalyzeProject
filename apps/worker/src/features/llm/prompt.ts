@@ -7,6 +7,9 @@ export const PROCESSING_PLATFORM_RULES = [
   '不得发明字段或参数。',
   '无法完整满足需求时必须返回 supported:false。',
   '只返回一个合法 JSON 对象，不要使用 Markdown 代码块。',
+  '支持时必须返回：{"supported":true,"scriptId":"清单内脚本 ID","scriptVersion":"清单内 x.y.z 版本","parameters":{},"reason":"中文理由","limitations":[]}。',
+  '不支持时必须返回：{"supported":false,"scriptId":null,"scriptVersion":null,"parameters":null,"reason":"中文理由","limitations":["至少一项限制"]}。',
+  '不得增加以上 JSON 结构以外的字段。',
 ].join('\n')
 
 export type ProcessingContext = {

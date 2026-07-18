@@ -97,8 +97,8 @@ function RoutedFieldMappingPage() {
       template={state.template}
       inspection={state.inspection}
       onConfirm={async (mappings) => {
-        await saveFieldMapping(versionId, mappings)
-        navigate(`/datasets/${versionId}/analysis`)
+        const result = await saveFieldMapping(versionId, mappings)
+        navigate(`/tasks/${result.baselineTaskId}`)
       }}
     />
   )

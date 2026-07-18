@@ -6,6 +6,7 @@ import { apiRequest } from '../../api/client'
 
 type TaskDetail = {
   id: string
+  datasetVersionId: string
   status: 'queued' | 'running' | 'succeeded' | 'failed'
   retryCount: number
   summary: Record<string, unknown> | null
@@ -58,7 +59,7 @@ export function TaskDetailPage() {
       <p>执行次数：{task.retryCount}</p>
       {task.summary ? <pre>{JSON.stringify(task.summary, null, 2)}</pre> : null}
       {task.error ? <p className="error">{task.error.code}：{task.error.message}</p> : null}
-      {task.status === 'succeeded' ? <Link to={`/tasks/${task.id}/reports/new`}>创建报表</Link> : null}
+      {task.status === 'succeeded' ? <div className="row"><Link to="/assets">查看已生成的数据</Link></div> : null}
     </section>
   )
 }

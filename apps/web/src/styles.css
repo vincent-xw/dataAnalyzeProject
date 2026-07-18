@@ -1,6 +1,6 @@
 :root {
   color: #172033;
-  background: #f6f8fb;
+  background: #f5f7fb;
   font-family: Inter, "PingFang SC", "Microsoft YaHei", sans-serif;
 }
 body {
@@ -8,7 +8,7 @@ body {
 }
 
 main {
-  width: min(1080px, calc(100% - 32px));
+  width: min(1180px, calc(100% - 40px));
   margin: 0 auto;
   padding: 24px 0 64px;
 }
@@ -25,7 +25,14 @@ nav,
 header {
   justify-content: space-between;
   margin-bottom: 32px;
+  padding: 6px 0 22px;
+  border-bottom: 1px solid #e5eaf2;
 }
+
+header h1 { margin: 0; font-size: 20px; letter-spacing: -.02em; }
+nav { gap: 8px; }
+nav a { padding: 8px 10px; border-radius: 8px; color: #536176; text-decoration: none; }
+nav a.active { color: #1747ba; background: #eaf0ff; font-weight: 650; }
 
 a {
   color: #2457d6;
@@ -33,9 +40,10 @@ a {
 
 .panel {
   padding: 24px;
-  border: 1px solid #dce2ec;
-  border-radius: 12px;
+  border: 1px solid #e0e6ef;
+  border-radius: 16px;
   background: white;
+  box-shadow: 0 8px 30px rgb(36 55 91 / 4%);
 }
 
 form,
@@ -57,6 +65,13 @@ button {
   padding: 9px 12px;
   font: inherit;
 }
+
+input, select, textarea { border: 1px solid #cbd5e1; border-radius: 8px; color: #172033; background: #fff; }
+input:focus, select:focus, textarea:focus { outline: 3px solid #dce9ff; border-color: #4c7de8; }
+button, .button-link { border: 1px solid #1f57cd; border-radius: 8px; color: #fff; background: #1f57cd; font-weight: 600; cursor: pointer; text-decoration: none; }
+button:disabled { cursor: wait; opacity: .65; }
+.secondary-button { border-color: #cbd5e1; color: #31527f; background: #fff; }
+.button-link { display: inline-flex; align-items: center; min-height: 40px; padding: 0 14px; }
 
 textarea {
   min-height: 120px;
@@ -141,4 +156,39 @@ td {
   padding: 10px;
   border-bottom: 1px solid #e4e8ef;
   text-align: left;
+}
+
+.asset-page { gap: 22px; }
+.page-heading { display: flex; align-items: flex-start; justify-content: space-between; gap: 24px; }
+.page-heading h2 { margin: 2px 0 8px; font-size: 28px; letter-spacing: -.03em; }
+.page-heading p:not(.eyebrow) { max-width: 700px; margin: 0; color: #64748b; line-height: 1.7; }
+.eyebrow { margin: 0; color: #3569d2; font-size: 13px; font-weight: 700; letter-spacing: .06em; }
+.asset-table-wrap { padding: 4px 22px; overflow-x: auto; }
+.asset-table th { color: #718096; font-size: 13px; font-weight: 650; white-space: nowrap; }
+.asset-table td { vertical-align: middle; }
+.asset-table td:first-child { min-width: 220px; }
+.asset-table small { display: block; max-width: 280px; margin-top: 5px; overflow: hidden; color: #7b8798; text-overflow: ellipsis; white-space: nowrap; }
+.tag-list { display: flex; max-width: 210px; flex-wrap: wrap; gap: 5px; }
+.tag { padding: 3px 8px; border-radius: 999px; color: #33517c; background: #edf3fb; font-size: 12px; white-space: nowrap; }
+.muted { color: #8b96a7; }
+.empty-state { padding: 54px 24px; text-align: center; }
+.empty-state h3 { margin: 0 0 8px; }
+.empty-state p { color: #64748b; }
+.breadcrumb { display: flex; gap: 8px; color: #718096; font-size: 14px; }
+.asset-detail-layout { display: grid; grid-template-columns: minmax(0, 1.65fr) minmax(280px, .8fr); align-items: start; gap: 20px; }
+.preview-panel { min-width: 0; }
+.section-heading h3 { margin: 0 0 6px; font-size: 17px; }
+.section-heading p { margin: 0; color: #718096; font-size: 13px; line-height: 1.5; }
+.preview-table-wrap { margin-top: 20px; overflow: auto; border: 1px solid #e5eaf2; border-radius: 10px; }
+.preview-table-wrap table { min-width: 100%; white-space: nowrap; }
+.preview-table-wrap th { position: sticky; top: 0; background: #f8faff; color: #536176; font-size: 13px; }
+.metadata-panel { gap: 14px; }
+.metadata-panel textarea { min-height: 112px; resize: vertical; }
+.status-chip { padding: 5px 9px; border-radius: 999px; color: #137251; background: #e7f7ef; font-size: 13px; font-weight: 700; }
+
+@media (max-width: 720px) {
+  main { width: min(100% - 24px, 1180px); padding-top: 16px; }
+  header, .page-heading { align-items: flex-start; flex-direction: column; }
+  .asset-detail-layout { grid-template-columns: 1fr; }
+  .asset-table-wrap { padding: 4px 12px; }
 }

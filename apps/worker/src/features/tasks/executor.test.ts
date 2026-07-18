@@ -113,6 +113,7 @@ describe('严格标准化', () => {
 describe('任务执行器', () => {
   beforeEach(async () => {
     await env.DB.batch([
+      env.DB.prepare('DELETE FROM data_assets'),
       env.DB.prepare('DELETE FROM processing_tasks'),
       env.DB.prepare('DELETE FROM execution_plans'),
       env.DB.prepare('DELETE FROM scripts'),
@@ -175,11 +176,22 @@ describe('任务执行器', () => {
     const result = await env.DATA_BUCKET.get(
       `data-analyze/datasets/${datasetId}/${versionId}/normalized/data.ndjson`,
     )
-    expect(await result?.text()).toContain('{"region":"华东","salesAmount":100,"orderId":"A"}')
+    expect(JSON.parse((await result?.text()) ?? '')).toEqual({
+      region: '华东',
+      salesAmount: 100,
+      orderId: 'A',
+    })
     const summary = await env.DATA_BUCKET.get(
       `data-analyze/datasets/${datasetId}/${versionId}/result/summary.json`,
     )
     expect(await summary?.json()).toEqual({ rowCount: 1, mode: 'baseline' })
+    expect(
+      await env.DB.prepare(
+        "SELECT kind, name, row_count, status FROM data_assets WHERE data_object_key = ?",
+      )
+        .bind(`data-analyze/datasets/${datasetId}/${versionId}/normalized/data.ndjson`)
+        .first(),
+    ).toMatchObject({ kind: 'source', name: 'sales', row_count: 1, status: 'ready' })
   })
 
   it('类型错误终止且标记为不可重试错误', async () => {

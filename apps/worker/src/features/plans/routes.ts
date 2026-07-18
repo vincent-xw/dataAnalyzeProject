@@ -12,6 +12,14 @@ const CreatePlanRequestSchema = z
   })
   .strict()
 
+const SelectScriptPlanRequestSchema = z
+  .object({
+    promptVersionId: z.string().uuid(),
+    scriptId: z.string().min(1),
+    scriptVersion: z.string().regex(/^\d+\.\d+\.\d+$/),
+  })
+  .strict()
+
 const ConfirmPlanRequestSchema = z
   .object({
     parameters: z.record(z.string(), z.unknown()),
@@ -33,6 +41,27 @@ datasetVersionPlanRoutes.post('/:id/plans', async (context) => {
         context.req.param('id'),
         request.data.promptVersionId,
         request.data.userRequirement,
+      ),
+      201,
+    )
+  } catch (error) {
+    return handlePlanError(context, error)
+  }
+})
+
+datasetVersionPlanRoutes.post('/:id/plans/selected', async (context) => {
+  const request = SelectScriptPlanRequestSchema.safeParse(await context.req.json().catch(() => undefined))
+  if (!request.success) {
+    return context.json({ code: 'INVALID_REQUEST', message: '脚本选择请求无效' }, 400)
+  }
+  try {
+    const service = new PlanService(context.env)
+    return context.json(
+      await service.createSelected(
+        context.req.param('id'),
+        request.data.promptVersionId,
+        request.data.scriptId,
+        request.data.scriptVersion,
       ),
       201,
     )

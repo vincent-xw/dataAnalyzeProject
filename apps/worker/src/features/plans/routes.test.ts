@@ -70,6 +70,7 @@ describe('执行计划 API', () => {
   beforeEach(async () => {
     // 按外键逆序重建已映射数据集，确保确认逻辑读取真实 D1 与 R2 控制面数据。
     await env.DB.batch([
+      env.DB.prepare('DELETE FROM data_assets'),
       env.DB.prepare('DELETE FROM processing_tasks'),
       env.DB.prepare('DELETE FROM execution_plans'),
       env.DB.prepare('DELETE FROM scripts'),
@@ -139,12 +140,42 @@ describe('执行计划 API', () => {
     )
 
     expect(response.status).toBe(200)
-    expect(await response.json()).toMatchObject({
-      fields: [
+    const body = await response.json() as { fields: unknown[]; scripts: unknown[] }
+    expect(body.fields).toEqual(expect.arrayContaining([
         { sourceLabel: '区域', name: 'region', type: 'string' },
         { sourceLabel: '销售额', name: 'salesAmount', type: 'number' },
-      ],
+    ]))
+    expect(body.scripts).toEqual(expect.arrayContaining([
+      expect.objectContaining({ id: 'sales-region-summary', version: '1.0.0' }),
+    ]))
+  })
+
+  it('用户选择启用脚本时不调用 LLM 而创建待确认计划', async () => {
+    const fetchMock = vi.spyOn(globalThis, 'fetch')
+    const response = await authenticatedRequest(
+      `/api/dataset-versions/${datasetVersionId}/plans/selected`,
+      {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({
+          promptVersionId,
+          scriptId: 'sales-region-summary',
+          scriptVersion: '1.0.0',
+        }),
+      },
+      requestEnv(createQueue(vi.fn())),
+    )
+
+    expect(response.status).toBe(201)
+    expect(await response.json()).toMatchObject({
+      decision: expect.objectContaining({
+        supported: true,
+        scriptId: 'sales-region-summary',
+        scriptVersion: '1.0.0',
+      }),
     })
+    expect(fetchMock).not.toHaveBeenCalled()
+    fetchMock.mockRestore()
   })
 
   it('不会把 D1 中未启用的构建脚本暴露给模型', async () => {

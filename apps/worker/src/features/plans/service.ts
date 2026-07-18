@@ -1,4 +1,4 @@
-import { FieldDefinitionSchema, ScriptDecisionSchema, type ScriptDecision } from '@data-analyze/contracts'
+import { FieldDefinitionSchema, ScriptDecisionSchema, type ScriptDecision, type ScriptMetadata } from '@data-analyze/contracts'
 import { getScript, listScriptMetadata } from '@data-analyze/scripts'
 import { z } from 'zod'
 
@@ -71,14 +71,7 @@ export class PlanService {
     }
 
     const fields = z.array(FieldDefinitionSchema).parse(JSON.parse(source.input_schema_json))
-    const enabledRows = await this.env.DB.prepare(
-      'SELECT id, version FROM scripts WHERE enabled = 1 ORDER BY id, version',
-    ).all<{ id: string; version: string }>()
-    const enabledVersions = new Set(enabledRows.results.map((row) => `${row.id}@${row.version}`))
-    // D1 只负责开放开关，metadata 与可执行代码始终来自当前构建产物。
-    const availableScripts = listScriptMetadata().filter((metadata) =>
-      enabledVersions.has(`${metadata.id}@${metadata.version}`),
-    )
+    const availableScripts = await this.getAvailableScripts()
     const context = buildProcessingContext({
       rowCount: source.row_count,
       columnCount: source.column_count,
@@ -108,6 +101,73 @@ export class PlanService {
         decision.supported ? decision.scriptId : null,
         decision.supported ? decision.scriptVersion : null,
         decision.supported ? JSON.stringify(decision.parameters) : null,
+        now,
+      )
+      .run()
+
+    return { id: planId, decision, confirmationStatus: 'pending' as const, createdAt: now }
+  }
+
+  /** 用户已明确选定脚本时，不再把相同选择交给 LLM 二次判断。 */
+  async createSelected(datasetVersionId: string, promptVersionId: string, scriptId: string, scriptVersion: string) {
+    const source = await this.env.DB.prepare(
+      `SELECT dv.row_count, dv.column_count, dv.validation_status,
+              d.template_id, at.input_schema_json,
+              pv.content AS prompt_content, pv.type AS prompt_type,
+              pv.template_id AS prompt_template_id
+       FROM dataset_versions dv
+       JOIN datasets d ON d.id = dv.dataset_id
+       JOIN analysis_templates at ON at.id = d.template_id
+       JOIN prompt_versions pv ON pv.id = ?
+       WHERE dv.id = ?`,
+    )
+      .bind(promptVersionId, datasetVersionId)
+      .first<PlanSourceRow>()
+
+    if (!source) throw new PlanServiceError('DATASET_VERSION_NOT_FOUND', '数据集版本不存在', 404)
+    if (source.validation_status !== 'mapped') {
+      throw new PlanServiceError('DATASET_NOT_MAPPED', '数据集尚未完成字段映射', 409)
+    }
+    if (source.prompt_type !== 'processing' || source.prompt_template_id !== source.template_id) {
+      throw new PlanServiceError('PROMPT_VERSION_MISMATCH', '加工 Prompt 版本不属于当前模板', 400)
+    }
+
+    const fields = z.array(FieldDefinitionSchema).parse(JSON.parse(source.input_schema_json))
+    const script = (await this.getAvailableScripts()).find(
+      (item) => item.id === scriptId && item.version === scriptVersion,
+    )
+    if (!script) throw new PlanServiceError('SCRIPT_NOT_AVAILABLE', '所选脚本未启用或不存在', 409)
+
+    const fieldTypes = new Map(fields.map((field) => [field.name, field.type]))
+    if (script.inputFields.some((field) => fieldTypes.get(field.name) !== field.type)) {
+      throw new PlanServiceError('SCRIPT_INPUT_MISMATCH', '当前字段映射不满足脚本输入', 409)
+    }
+
+    const decision: ScriptDecision = {
+      supported: true,
+      scriptId,
+      scriptVersion,
+      parameters: {},
+      reason: '已由用户手动选择该脚本',
+      limitations: [],
+    }
+    const planId = crypto.randomUUID()
+    const now = new Date().toISOString()
+    await this.env.DB.prepare(
+      `INSERT INTO execution_plans
+        (id, dataset_version_id, model_name, prompt_version_id, user_requirement,
+         decision_json, script_id, script_version, parameters_json,
+         confirmation_status, created_at)
+       VALUES (?, ?, 'manual-selection', ?, '用户手动选择脚本', ?, ?, ?, ?, 'pending', ?)`,
+    )
+      .bind(
+        planId,
+        datasetVersionId,
+        promptVersionId,
+        JSON.stringify(decision),
+        scriptId,
+        scriptVersion,
+        JSON.stringify({}),
         now,
       )
       .run()
@@ -194,7 +254,17 @@ export class PlanService {
         name: mapping.target_field,
         type: mapping.target_type,
       })),
+      scripts: await this.getAvailableScripts(),
     }
+  }
+
+  /** D1 的启用开关与构建期注册表共同决定页面可选择的精确脚本版本。 */
+  private async getAvailableScripts(): Promise<ScriptMetadata[]> {
+    const enabledRows = await this.env.DB.prepare(
+      'SELECT id, version FROM scripts WHERE enabled = 1 ORDER BY id, version',
+    ).all<{ id: string; version: string }>()
+    const enabledVersions = new Set(enabledRows.results.map((row) => `${row.id}@${row.version}`))
+    return listScriptMetadata().filter((metadata) => enabledVersions.has(`${metadata.id}@${metadata.version}`))
   }
 
   async confirm(id: string, parameterOverride?: Record<string, unknown>) {

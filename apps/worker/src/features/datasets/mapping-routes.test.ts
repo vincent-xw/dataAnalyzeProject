@@ -14,6 +14,10 @@ describe('字段映射 API', () => {
   beforeEach(async () => {
     // 固定测试夹具只描述已完成结构检查的数据集，不为缺失字段提供隐式默认值。
     await env.DB.batch([
+      // 其他 Worker 测试共享 D1；先按外键逆序清理任务和计划，避免版本夹具互相残留。
+      env.DB.prepare('DELETE FROM data_assets'),
+      env.DB.prepare('DELETE FROM processing_tasks'),
+      env.DB.prepare('DELETE FROM execution_plans'),
       env.DB.prepare('DELETE FROM field_mappings'),
       env.DB.prepare('DELETE FROM dataset_versions'),
       env.DB.prepare('DELETE FROM datasets'),

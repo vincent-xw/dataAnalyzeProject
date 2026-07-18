@@ -59,6 +59,7 @@ describe('报表草稿和发布 API', () => {
     await env.DB.batch([
       env.DB.prepare('DELETE FROM report_versions'),
       env.DB.prepare('DELETE FROM reports'),
+      env.DB.prepare('DELETE FROM data_assets'),
       env.DB.prepare('DELETE FROM processing_tasks'),
       env.DB.prepare('DELETE FROM execution_plans'),
       env.DB.prepare('DELETE FROM field_mappings'),
