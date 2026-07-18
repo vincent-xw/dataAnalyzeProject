@@ -1,6 +1,6 @@
 import { cleanup, render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
-import { MemoryRouter } from 'react-router-dom'
+import { MemoryRouter, Route, Routes } from 'react-router-dom'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 
 import { TemplateEditorPage } from './TemplateEditorPage'
@@ -71,5 +71,36 @@ describe('TemplateEditorPage', () => {
     await user.upload(container.querySelector('input[type="file"]') as HTMLInputElement, file)
 
     expect(await screen.findByLabelText('工作表')).toHaveValue('一月')
+  })
+
+  it('编辑模式加载模板并使用 PUT 保存', async () => {
+    const user = userEvent.setup()
+    const fetcher = vi.fn<typeof fetch>().mockImplementation(async (path, init) => {
+      if (path === '/api/templates/template-1' && !init) {
+        return new Response(JSON.stringify({
+          id: 'template-1',
+          name: '销售分析',
+          description: '按地区汇总销售额',
+          fields: [{ name: 'sales_amount', sourceLabel: '销售额', type: 'number', required: true }],
+          processingPrompt: { version: 1, content: '加工 Prompt' },
+          reportingPrompt: { version: 1, content: '报表 Prompt' },
+        }), { status: 200, headers: { 'content-type': 'application/json' } })
+      }
+      if (path === '/api/templates/template-1' && init?.method === 'PUT') {
+        return new Response(JSON.stringify({ id: 'template-1' }), { status: 200, headers: { 'content-type': 'application/json' } })
+      }
+      throw new Error(`意外请求：${String(path)}`)
+    })
+    vi.stubGlobal('fetch', fetcher)
+
+    render(
+      <MemoryRouter initialEntries={['/templates/template-1/edit']}>
+        <Routes><Route path="/templates/:templateId/edit" element={<TemplateEditorPage />} /></Routes>
+      </MemoryRouter>,
+    )
+
+    expect(await screen.findByLabelText('名称')).toHaveValue('销售分析')
+    await user.click(screen.getByRole('button', { name: '保存模板' }))
+    expect(fetcher).toHaveBeenCalledWith('/api/templates/template-1', expect.objectContaining({ method: 'PUT' }))
   })
 })

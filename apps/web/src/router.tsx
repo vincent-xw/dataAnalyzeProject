@@ -5,6 +5,7 @@ import { DatasetUploadPage } from './features/datasets/DatasetUploadPage'
 import { FieldMappingPage } from './features/datasets/FieldMappingPage'
 import { TemplateEditorPage } from './features/templates/TemplateEditorPage'
 import { TemplateListPage } from './features/templates/TemplateListPage'
+import { TemplatePreviewPage } from './features/templates/TemplatePreviewPage'
 import { AnalysisRequestPage } from './features/analysis/AnalysisRequestPage'
 import { PlanConfirmationPage } from './features/analysis/PlanConfirmationPage'
 import { TaskDetailPage } from './features/tasks/TaskDetailPage'
@@ -24,6 +25,8 @@ export const router = createBrowserRouter([
       { path: 'assets/:assetId', element: <AssetDetailPage /> },
       { path: 'templates', element: <TemplateListPage /> },
       { path: 'templates/new', element: <TemplateEditorPage /> },
+      { path: 'templates/:templateId/edit', element: <TemplateEditorPage /> },
+      { path: 'templates/:templateId', element: <TemplatePreviewPage /> },
       { path: 'datasets/new', element: <DatasetUploadPage /> },
       { path: 'datasets/:versionId/mapping', element: <FieldMappingPage /> },
       { path: 'datasets/:versionId/analysis', element: <AnalysisRequestPage /> },

@@ -19,6 +19,9 @@ function resolveApiUrl(path: string) {
 
 export async function apiRequest<T>(path: string, init?: RequestInit): Promise<T> {
   const response = await fetch(resolveApiUrl(path), init)
+  if (response.status === 204 || response.status === 205) {
+    return undefined as T
+  }
   const payload: unknown = await response.json()
   if (!response.ok) {
     throw new ApiError(response.status, payload)

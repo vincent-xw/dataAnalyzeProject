@@ -1,5 +1,5 @@
-import { useState, type FormEvent } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useEffect, useState, type FormEvent } from 'react'
+import { useNavigate, useParams } from 'react-router-dom'
 
 import type { FieldDefinition, FieldType } from '@data-analyze/contracts'
 
@@ -8,6 +8,13 @@ import { PromptEditorDialog } from './PromptEditorDialog'
 
 type SourceInspection = { rowCount: number; columnCount: number; sheets: string[]; sourceFields: string[] }
 type SourceInspectionResult = { status: 'inspected' | 'awaiting_sheet'; inspection?: SourceInspection; sheets?: string[] }
+type TemplateDetail = {
+  name: string
+  description: string
+  fields: FieldDefinition[]
+  processingPrompt: { content: string }
+  reportingPrompt: { content: string }
+}
 
 const initialField: FieldDefinition = {
   sourceLabel: '',
@@ -36,6 +43,7 @@ type EditingPrompt = 'processing' | 'reporting' | null
 
 export function TemplateEditorPage() {
   const navigate = useNavigate()
+  const { templateId } = useParams()
   const [name, setName] = useState('')
   const [description, setDescription] = useState('')
   const [processingPrompt, setProcessingPrompt] = useState(defaultProcessingPrompt)
@@ -51,6 +59,27 @@ export function TemplateEditorPage() {
   const [generating, setGenerating] = useState(false)
   const [editingPrompt, setEditingPrompt] = useState<EditingPrompt>(null)
   const [error, setError] = useState('')
+
+  useEffect(() => {
+    if (!templateId) return
+    let active = true
+    setError('')
+    apiRequest<TemplateDetail>(`/api/templates/${templateId}`)
+      .then((template) => {
+        if (!active) return
+        setName(template.name)
+        setDescription(template.description)
+        setFields(template.fields)
+        setProcessingPrompt(template.processingPrompt.content)
+        setReportingPrompt(template.reportingPrompt.content)
+      })
+      .catch((reason) => {
+        if (active) reportError('模板加载失败，请稍后重试', '模板加载失败', reason)
+      })
+    return () => {
+      active = false
+    }
+  }, [templateId])
 
   function updateField(index: number, patch: Partial<FieldDefinition>) {
     // 只修改用户正在编辑的字段，保留其余字段的显式配置。
@@ -95,14 +124,14 @@ export function TemplateEditorPage() {
     event.preventDefault()
     setError('')
     try {
-      await apiRequest('/api/templates', {
-        method: 'POST',
+      await apiRequest(templateId ? `/api/templates/${templateId}` : '/api/templates', {
+        method: templateId ? 'PUT' : 'POST',
         headers: { 'content-type': 'application/json' },
         body: JSON.stringify({ name, description, fields, processingPrompt, reportingPrompt }),
       })
-      navigate('/templates')
+      navigate(templateId ? `/templates/${templateId}` : '/templates')
     } catch (reason) {
-      reportError('模板创建失败，请检查字段和 Prompt', '模板创建失败', reason)
+      reportError(templateId ? '模板保存失败，请检查字段和 Prompt' : '模板创建失败，请检查字段和 Prompt', templateId ? '模板保存失败' : '模板创建失败', reason)
     }
   }
 
@@ -137,7 +166,7 @@ export function TemplateEditorPage() {
   return (
     <section className="panel">
       {error ? <div className="toast-error" role="alert"><span>{error}</span><button type="button" onClick={() => setError('')}>关闭提示</button></div> : null}
-      <h2>新建分析模板</h2>
+      <h2>{templateId ? '编辑分析模板' : '新建分析模板'}</h2>
       <form onSubmit={submit}>
         <label>名称<input required value={name} onChange={(event) => setName(event.target.value)} /></label>
         <label>描述<input required value={description} onChange={(event) => setDescription(event.target.value)} /></label>
@@ -172,7 +201,7 @@ export function TemplateEditorPage() {
         <button type="button" onClick={() => setEditingPrompt('processing')}>放大编辑数据加工预设 Prompt</button>
         <label>报表预设 Prompt<textarea required value={reportingPrompt} onChange={(event) => setReportingPrompt(event.target.value)} /></label>
         <button type="button" onClick={() => setEditingPrompt('reporting')}>放大编辑报表预设 Prompt</button>
-        <button type="submit">创建模板</button>
+        <button type="submit">{templateId ? '保存模板' : '创建模板'}</button>
       </form>
       {editingPrompt === 'processing' ? <PromptEditorDialog title="数据加工预设 Prompt" value={processingPrompt} onSave={setProcessingPrompt} onClose={() => setEditingPrompt(null)} /> : null}
       {editingPrompt === 'reporting' ? <PromptEditorDialog title="报表预设 Prompt" value={reportingPrompt} onSave={setReportingPrompt} onClose={() => setEditingPrompt(null)} /> : null}
