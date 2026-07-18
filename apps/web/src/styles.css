@@ -3,36 +3,89 @@
   background: #f5f7fb;
   font-family: Inter, "PingFang SC", "Microsoft YaHei", sans-serif;
 }
+
+html,
+body,
+#root {
+  min-height: 100%;
+}
+
 body {
   margin: 0;
 }
 
-main {
-  width: min(1180px, calc(100% - 40px));
-  margin: 0 auto;
-  padding: 24px 0 64px;
+.app-shell {
+  min-height: 100vh;
 }
 
-header,
-nav,
+.app-header {
+  height: 64px;
+  padding: 0;
+  background: #001529;
+}
+
+.app-header-inner {
+  display: flex;
+  width: min(1180px, calc(100% - 40px));
+  height: 64px;
+  align-items: center;
+  flex-wrap: nowrap;
+  gap: 32px;
+  margin: 0 auto;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.app-header-inner::-webkit-scrollbar {
+  display: none;
+}
+
+.app-brand {
+  flex: 0 0 auto;
+  margin: 0;
+  color: #fff;
+  font-size: 20px;
+  letter-spacing: -.02em;
+  white-space: nowrap;
+}
+
+.app-navigation {
+  flex: 0 0 auto;
+}
+
+.app-navigation .ant-menu {
+  min-width: max-content;
+  border-bottom: 0;
+  background: transparent;
+  line-height: 64px;
+}
+
+.app-content {
+  display: flex;
+  flex: 1;
+  background: #f5f7fb;
+}
+
+.app-content-inner {
+  width: min(1180px, calc(100% - 40px));
+  margin: 0 auto;
+  padding: 32px 0 64px;
+}
+
+.app-footer {
+  padding: 18px 20px;
+  color: #8b96a7;
+  background: #f5f7fb;
+  font-size: 13px;
+  text-align: center;
+}
+
 .row,
 .actions {
   display: flex;
   align-items: center;
   gap: 16px;
 }
-
-header {
-  justify-content: space-between;
-  margin-bottom: 32px;
-  padding: 6px 0 22px;
-  border-bottom: 1px solid #e5eaf2;
-}
-
-header h1 { margin: 0; font-size: 20px; letter-spacing: -.02em; }
-nav { gap: 8px; }
-nav a { padding: 8px 10px; border-radius: 8px; color: #536176; text-decoration: none; }
-nav a.active { color: #1747ba; background: #eaf0ff; font-weight: 650; }
 
 a {
   color: #2457d6;
@@ -99,6 +152,7 @@ textarea {
 }
 
 .prompt-dialog header {
+  display: flex;
   justify-content: space-between;
 }
 
@@ -187,8 +241,9 @@ td {
 .status-chip { padding: 5px 9px; border-radius: 999px; color: #137251; background: #e7f7ef; font-size: 13px; font-weight: 700; }
 
 @media (max-width: 720px) {
-  main { width: min(100% - 24px, 1180px); padding-top: 16px; }
-  header, .page-heading { align-items: flex-start; flex-direction: column; }
+  .app-header-inner, .app-content-inner { width: min(100% - 24px, 1180px); }
+  .app-content-inner { padding-top: 16px; }
+  .page-heading { align-items: flex-start; flex-direction: column; }
   .asset-detail-layout { grid-template-columns: 1fr; }
   .asset-table-wrap { padding: 4px 12px; }
 }
