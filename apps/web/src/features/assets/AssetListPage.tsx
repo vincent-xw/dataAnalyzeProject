@@ -1,4 +1,4 @@
-import { Button, Table, Tag, type TableProps } from 'antd'
+import { Button, Table, Tag, Tooltip, type TableProps } from 'antd'
 import { useEffect, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 
@@ -15,7 +15,10 @@ const assetColumns: NonNullable<TableProps<DataAsset>['columns']> = [
   {
     title: '数据名称',
     dataIndex: 'name',
-    render: (name: string, asset) => <><strong>{name}</strong><small>{asset.description || '暂未填写说明'}</small></>,
+    render: (name: string, asset) => {
+      const description = asset.description || '暂未填写说明'
+      return <div className="asset-name-cell"><strong>{name}</strong><Tooltip title={description}><span className="asset-description">{description}</span></Tooltip></div>
+    },
   },
   {
     title: '标签',
