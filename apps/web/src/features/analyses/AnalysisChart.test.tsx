@@ -18,4 +18,12 @@ describe('buildChartOption', () => {
     expect(option.xAxis.data).toEqual(['教师', '顾问'])
     expect(option.series).toEqual([{ name: '刘胜男', type: 'line', data: [1, 1] }, { name: '王芳', type: 'line', data: [1, 0] }])
   })
+
+  it('将空分组显示为空值，并为饼图提供人数标签、图例和提示信息', () => {
+    const option = buildChartOption({ id: 'empty-pie', type: 'pie', title: '负责人', dataset: 'result', dimension: '招聘负责人', aggregation: 'count', layout: { x: 0, y: 0, w: 12, h: 5 } }, [{ 招聘负责人: '刘胜男' }, { 招聘负责人: ' ' }, { 招聘负责人: '-' }]) as { legend: { show: boolean }; tooltip: { show: boolean }; series: Array<{ label: { formatter: string }; data: Array<{ name: string; value: number }> }> }
+    expect(option.series[0]?.data).toEqual([{ name: '刘胜男', value: 1 }, { name: '空值', value: 2 }])
+    expect(option.legend).toEqual({ show: true })
+    expect(option.tooltip).toEqual(expect.objectContaining({ show: true }))
+    expect(option.series[0]?.label.formatter).toContain('{c}')
+  })
 })
