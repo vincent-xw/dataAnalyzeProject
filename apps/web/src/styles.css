@@ -175,6 +175,7 @@ a {
 }
 
 .asset-page { gap: 22px; }
+.asset-page .ant-tag { margin-inline: 4px; }
 .page-heading { display: flex; align-items: flex-start; justify-content: space-between; gap: 24px; }
 .page-heading h2 { margin: 2px 0 8px; font-size: 28px; letter-spacing: -.03em; }
 .page-heading p:not(.eyebrow) { max-width: 700px; margin: 0; color: #64748b; line-height: 1.7; }
