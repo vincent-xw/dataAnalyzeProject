@@ -20,29 +20,17 @@
 	"r2_buckets": [
 		{
 			"binding": "DATA_BUCKET",
-			"bucket_name": "data-analyze-data"
+			"bucket_name": "data-analyze-data",
+			"remote": true
 		}
 	],
-	"queues": {
-		"producers": [
-			{
-				"binding": "TASK_QUEUE",
-				"queue": "data-analyze-tasks"
-			}
-		],
-		"consumers": [
-			{
-				"queue": "data-analyze-tasks",
-				"max_retries": 2
-			}
-		]
-	},
 	"d1_databases": [
 		{
 			"binding": "DB",
 			"database_name": "data-analyze-db",
 			"database_id": "00a898db-0120-4de1-b651-a348da9ddf81",
-			"migrations_dir": "migrations"
+			"migrations_dir": "migrations",
+			"remote": true
 		}
 	]
 }

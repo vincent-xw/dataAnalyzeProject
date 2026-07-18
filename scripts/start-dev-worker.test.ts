@@ -13,18 +13,19 @@ describe('start-dev-worker', () => {
     vi.mocked(spawnSync).mockClear()
   })
 
-  it('使用远端 Cloudflare 开发资源启动 Worker', async () => {
+  it('使用本地 Worker 与远端 Cloudflare 绑定启动开发服务', async () => {
     await import('./start-dev-worker')
 
     expect(spawnSync).not.toHaveBeenCalled()
     expect(spawn).toHaveBeenCalledWith(
       'pnpm',
-      ['--filter', '@data-analyze/worker', 'exec', 'wrangler', 'dev', '--remote', '--port', '8787', '--var', 'ENVIRONMENT:development'],
+      ['--filter', '@data-analyze/worker', 'exec', 'wrangler', 'dev', '--port', '8787', '--var', 'ENVIRONMENT:development'],
       { stdio: 'inherit' },
     )
 
     const arguments_ = vi.mocked(spawn).mock.calls[0]![1] as string[]
     expect(arguments_).not.toContain('--local')
+    expect(arguments_).not.toContain('--remote')
     expect(arguments_).not.toContain('--persist-to')
   })
 })
