@@ -1,9 +1,27 @@
+import { Button, Table, Tag, type TableProps } from 'antd'
 import { useEffect, useState } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 
 import { apiRequest, type DataAsset } from '../../api/client'
 
+const assetColumns: NonNullable<TableProps<DataAsset>['columns']> = [
+  {
+    title: '数据名称',
+    dataIndex: 'name',
+    render: (name: string, asset) => <><strong>{name}</strong><small>{asset.description || '暂未填写说明'}</small></>,
+  },
+  {
+    title: '标签',
+    dataIndex: 'tags',
+    render: (tags: string[]) => tags.length ? tags.map((tag) => <Tag key={tag}>{tag}</Tag>) : <span className="muted">暂无标签</span>,
+  },
+  { title: '数据量', dataIndex: 'rowCount', render: (rowCount: number) => `${rowCount} 行` },
+  { title: '创建时间', dataIndex: 'createdAt', render: (createdAt: string) => new Intl.DateTimeFormat('zh-CN', { dateStyle: 'medium' }).format(new Date(createdAt)) },
+  { title: '操作', key: 'action', render: (_, asset) => <Link to={`/assets/${asset.id}`}>预览数据</Link> },
+]
+
 export function AssetListPage() {
+  const navigate = useNavigate()
   const [assets, setAssets] = useState<DataAsset[]>([])
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(true)
@@ -20,14 +38,12 @@ export function AssetListPage() {
           <h2>我的数据</h2>
           <p>上传表格后会直接转换为可预览、可复用的数据资产。</p>
         </div>
-        <Link className="button-link" to="/assets/upload">上传新数据</Link>
+        <Button type="primary" onClick={() => navigate('/assets/upload')}>上传新数据</Button>
       </div>
       {error ? <p className="error">{error}</p> : null}
       {loading ? <p className="muted" role="status">正在加载数据资产…</p> : null}
       {assets.length === 0 && !error && !loading ? <div className="panel empty-state"><h3>还没有可用数据</h3><p>上传一份表格后，它会直接成为可预览的数据资产。</p><Link to="/assets/upload">开始上传</Link></div> : null}
-      {assets.length > 0 ? <div className="panel asset-table-wrap"><table className="asset-table"><thead><tr><th>数据名称</th><th>标签</th><th>数据量</th><th>创建时间</th><th aria-label="操作" /></tr></thead><tbody>
-        {assets.map((asset) => <tr key={asset.id}><td><strong>{asset.name}</strong><small>{asset.description || '暂未填写说明'}</small></td><td><span className="tag-list">{asset.tags.length ? asset.tags.map((tag) => <span key={tag} className="tag">{tag}</span>) : <span className="muted">暂无标签</span>}</span></td><td>{asset.rowCount} 行</td><td>{new Intl.DateTimeFormat('zh-CN', { dateStyle: 'medium' }).format(new Date(asset.createdAt))}</td><td><Link to={`/assets/${asset.id}`}>预览数据</Link></td></tr>)}
-      </tbody></table></div> : null}
+      {assets.length > 0 ? <div className="panel asset-table-wrap"><Table columns={assetColumns} dataSource={assets} pagination={false} rowKey="id" /></div> : null}
     </section>
   )
 }

@@ -1,4 +1,5 @@
-import { useState, type FormEvent } from 'react'
+import { Button, Form, Select, Upload, type UploadProps } from 'antd'
+import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 
 import { apiRequest } from '../../api/client'
@@ -13,8 +14,19 @@ export function AssetUploadPage() {
   const [selectedSheet, setSelectedSheet] = useState('')
   const [uploading, setUploading] = useState(false)
 
-  async function submit(event: FormEvent) {
-    event.preventDefault()
+  const uploadProps: UploadProps = {
+    accept: '.csv,.xlsx,text/csv,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+    beforeUpload: () => false,
+    disabled: uploading,
+    maxCount: 1,
+    onChange: (info) => {
+      setFile(info.file.originFileObj || null)
+      setSheets([])
+      setSelectedSheet('')
+    },
+  }
+
+  async function submit() {
     if (!file) return
     setError('')
     setUploading(true)
@@ -26,8 +38,7 @@ export function AssetUploadPage() {
         body: file,
       })
       if ('status' in result) { setSheets(result.sheets); setSelectedSheet(result.sheets[0] || ''); return }
-      const asset = result
-      navigate(`/assets/${asset.id}`)
+      navigate(`/assets/${result.id}`)
     } catch {
       setError('文件上传或转换失败，请检查 CSV 格式。')
     } finally {
@@ -35,10 +46,13 @@ export function AssetUploadPage() {
     }
   }
 
-  return <section className="panel stack"><h2>上传数据</h2><p>上传后会直接转换为可预览、可维护的数据资产。</p><form onSubmit={submit} className="stack">
-    <label>CSV 或 XLSX 文件<input disabled={uploading} required type="file" accept=".csv,.xlsx,text/csv,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" onChange={(event) => { setFile(event.target.files?.[0] || null); setSheets([]); setSelectedSheet('') }} /></label>
-    {!file?.name.toLowerCase().endsWith('.xlsx') ? <><label>编码<select value={encoding} onChange={(event) => setEncoding(event.target.value)}><option value="utf-8">UTF-8</option><option value="utf-8-bom">UTF-8 BOM</option><option value="gb18030">GB18030</option></select></label><label>分隔符<select value={delimiter} onChange={(event) => setDelimiter(event.target.value)}><option value=",">逗号</option><option value="\t">制表符</option><option value=";">分号</option></select></label></> : null}
-    {sheets.length ? <label>工作表<select disabled={uploading} value={selectedSheet} onChange={(event) => setSelectedSheet(event.target.value)}>{sheets.map((sheet) => <option key={sheet}>{sheet}</option>)}</select></label> : null}
-    {error ? <p className="error">{error}</p> : null}<button type="submit" disabled={uploading}>{uploading ? (file?.name.toLowerCase().endsWith('.xlsx') && !selectedSheet ? '正在读取工作表…' : '正在上传并转换…') : '上传并转换'}</button>
-  </form></section>
+  const isXlsx = file?.name.toLowerCase().endsWith('.xlsx')
+  const submitLabel = uploading ? (isXlsx && !selectedSheet ? '正在读取工作表…' : '正在上传并转换…') : '上传并转换'
+
+  return <section className="panel stack"><h2>上传数据</h2><p>上传后会直接转换为可预览、可维护的数据资产。</p><Form layout="vertical" onFinish={submit} className="stack">
+    <Form.Item label="CSV 或 XLSX 文件" required><Upload {...uploadProps}><Button disabled={uploading}>选择文件</Button></Upload></Form.Item>
+    {!isXlsx ? <><Form.Item label="编码"><Select value={encoding} onChange={setEncoding} options={[{ value: 'utf-8', label: 'UTF-8' }, { value: 'utf-8-bom', label: 'UTF-8 BOM' }, { value: 'gb18030', label: 'GB18030' }]} /></Form.Item><Form.Item label="分隔符"><Select value={delimiter} onChange={setDelimiter} options={[{ value: ',', label: '逗号' }, { value: '\t', label: '制表符' }, { value: ';', label: '分号' }]} /></Form.Item></> : null}
+    {sheets.length ? <Form.Item label="工作表"><Select disabled={uploading} value={selectedSheet} onChange={setSelectedSheet} options={sheets.map((sheet) => ({ value: sheet, label: sheet }))} /></Form.Item> : null}
+    {error ? <p className="error">{error}</p> : null}<Button type="primary" htmlType="submit" disabled={!file} loading={uploading}>{submitLabel}</Button>
+  </Form></section>
 }
