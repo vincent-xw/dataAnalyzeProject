@@ -4,6 +4,13 @@ import { Link, useNavigate } from 'react-router-dom'
 
 import { apiRequest, type DataAsset } from '../../api/client'
 
+const tagColors = ['blue', 'cyan', 'geekblue', 'purple', 'magenta', 'green', 'gold', 'orange'] as const
+
+function getTagColor(tag: string): (typeof tagColors)[number] {
+  const hash = Array.from(tag).reduce((total, character) => total + character.charCodeAt(0), 0)
+  return tagColors[hash % tagColors.length]!
+}
+
 const assetColumns: NonNullable<TableProps<DataAsset>['columns']> = [
   {
     title: '数据名称',
@@ -13,7 +20,7 @@ const assetColumns: NonNullable<TableProps<DataAsset>['columns']> = [
   {
     title: '标签',
     dataIndex: 'tags',
-    render: (tags: string[]) => tags.length ? tags.map((tag) => <Tag key={tag}>{tag}</Tag>) : <span className="muted">暂无标签</span>,
+    render: (tags: string[]) => tags.length ? tags.map((tag) => <Tag color={getTagColor(tag)} key={tag}>{tag}</Tag>) : <span className="muted">暂无标签</span>,
   },
   { title: '数据量', dataIndex: 'rowCount', render: (rowCount: number) => `${rowCount} 行` },
   { title: '创建时间', dataIndex: 'createdAt', render: (createdAt: string) => new Intl.DateTimeFormat('zh-CN', { dateStyle: 'medium' }).format(new Date(createdAt)) },
