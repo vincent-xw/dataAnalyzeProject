@@ -30,8 +30,17 @@ export const handleError: ErrorHandler<Env> = (error, context) => {
   const appError = error instanceof AppError
     ? error
     : new AppError('INTERNAL_ERROR', '服务处理请求时发生错误', 500)
-  createLogger({ requestId }).error('请求处理失败', { errorCode: appError.code })
+  createLogger({ requestId }).error('请求处理失败', {
+    errorCode: appError.code,
+    failureReason: describeFailure(error),
+  })
   return errorResponse(context, appError, requestId)
+}
+
+/** 日志保留可定位的异常类型与短原因；不记录堆栈、请求体或完整上游响应。 */
+function describeFailure(error: unknown) {
+  if (!(error instanceof Error)) return 'NonErrorThrow'
+  return `${error.name}: ${error.message}`.replace(/[\r\n\t]/g, ' ').slice(0, 300)
 }
 
 function errorResponse(context: Context<Env>, error: AppError, requestId: string) {
