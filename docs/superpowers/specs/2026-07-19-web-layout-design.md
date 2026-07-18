@@ -8,8 +8,8 @@
 
 采用 `Layout > Header + Content + Footer`：
 
-- `Header` 高度为 64px，包含左侧产品名“数据分析 Agent”和右侧横向主菜单。
-- 主菜单使用 Ant Design `Menu`，沿用现有路由与文案：`/assets`、`/analyses`、`/settings`、`/assets/upload`；活动路由需自动高亮。
+- `Header` 高度为 64px，使用深色主题色，包含左侧白色产品名“数据分析 Agent”和右侧横向主菜单。
+- 主菜单使用 Ant Design 深色 `Menu`，沿用现有路由与文案：`/assets`、`/analyses`、`/settings`、`/assets/upload`；活动路由需以高对比度状态自动高亮。
 - `Content` 使用浅灰页面背景与最小视口高度。其内部新增居中工作区容器，最大宽度约 1200px，并保留适合当前业务页面的纵向留白。
 - `Footer` 采用低干扰的简洁文本，使内容不足一屏时仍位于页面底部。
 - 窄屏下，Header 内部可横向滚动，品牌与菜单不换行、不重叠；内容区左右间距收窄。
