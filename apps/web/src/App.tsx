@@ -7,8 +7,7 @@ export function App() {
         <h1>数据分析 Agent</h1>
         <nav aria-label="主导航">
           <NavLink to="/assets">我的数据</NavLink>
-          <NavLink to="/templates">分析模板</NavLink>
-          <NavLink to="/datasets/new">上传数据</NavLink>
+          <NavLink to="/assets/upload">上传数据</NavLink>
         </nav>
       </header>
       <Outlet />

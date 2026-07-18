@@ -38,7 +38,7 @@ const AssetMetadataSuggestionSchema = z.object({
  * 仅根据用户说明和资产控制面信息生成可编辑建议；调用边界不包含 R2 数据行。
  */
 export async function requestAssetMetadataSuggestion(
-  context: { name: string; templateName: string; rowCount: number; description: string },
+  context: { name: string; rowCount: number; description: string },
   bindings: LlmBindings,
   fetcher: typeof fetch = fetch,
   timeoutMs = 15_000,
@@ -289,7 +289,7 @@ async function readSafeUpstreamError(response: Response) {
   if (!response.headers.get('content-type')?.toLowerCase().includes('application/json')) return ''
   const body = await response.json().catch(() => null)
   if (!body || typeof body !== 'object' || Array.isArray(body) || !('error' in body)) return ''
-  const error = body.error
+  const error = body.error as Record<string, unknown>
   if (!error || typeof error !== 'object' || Array.isArray(error)) return ''
   const code = typeof error.code === 'string' ? sanitizeUpstreamErrorPart(error.code, 80) : ''
   const message = typeof error.message === 'string' ? sanitizeUpstreamErrorPart(error.message, 240) : ''

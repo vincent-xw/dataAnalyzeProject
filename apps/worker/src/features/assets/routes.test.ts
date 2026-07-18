@@ -3,7 +3,6 @@ import { beforeEach, describe, expect, it } from 'vitest'
 
 import { authenticatedRequest } from '../../testing/request'
 
-const templateId = 'a0000000-0000-4000-8000-000000000001'
 const assetId = 'a0000000-0000-4000-8000-000000000002'
 const dataKey = `data-analyze/assets/${assetId}/data.ndjson`
 const schemaKey = `data-analyze/assets/${assetId}/schema.json`
@@ -12,18 +11,12 @@ describe('数据资产 API', () => {
   beforeEach(async () => {
     await env.DB.batch([
       env.DB.prepare('DELETE FROM data_assets'),
-      env.DB.prepare('DELETE FROM analysis_templates'),
-      env.DB.prepare(
-        `INSERT INTO analysis_templates
-          (id, name, description, input_schema_json, created_at, updated_at)
-         VALUES (?, '学生成绩', '成绩数据', '[]', ?, ?)`,
-      ).bind(templateId, new Date().toISOString(), new Date().toISOString()),
       env.DB.prepare(
         `INSERT INTO data_assets
-          (id, kind, template_id, name, description, tags_json, data_object_key, schema_object_key,
+          (id, kind, name, description, tags_json, data_object_key, schema_object_key,
            row_count, status, created_by, created_at, updated_at)
-         VALUES (?, 'source', ?, '三年二班期中成绩', '王老师的期中成绩', ?, ?, ?, 2, 'ready', 'teacher@example.com', ?, ?)`,
-      ).bind(assetId, templateId, JSON.stringify(['王老师', '期中考试']), dataKey, schemaKey, new Date().toISOString(), new Date().toISOString()),
+         VALUES (?, 'source', '三年二班期中成绩', '王老师的期中成绩', ?, ?, ?, 2, 'ready', 'teacher@example.com', ?, ?)`,
+      ).bind(assetId, JSON.stringify(['王老师', '期中考试']), dataKey, schemaKey, new Date().toISOString(), new Date().toISOString()),
     ])
     await env.DATA_BUCKET.put(dataKey, '{"student_name":"张三","total_score":178}\n{"student_name":"李四","total_score":174}\n')
     await env.DATA_BUCKET.put(schemaKey, JSON.stringify([
@@ -43,6 +36,27 @@ describe('数据资产 API', () => {
       tags: ['王老师', '期中考试'],
       rowCount: 2,
     })])
+  })
+
+  it('直接上传 CSV 后创建可预览的无模板 NDJSON 资产', async () => {
+    const content = '姓名,总成绩\n张三,178\n李四,174\n'
+    const response = await authenticatedRequest('/api/assets/upload', {
+      method: 'POST',
+      headers: {
+        'content-type': 'text/csv',
+        'x-file-name': encodeURIComponent('期中成绩.csv'),
+        'x-csv-encoding': 'utf-8',
+        'x-csv-delimiter': ',',
+      },
+      body: content,
+    }, env)
+
+    expect(response.status).toBe(201)
+    expect(await response.json()).toMatchObject({
+      name: '期中成绩',
+      kind: 'source',
+      rowCount: 2,
+    })
   })
 
   it('只返回前 50 行标准化数据作为预览', async () => {

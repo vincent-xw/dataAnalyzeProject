@@ -1,5 +1,3 @@
-import type { FieldMapping } from '@data-analyze/contracts'
-
 const configuredApiBaseUrl = import.meta.env.VITE_API_BASE_URL as string | undefined
 
 export class ApiError extends Error {
@@ -29,17 +27,9 @@ export async function apiRequest<T>(path: string, init?: RequestInit): Promise<T
   return payload as T
 }
 
-export type FieldMappingSaveResult = {
-  status: 'mapped'
-  mappingCount: number
-  baselineTaskId: string
-}
-
 export type DataAsset = {
   id: string
   kind: 'source' | 'derived'
-  templateId: string
-  templateName: string
   name: string
   description: string | null
   tags: string[]
@@ -53,14 +43,3 @@ export type DataAsset = {
 }
 
 export type DataAssetPreview = { rowCount: number; rows: Array<Record<string, unknown>> }
-
-export function saveFieldMapping(versionId: string, mappings: FieldMapping[]) {
-  return apiRequest<FieldMappingSaveResult>(
-    `/api/datasets/${versionId}/mapping`,
-    {
-      method: 'PUT',
-      headers: { 'content-type': 'application/json' },
-      body: JSON.stringify(mappings),
-    },
-  )
-}

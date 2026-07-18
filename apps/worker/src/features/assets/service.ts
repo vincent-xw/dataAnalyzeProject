@@ -3,8 +3,6 @@ import type { Env } from '../../index'
 type AssetRow = {
   id: string
   kind: 'source' | 'derived'
-  template_id: string
-  template_name: string
   name: string
   description: string | null
   tags_json: string
@@ -23,20 +21,15 @@ export class AssetService {
 
   async list() {
     const rows = await this.env.DB.prepare(
-      `SELECT da.*, at.name AS template_name
-       FROM data_assets da
-       JOIN analysis_templates at ON at.id = da.template_id
-       ORDER BY da.created_at DESC`,
+      `SELECT * FROM data_assets
+       ORDER BY created_at DESC`,
     ).all<AssetRow>()
     return rows.results.map((row) => this.toAsset(row))
   }
 
   async get(id: string) {
     const row = await this.env.DB.prepare(
-      `SELECT da.*, at.name AS template_name
-       FROM data_assets da
-       JOIN analysis_templates at ON at.id = da.template_id
-       WHERE da.id = ?`,
+      `SELECT * FROM data_assets WHERE id = ?`,
     ).bind(id).first<AssetRow>()
     return row ? this.toAsset(row) : null
   }
@@ -71,8 +64,6 @@ export class AssetService {
     return {
       id: row.id,
       kind: row.kind,
-      templateId: row.template_id,
-      templateName: row.template_name,
       name: row.name,
       description: row.description,
       tags: JSON.parse(row.tags_json) as string[],

@@ -1,6 +1,6 @@
 import type { ScriptMetadata } from '@data-analyze/contracts'
 
-export type StandardValue = string | number | boolean
+export type StandardValue = string | number | boolean | null
 export type StandardRecord = Readonly<Record<string, StandardValue>>
 
 export interface OutputWriter {
