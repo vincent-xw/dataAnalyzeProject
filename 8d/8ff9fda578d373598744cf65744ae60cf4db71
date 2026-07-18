@@ -1,0 +1,158 @@
+apps/worker/src/features/llm/client.test.ts
+  s_1144233e5b45e2::t_4316b05d393638 3,178-195
+  s_edbf29209c8443::t_8a55fd487eab68 58-74,196-197
+  s_edbf29209c8443::t_c52775b7f516b1 198
+apps/worker/src/features/datasets/routes.test.ts
+  s_1144233e5b45e2::t_e4ad89f988abbe 55
+apps/worker/src/features/tasks/routes.test.ts
+  s_1144233e5b45e2::t_e4ad89f988abbe 9
+apps/web/src/styles.css
+  s_1144233e5b45e2::t_4e245bea4f82ea 3,11,28-29,32-36,43-44,46,69-72,74-75,160-193
+  s_1144233e5b45e2::t_80328eea1b7bbf 73
+  s_1144233e5b45e2::t_b03174d492fbba 194
+apps/web/src/features/tasks/TaskDetailPage.tsx
+  s_1144233e5b45e2::t_9b61a93c2dc777 9
+  s_1144233e5b45e2::t_1f6144175b030e 62
+docs/superpowers/specs/2026-07-17-data-asset-platform-design.md
+  s_1144233e5b45e2::t_c06d70326fae9d 1-22,24-99,109-110,112-123,126-129,132-185,190-217,219-226,228-233,236-238,240
+  s_1144233e5b45e2::t_6548c7a641d2cb 100-108,111,124-125,130-131,186,189,218,234-235
+  s_1144233e5b45e2::t_07767b76c06056 23,187-188,227,239
+apps/worker/src/db/schema.ts
+  s_1144233e5b45e2::t_5be471e2d53a3c 155-181
+  s_1144233e5b45e2::t_e2eab7f31e7ca8 126-127
+scripts/validate-script-registry.test.ts
+  s_1144233e5b45e2::t_4f296dae18b6d4 11-12
+apps/worker/src/features/tasks/executor.test.ts
+  s_1144233e5b45e2::t_6d4675cb662db6 188-194
+  s_1144233e5b45e2::t_373fd9ce19d9a2 179-183
+  s_1144233e5b45e2::t_e4ad89f988abbe 116
+docs/superpowers/plans/2026-07-17-data-asset-platform-roadmap.md
+  s_1144233e5b45e2::t_bc3136e2f04fdb 1-291
+apps/worker/src/features/assets/service.ts
+  s_1144233e5b45e2::t_b4ec74056164df 1-53,70-94
+  s_1144233e5b45e2::t_5be471e2d53a3c 54-69
+apps/web/src/api/client.ts
+  s_1144233e5b45e2::t_4284faf7a68ad9 29-34,55
+  s_1144233e5b45e2::t_1f6144175b030e 35-53
+apps/worker/src/features/plans/routes.test.ts
+  s_1144233e5b45e2::t_a20b7f614ddd24 143-144,147-150
+  s_1144233e5b45e2::t_356074b2967b56 151-175,177-178
+  s_1144233e5b45e2::t_e4ad89f988abbe 73
+apps/worker/src/features/script-admin/routes.test.ts
+  s_1144233e5b45e2::t_92bd92ef897ed1 2,16-17,26
+apps/web/src/features/assets/AssetListPage.tsx
+  s_1144233e5b45e2::t_1f6144175b030e 1-31
+apps/worker/src/features/datasets/mapping-routes.test.ts
+  s_1144233e5b45e2::t_e4ad89f988abbe 18
+  s_1144233e5b45e2::t_373fd9ce19d9a2 17,19-20
+apps/worker/src/features/llm/prompt.test.ts
+  s_edbf29209c8443::t_8a55fd487eab68 44-45
+apps/worker/src/features/assets/routes.test.ts
+  s_1144233e5b45e2::t_ece7b32969f836 60-93
+  s_1144233e5b45e2::t_858eb60776f891 1-59,94
+apps/worker/src/features/tasks/executor.ts
+  s_1144233e5b45e2::t_fe1a1abc1dfe1d 28-30,41,272-297
+apps/worker/src/features/llm/prompt.ts
+  s_edbf29209c8443::t_c68e32c984aa8b 10-12
+apps/worker/src/features/plans/routes.ts
+  s_1144233e5b45e2::t_0d0e4555acca0b 15-22,52-64,70
+  s_1144233e5b45e2::t_3e1709ca832f67 65-69
+  s_1144233e5b45e2::t_f39a15f277a31c 71-72
+apps/worker/src/index.ts
+  s_1144233e5b45e2::t_b4ec74056164df 11,52
+apps/worker/src/features/reports/routes.test.ts
+  s_1144233e5b45e2::t_e4ad89f988abbe 62
+apps/worker/src/features/templates/routes.test.ts
+  s_1144233e5b45e2::t_e4ad89f988abbe 36
+apps/web/src/features/assets/AssetDetailPage.test.tsx
+  s_1144233e5b45e2::t_1015ac9a00e2cc 2,4-6,8-11,13-19,23-37,50-51
+  s_1144233e5b45e2::t_5e8e0ae48b45c4 7
+  s_1144233e5b45e2::t_072b7994e1822a 20-22,38-49
+  s_1144233e5b45e2::t_164e4d7bd8ff13 1,3,12
+apps/web/src/features/analysis/AnalysisRequestPage.test.tsx
+  s_1144233e5b45e2::t_543bf9076437ca 1,83,85-86,88
+  s_1144233e5b45e2::t_a20b7f614ddd24 2-6,13-17,19-75,89-90
+  s_1144233e5b45e2::t_4316b05d393638 7-12,18,76-82,84,87
+apps/worker/src/features/tasks/routes.ts
+  s_1144233e5b45e2::t_9b61a93c2dc777 7,22,24-26,53
+  s_1144233e5b45e2::t_bb69239c88603f 23
+apps/web/src/features/assets/AssetDetailPage.tsx
+  s_1144233e5b45e2::t_1f6144175b030e 1-14,16-45,66-78,80,82-87
+  s_1144233e5b45e2::t_80328eea1b7bbf 15,46-65,79,81
+apps/web/src/features/scripts/ScriptUploadPage.test.tsx
+  s_1144233e5b45e2::t_f3376dc83da150 17,20-22,35,37-38
+apps/web/src/features/assets/AssetListPage.test.tsx
+  s_1144233e5b45e2::t_5e8e0ae48b45c4 7
+  s_1144233e5b45e2::t_1015ac9a00e2cc 1-6,8-38
+apps/worker/src/features/plans/service.ts
+  s_1144233e5b45e2::t_0d0e4555acca0b 1,74,111-177,257,261-267
+  s_1144233e5b45e2::t_aa43037493faa3 268-269
+apps/web/src/router.tsx
+  s_1144233e5b45e2::t_1f6144175b030e 14-15,22-24
+apps/web/src/features/datasets/FieldMappingPage.test.tsx
+  s_1144233e5b45e2::t_7114ba8e2503e2 1,75-76
+  s_1144233e5b45e2::t_11c989cb3fd62b 2-3,11-25,66-74,77-78
+  s_1144233e5b45e2::t_f3b17c9021ab7b 7-10
+  s_1144233e5b45e2::t_c8671ea0663228 79
+.gitignore
+  s_1144233e5b45e2::t_e91be35483f5fc 11
+apps/worker/migrations/0005_data_assets.sql
+  s_1144233e5b45e2::t_858eb60776f891 1-22
+  s_1144233e5b45e2::t_fe1a1abc1dfe1d 23-25
+docs/superpowers/plans/2026-07-17-default-baseline-and-explicit-script-selection.md
+  s_1144233e5b45e2::t_ba3874d931090a 1-130
+apps/web/src/App.tsx
+  s_1144233e5b45e2::t_1f6144175b030e 9
+apps/worker/src/features/datasets/routes.ts
+  s_1144233e5b45e2::t_fe1a1abc1dfe1d 263-264,271
+apps/web/src/features/analysis/AnalysisRequestPage.tsx
+  s_1144233e5b45e2::t_f3376dc83da150 36,129,131,134,140,142,198-199
+  s_1144233e5b45e2::t_dfd8fd438e5903 4,122-123,205-215
+  s_1144233e5b45e2::t_aad80f215ef86c 17-24,82-107,151,160-174,176-177,183
+  s_1144233e5b45e2::t_b55f2b6f9b1082 216
+apps/worker/src/features/assets/routes.ts
+  s_1144233e5b45e2::t_b4ec74056164df 1,3-4,6-7,18-36,45-46,66
+  s_1144233e5b45e2::t_5be471e2d53a3c 2,5,8-17,37-44,47-65
+apps/web/src/features/scripts/ScriptUploadPage.tsx
+  s_1144233e5b45e2::t_92bd92ef897ed1 6-8,11,37,44,60,65
+apps/web/src/features/datasets/FieldMappingPage.tsx
+  s_1144233e5b45e2::t_4284faf7a68ad9 100-101
+apps/worker/src/features/script-admin/routes.ts
+  s_1144233e5b45e2::t_d3248e6cf7a600 1
+  s_1144233e5b45e2::t_92bd92ef897ed1 11-12,39,45-51
+apps/worker/src/features/llm/client.ts
+  s_1144233e5b45e2::t_5be471e2d53a3c 9,31-46,48-85
+  s_edbf29209c8443::t_c68e32c984aa8b 86-87,104-108,355,358-366,370-391
+  s_1144233e5b45e2::t_dfd8fd438e5903 188-189,197,208-220,224-231,233-234,237-241
+  s_1144233e5b45e2::t_7397f9a8bcac3c 47
+  s_edbf29209c8443::t_17160161e5cdca 88
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.14",
+  "base_commit_sha": "8d8ff9fda578d373598744cf65744ae60cf4db71",
+  "prompts": {},
+  "humans": {
+    "h_c3a612a540ca0b": {
+      "author": "xuewen.jia <xuewen.jia@ly.com>"
+    }
+  },
+  "sessions": {
+    "s_1144233e5b45e2": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019f6dba-d9ee-7ca0-a5fc-436f96a679a3",
+        "model": "gpt-5.6-terra"
+      },
+      "human_author": "xuewen.jia <xuewen.jia@ly.com>"
+    },
+    "s_edbf29209c8443": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019f650a-a789-7b51-899b-e27b3fb6cc98",
+        "model": "gpt-5.6-terra"
+      },
+      "human_author": "xuewen.jia <xuewen.jia@ly.com>"
+    }
+  }
+}
