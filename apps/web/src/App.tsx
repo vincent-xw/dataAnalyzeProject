@@ -36,7 +36,7 @@ export function App() {
         </div>
       </Layout.Header>
       <Layout.Content className="app-content" role="main">
-        <div className="app-content-inner">
+        <div className={`app-content-inner${location.pathname.startsWith('/analyses/') ? ' app-content-inner--wide' : ''}`}>
           <Outlet />
         </div>
       </Layout.Content>

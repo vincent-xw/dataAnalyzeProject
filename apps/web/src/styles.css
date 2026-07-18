@@ -1,6 +1,6 @@
 :root {
   color: #172033;
-  background: #f5f7fb;
+  background: #fff;
   font-family: Inter, "PingFang SC", "Microsoft YaHei", sans-serif;
 }
 
@@ -26,7 +26,7 @@ body {
 
 .app-header-inner {
   display: flex;
-  width: min(1180px, calc(100% - 40px));
+  width: calc(100% - 200px);
   height: 64px;
   align-items: center;
   flex-wrap: nowrap;
@@ -63,19 +63,24 @@ body {
 .app-content {
   display: flex;
   flex: 1;
-  background: #f5f7fb;
+  background: #fff;
 }
 
 .app-content-inner {
-  width: min(1180px, calc(100% - 40px));
-  margin: 0 auto;
-  padding: 32px 0 64px;
+  box-sizing: border-box;
+  width: 100%;
+  padding: 32px 100px 64px;
+}
+
+.app-content-inner--wide {
+  width: 100%;
 }
 
 .app-footer {
   padding: 18px 20px;
+  border-top: 1px solid #f0f0f0;
   color: #8b96a7;
-  background: #f5f7fb;
+  background: #fff;
   font-size: 13px;
   text-align: center;
 }
@@ -175,6 +180,33 @@ a {
 }
 
 .asset-page { gap: 22px; }
+.analysis-create-panel { padding: 12px; border-radius: 6px; }
+.analysis-history-card { display: grid; gap: 8px; padding: 12px; border-radius: 6px; color: #172033; text-decoration: none; }
+.analysis-history-card-heading { display: flex; align-items: center; gap: 16px; }
+.analysis-history-card-heading h3 { flex: 1; margin: 0; color: #172033; }
+.analysis-primary-asset { flex: 0 0 auto; color: #64748b; font-size: 13px; }
+.analysis-history-description { margin: 0; color: #475569; line-height: 1.6; }
+.analysis-history-card .muted { margin: 0; }
+.analysis-status-mark { width: fit-content; padding: 3px 8px; border-radius: 4px; font-size: 12px; font-weight: 650; }
+.analysis-status-mark.is-ready { color: #137251; background: #e7f7ef; }
+.analysis-status-mark.is-failed { color: #b42318; background: #fef3f2; }
+.analysis-detail-title-content { min-width: 0; flex: 1; }
+.analysis-detail-title-row { display: flex; align-items: center; gap: 4px; }
+.analysis-detail-title-row h2 { margin: 2px 0 8px; font-size: 28px; letter-spacing: -.03em; }
+.analysis-requirement { display: flex; align-items: flex-start; gap: 8px; padding: 12px; border: 1px solid #d9dfe8; border-radius: 6px; background: #f8fafc; }
+.analysis-requirement p { flex: 1; margin: 0; color: #334155; font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace; line-height: 1.7; white-space: pre-wrap; }
+.analysis-related-assets { display: flex; align-items: center; flex-wrap: wrap; gap: 6px; }
+.analysis-widget-layout { display: grid; gap: 16px; }
+.analysis-widget-row { position: relative; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; padding-bottom: 8px; }
+.analysis-widget-row.widget-count-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.analysis-widget-row.widget-count-1 { grid-template-columns: minmax(0, 1fr); }
+.analysis-widget-panel { display: flex; min-width: 0; min-height: 0; flex-direction: column; padding: 10px; border-radius: 6px; }
+.analysis-widget-header { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.analysis-widget-title { display: inline-flex; align-items: center; gap: 6px; min-width: 0; font-weight: 650; cursor: grab; }
+.analysis-widget-content { min-height: 0; flex: 1; }
+.analysis-chart { width: 100%; height: 100%; min-height: 0; }
+.analysis-row-resize-handle { position: absolute; right: 0; bottom: 0; left: 0; height: 8px; cursor: row-resize; }
+.analysis-row-resize-handle::after { display: block; width: 36px; height: 3px; margin: 2px auto; border-radius: 999px; background: #cbd5e1; content: ''; }
 .asset-page .ant-tag { margin-inline: 4px; }
 .asset-name-cell { display: grid; gap: 6px; }
 .asset-description { display: block; overflow: hidden; color: #8b96a7; font-size: 12px; text-overflow: ellipsis; white-space: nowrap; }
@@ -198,8 +230,11 @@ a {
 .status-chip { padding: 5px 9px; border-radius: 999px; color: #137251; background: #e7f7ef; font-size: 13px; font-weight: 700; }
 
 @media (max-width: 720px) {
-  .app-header-inner, .app-content-inner { width: min(100% - 24px, 1180px); }
-  .app-content-inner { padding-top: 16px; }
+  .app-header-inner { width: calc(100% - 24px); }
+  .app-content-inner { padding: 16px 12px 64px; }
   .page-heading { align-items: flex-start; flex-direction: column; }
   .asset-detail-layout { grid-template-columns: 1fr; }
+  .app-content-inner--wide { width: 100%; }
+  .analysis-widget-row { grid-template-columns: 1fr; height: auto !important; }
+  .analysis-row-resize-handle { display: none; }
 }

@@ -48,10 +48,13 @@ describe('数据资产分析 API', () => {
       config: expect.objectContaining({ widgets: expect.any(Array) }),
     }))
 
-    const listed = await authenticatedRequest('/api/analyses', {}, env)
-    expect(await listed.json()).toEqual([expect.objectContaining({
-      requirement: '按姓名展示总成绩', status: 'ready',
-    })])
+    const listed = await authenticatedRequest('/api/analyses?page=1&pageSize=1', {}, env)
+    expect(await listed.json()).toEqual(expect.objectContaining({
+      items: [expect.objectContaining({ requirement: '按姓名展示总成绩', status: 'ready' })],
+      total: 1,
+      page: 1,
+      pageSize: 1,
+    }))
   })
 
   it('返回冻结的规则和用于渲染的数据行，并禁止跨资产访问', async () => {
@@ -88,6 +91,6 @@ describe('数据资产分析 API', () => {
       },
     }))
     const listed = await authenticatedRequest('/api/analyses', {}, env)
-    expect(await listed.json()).toEqual([expect.objectContaining({ status: 'failed', failureReason: expect.any(String) })])
+    expect(await listed.json()).toEqual(expect.objectContaining({ items: [expect.objectContaining({ status: 'failed', failureReason: expect.any(String) })] }))
   })
 })

@@ -49,7 +49,7 @@ export function AssetUploadPage() {
   const isXlsx = file?.name.toLowerCase().endsWith('.xlsx')
   const submitLabel = uploading ? (isXlsx && !selectedSheet ? '正在读取工作表…' : '正在上传并转换…') : '上传并转换'
 
-  return <section className="panel stack"><h2>上传数据</h2><p>上传后会直接转换为可预览、可维护的数据资产。</p><Form layout="vertical" onFinish={submit} className="stack">
+  return <section className="stack"><div className="page-heading"><div><p className="eyebrow">数据资产</p><h2>上传数据</h2><p>上传后会直接转换为可预览、可维护的数据资产。</p></div></div><Form className="panel stack" layout="vertical" onFinish={submit}>
     <Form.Item label="CSV 或 XLSX 文件" required><Upload {...uploadProps}><Button disabled={uploading}>选择文件</Button></Upload></Form.Item>
     {!isXlsx ? <><Form.Item label="编码"><Select value={encoding} onChange={setEncoding} options={[{ value: 'utf-8', label: 'UTF-8' }, { value: 'utf-8-bom', label: 'UTF-8 BOM' }, { value: 'gb18030', label: 'GB18030' }]} /></Form.Item><Form.Item label="分隔符"><Select value={delimiter} onChange={setDelimiter} options={[{ value: ',', label: '逗号' }, { value: '\t', label: '制表符' }, { value: ';', label: '分号' }]} /></Form.Item></> : null}
     {sheets.length ? <Form.Item label="工作表"><Select disabled={uploading} value={selectedSheet} onChange={setSelectedSheet} options={sheets.map((sheet) => ({ value: sheet, label: sheet }))} /></Form.Item> : null}

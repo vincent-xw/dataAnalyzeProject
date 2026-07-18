@@ -8,9 +8,14 @@ import { SystemPromptService } from '../settings/service'
 import { createLogger, createSensitiveDebugLogger } from '../../lib/logger'
 
 const RequestSchema = z.object({ requirement: z.string().trim().min(1).max(1_000), assetIds: z.array(z.string().uuid()).min(1).max(20), primaryAssetId: z.string().uuid() }).strict()
+const ListQuerySchema = z.object({ page: z.coerce.number().int().min(1).default(1), pageSize: z.coerce.number().int().min(1).max(100).default(10) })
 class AnalysisConfigError extends Error {}
 export const analysisRoutes = new Hono<Env>()
-analysisRoutes.get('/', async (c) => c.json(await new AnalysisService(c.env).list()))
+analysisRoutes.get('/', async (c) => {
+  const query = ListQuerySchema.safeParse(c.req.query())
+  if (!query.success) return c.json({ code: 'INVALID_PAGINATION', message: '分页参数无效' }, 400)
+  return c.json(await new AnalysisService(c.env).listPage(query.data.page, query.data.pageSize))
+})
 analysisRoutes.post('/', async (c) => {
   const startedAt = Date.now(); const logger = createLogger({ requestId: c.get('requestId'), category: 'analysis', operation: 'create_analysis' })
   const diagnostic = createSensitiveDebugLogger(c.env, undefined, { requestId: c.get('requestId'), category: 'analysis', operation: 'create_analysis_debug' })

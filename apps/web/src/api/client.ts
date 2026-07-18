@@ -45,3 +45,4 @@ export type DataAsset = {
 export type DataAssetPreview = { rowCount: number; rows: Array<Record<string, unknown>> }
 export type AnalysisFailureGuidance = { summary: string; suggestion: string; revisedRequirement: string }
 export type AnalysisSummary = { id: string; requirement: string; title: string | null; status: 'ready' | 'failed'; failureReason: string | null; guidance: AnalysisFailureGuidance | null; createdAt: string; assets?: Array<{ id: string; name: string; role: 'primary' | 'reference' }> }
+export type AnalysisPage = { items: AnalysisSummary[]; total: number; page: number; pageSize: number }

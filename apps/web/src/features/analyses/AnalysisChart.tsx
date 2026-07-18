@@ -9,4 +9,25 @@ export function buildChartOption(widget: ChartWidget, rows: Array<Record<string,
   if (widget.type === 'pie') { const data = categories.map((name) => ({ name, value: seriesNames.reduce((sum, series) => sum + (values.get(series)?.get(name) || 0), 0) })); return { legend: { show: true }, tooltip: { show: true, trigger: 'item', formatter: '{b}：{c} 人（{d}%）' }, series: [{ type: 'pie', label: { show: true, formatter: '{b}：{c} 人（{d}%）' }, data }] } }
   return { legend: { show: true }, tooltip: { show: true, trigger: 'axis' }, xAxis: { type: 'category', data: categories }, yAxis: { type: 'value', name: widget.aggregation === 'count' ? '人数' : '数值' }, series: seriesNames.map((name) => ({ ...(widget.series ? { name } : {}), type: widget.type, data: categories.map((category) => values.get(name)?.get(category) || 0) })) }
 }
-export function AnalysisChart({ widget, rows }: { widget: ChartWidget; rows: Array<Record<string, unknown>> }) { const ref = useRef<HTMLDivElement>(null); useEffect(() => { if (!ref.current || import.meta.env.MODE === 'test') return; const chart = echarts.init(ref.current); chart.setOption(buildChartOption(widget, rows)); return () => chart.dispose() }, [widget, rows]); return <div data-testid={`chart-${widget.id}`} style={{ height: 320 }} ref={ref} /> }
+export function AnalysisChart({ widget, rows, refreshToken = 0 }: { widget: ChartWidget; rows: Array<Record<string, unknown>>; refreshToken?: number }) {
+  const ref = useRef<HTMLDivElement>(null)
+  const chartRef = useRef<echarts.ECharts | null>(null)
+
+  useEffect(() => {
+    if (!ref.current || import.meta.env.MODE === 'test') return
+    const chart = echarts.init(ref.current)
+    chartRef.current = chart
+    chart.setOption(buildChartOption(widget, rows), { notMerge: true })
+    const observer = new ResizeObserver(() => chart.resize())
+    observer.observe(ref.current)
+    return () => { observer.disconnect(); chart.dispose(); chartRef.current = null }
+  }, [widget, rows])
+
+  useEffect(() => {
+    if (!chartRef.current) return
+    chartRef.current.setOption(buildChartOption(widget, rows), { notMerge: true })
+    chartRef.current.resize()
+  }, [refreshToken, rows, widget])
+
+  return <div className="analysis-chart" data-testid={`chart-${widget.id}`} ref={ref} />
+}

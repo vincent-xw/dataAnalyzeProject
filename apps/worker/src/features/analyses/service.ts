@@ -25,9 +25,13 @@ export class AnalysisService {
     return this.get(id)
   }
 
-  async list() {
-    const rows = await this.env.DB.prepare(`SELECT a.* FROM analyses a ORDER BY a.created_at DESC`).all<AnalysisRow>()
-    return Promise.all(rows.results.map((row) => this.detail(row)))
+  async listPage(page: number, pageSize: number) {
+    const offset = (page - 1) * pageSize
+    const [count, rows] = await Promise.all([
+      this.env.DB.prepare('SELECT COUNT(*) AS total FROM analyses').first<{ total: number }>(),
+      this.env.DB.prepare('SELECT a.* FROM analyses a ORDER BY a.created_at DESC LIMIT ? OFFSET ?').bind(pageSize, offset).all<AnalysisRow>(),
+    ])
+    return { items: await Promise.all(rows.results.map((row) => this.detail(row))), total: count?.total || 0, page, pageSize }
   }
 
   async get(id: string) {
