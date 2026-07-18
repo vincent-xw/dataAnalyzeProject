@@ -50,7 +50,7 @@ export function AssetListPage() {
       {error ? <p className="error">{error}</p> : null}
       {loading ? <p className="muted" role="status">正在加载数据资产…</p> : null}
       {assets.length === 0 && !error && !loading ? <div className="panel empty-state"><h3>还没有可用数据</h3><p>上传一份表格后，它会直接成为可预览的数据资产。</p><Link to="/assets/upload">开始上传</Link></div> : null}
-      {assets.length > 0 ? <div className="panel asset-table-wrap"><Table columns={assetColumns} dataSource={assets} pagination={false} rowKey="id" /></div> : null}
+      {assets.length > 0 ? <Table columns={assetColumns} dataSource={assets} pagination={false} rowKey="id" /> : null}
     </section>
   )
 }

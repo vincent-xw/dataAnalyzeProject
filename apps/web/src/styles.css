@@ -175,14 +175,10 @@ a {
 }
 
 .asset-page { gap: 22px; }
-.asset-page .panel { border-color: transparent; }
 .page-heading { display: flex; align-items: flex-start; justify-content: space-between; gap: 24px; }
 .page-heading h2 { margin: 2px 0 8px; font-size: 28px; letter-spacing: -.03em; }
 .page-heading p:not(.eyebrow) { max-width: 700px; margin: 0; color: #64748b; line-height: 1.7; }
 .eyebrow { margin: 0; color: #3569d2; font-size: 13px; font-weight: 700; letter-spacing: .06em; }
-.asset-table-wrap { padding: 4px 22px; overflow-x: auto; }
-.asset-table-wrap .ant-table-cell { vertical-align: middle; }
-.asset-table-wrap small { display: block; max-width: 280px; margin-top: 5px; overflow: hidden; color: #7b8798; text-overflow: ellipsis; white-space: nowrap; }
 .muted { color: #8b96a7; }
 .empty-state { padding: 54px 24px; text-align: center; }
 .empty-state h3 { margin: 0 0 8px; }
@@ -203,5 +199,4 @@ a {
   .app-content-inner { padding-top: 16px; }
   .page-heading { align-items: flex-start; flex-direction: column; }
   .asset-detail-layout { grid-template-columns: 1fr; }
-  .asset-table-wrap { padding: 4px 12px; }
 }
