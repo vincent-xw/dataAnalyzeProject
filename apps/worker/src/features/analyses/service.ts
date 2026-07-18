@@ -2,7 +2,7 @@ import { ReportConfigSchema, type ReportConfig } from '@data-analyze/report-sche
 
 import type { Env } from '../../index'
 
-type AnalysisRow = { id: string; requirement: string; title: string | null; config_json: string | null; status: 'ready' | 'failed'; failure_reason: string | null; created_by: string; created_at: string }
+type AnalysisRow = { id: string; requirement: string; title: string | null; config_json: string | null; status: 'ready' | 'failed'; failure_reason: string | null; prompt_version_id: string | null; created_by: string; created_at: string }
 
 export class AnalysisService {
   constructor(private readonly env: Env['Bindings']) {}
@@ -16,10 +16,10 @@ export class AnalysisService {
     return { asset, fields, byteSize: dataObject.size }
   }
 
-  async create(assetIds: string[], primaryAssetId: string, requirement: string, createdBy: string, config: ReportConfig | null, failureReason: string | null) {
+  async create(assetIds: string[], primaryAssetId: string, requirement: string, createdBy: string, config: ReportConfig | null, failureReason: string | null, promptVersionId: string | null = null) {
     const id = crypto.randomUUID(); const createdAt = new Date().toISOString()
-    await this.env.DB.prepare(`INSERT INTO analyses (id, requirement, title, config_json, status, failure_reason, created_by, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?)`)
-      .bind(id, requirement, config?.title ?? null, config ? JSON.stringify(config) : null, config ? 'ready' : 'failed', failureReason, createdBy, createdAt).run()
+    await this.env.DB.prepare(`INSERT INTO analyses (id, requirement, title, config_json, status, failure_reason, prompt_version_id, created_by, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`)
+      .bind(id, requirement, config?.title ?? null, config ? JSON.stringify(config) : null, config ? 'ready' : 'failed', failureReason, promptVersionId, createdBy, createdAt).run()
     await this.env.DB.batch(assetIds.map((assetId) => this.env.DB.prepare('INSERT INTO analysis_data_assets (analysis_id, asset_id, role) VALUES (?, ?, ?)').bind(id, assetId, assetId === primaryAssetId ? 'primary' : 'reference')))
     return this.get(id)
   }
@@ -45,6 +45,6 @@ export class AnalysisService {
 
   private async primaryAsset(analysisId: string) { return this.env.DB.prepare(`SELECT d.id, d.name FROM data_assets d JOIN analysis_data_assets ada ON ada.asset_id = d.id WHERE ada.analysis_id = ? AND ada.role = 'primary'`).bind(analysisId).first<{ id: string; name: string }>() }
   private async assets(analysisId: string) { const rows = await this.env.DB.prepare(`SELECT d.id, d.name, ada.role FROM data_assets d JOIN analysis_data_assets ada ON ada.asset_id = d.id WHERE ada.analysis_id = ? ORDER BY ada.role DESC, d.name`).bind(analysisId).all<{ id: string; name: string; role: 'primary' | 'reference' }>(); return rows.results }
-  private summary(row: AnalysisRow) { return { id: row.id, requirement: row.requirement, title: row.title, status: row.status, failureReason: row.failure_reason, createdAt: row.created_at } }
+  private summary(row: AnalysisRow) { return { id: row.id, requirement: row.requirement, title: row.title, status: row.status, failureReason: row.failure_reason, promptVersionId: row.prompt_version_id, createdAt: row.created_at } }
   private async detail(row: AnalysisRow) { return { ...this.summary(row), assets: await this.assets(row.id), config: row.config_json ? ReportConfigSchema.parse(JSON.parse(row.config_json)) : null } }
 }

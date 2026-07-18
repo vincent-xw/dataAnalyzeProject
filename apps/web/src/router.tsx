@@ -6,6 +6,7 @@ import { AssetDetailPage } from './features/assets/AssetDetailPage'
 import { AssetUploadPage } from './features/assets/AssetUploadPage'
 import { AnalysisListPage } from './features/analyses/AnalysisListPage'
 import { AnalysisDetailPage } from './features/analyses/AnalysisDetailPage'
+import { SystemSettingsPage } from './features/settings/SystemSettingsPage'
 
 export const router = createBrowserRouter([
   {
@@ -18,6 +19,7 @@ export const router = createBrowserRouter([
       { path: 'assets/:assetId', element: <AssetDetailPage /> },
       { path: 'analyses', element: <AnalysisListPage /> },
       { path: 'analyses/:analysisId', element: <AnalysisDetailPage /> },
+      { path: 'settings', element: <SystemSettingsPage /> },
     ],
   },
 ])

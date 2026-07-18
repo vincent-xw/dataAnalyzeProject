@@ -2,6 +2,7 @@ import { Hono } from 'hono'
 
 import { assetRoutes } from './features/assets/routes'
 import { analysisRoutes } from './features/analyses/routes'
+import { settingsRoutes } from './features/settings/routes'
 import { requireAccess, type AuthenticatedUser } from './middleware/access-auth'
 import { handleError, requestContext } from './middleware/error-handler'
 
@@ -37,6 +38,7 @@ app.use('/api/*', requireAccess())
 app.use('/internal/*', requireAccess())
 app.route('/api/assets', assetRoutes)
 app.route('/api/analyses', analysisRoutes)
+app.route('/api/settings', settingsRoutes)
 
 export default {
   fetch: app.fetch,

@@ -33,14 +33,14 @@ export class LlmClientError extends Error {
 /** 分析规则生成可能包含多图布局，允许用户等待至多三分钟。 */
 export const ANALYSIS_LLM_TIMEOUT_MS = 180_000
 
-export async function requestAssetAnalysisConfig(context: { requirement: string; assetName: string; fields: Array<{ name: string; type: string }>; rowCount: number }, bindings: LlmBindings, fetcher: typeof fetch = fetch, diagnostic?: SensitiveDebugLogger, timeoutMs = ANALYSIS_LLM_TIMEOUT_MS): Promise<ReportConfig> {
+export async function requestAssetAnalysisConfig(context: { requirement: string; assetName: string; fields: Array<{ name: string; type: string }>; rowCount: number }, bindings: LlmBindings, fetcher: typeof fetch = fetch, diagnostic?: SensitiveDebugLogger, timeoutMs = ANALYSIS_LLM_TIMEOUT_MS, systemPrompt?: string): Promise<ReportConfig> {
   if (bindings.ENVIRONMENT === 'test' || bindings.ENVIRONMENT === 'unit-test') {
     if (context.requirement.includes('不支持')) throw new LlmClientError('LLM_INVALID_RESPONSE', '分析规则不符合字段约束')
     const [dimension, metric = dimension] = context.fields
     if (!dimension || !metric) throw new LlmClientError('LLM_INVALID_RESPONSE', '数据资产没有可分析的字段')
     return { title: `${context.assetName}分析`, description: context.requirement, filters: [], widgets: [{ id: 'analysis-chart', type: 'bar', title: context.requirement, dataset: 'result', dimension: dimension.name, metric: metric.name, layout: { x: 0, y: 0, w: 12, h: 5 } }] }
   }
-  const rules = '你是数据分析规则助手。仅用提供字段生成报表。只返回符合 ReportConfig 的 JSON；组件 type 仅 bar、line、pie、metric、table，dataset 固定 result，禁止臆造字段。'
+  const rules = systemPrompt || '你是数据分析规则助手。仅用提供字段生成报表。只返回符合 ReportConfig 的 JSON；组件 type 仅 bar、line、pie、metric、table，dataset 固定 result，禁止臆造字段。'
   let response: Response
   try { response = await fetcher(`${bindings.LLM_BASE_URL.replace(/\/$/, '')}/chat/completions`, { method: 'POST', headers: { authorization: `Bearer ${bindings.LLM_API_KEY}`, 'content-type': 'application/json' }, body: JSON.stringify({ model: bindings.LLM_MODEL, messages: [{ role: 'system', content: rules }, { role: 'user', content: JSON.stringify(context) }], response_format: { type: 'json_object' }, }), signal: AbortSignal.timeout(timeoutMs) }) } catch (error) { if (isTimeoutError(error)) throw new LlmClientError('LLM_REQUEST_TIMEOUT', `分析规则生成超过 ${timeoutMs / 1000} 秒`); throw new LlmClientError('LLM_REQUEST_FAILED', '分析规则生成请求失败') }
   if (!response.ok) throw new LlmClientError('LLM_REQUEST_FAILED', `LLM HTTP 状态异常: ${response.status}`)
