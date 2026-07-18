@@ -10,6 +10,13 @@ const allowedFieldNames = [
   'failureReason',
   'upstreamStatus',
   'durationMs',
+  'operation',
+  'stage',
+  'fileType',
+  'byteSize',
+  'rowCount',
+  'columnCount',
+  'sheetCount',
 ] as const
 
 type AllowedFieldName = (typeof allowedFieldNames)[number]

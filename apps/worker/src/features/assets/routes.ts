@@ -5,6 +5,7 @@ import iconv from 'iconv-lite'
 import * as XLSX from 'xlsx'
 
 import type { Env } from '../../index'
+import { createLogger } from '../../lib/logger'
 import { LlmClientError, requestAssetMetadataSuggestion } from '../llm/client'
 import { AssetService, AssetServiceError } from './service'
 
@@ -21,6 +22,7 @@ const MetadataSuggestionRequestSchema = z.object({
 export const assetRoutes = new Hono<Env>()
 
 assetRoutes.post('/upload', async (context) => {
+  const startedAt = Date.now()
   const fileName = context.req.header('x-file-name')
   const isXlsx = context.req.header('content-type') === 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
   const encoding = context.req.header('x-csv-encoding')
@@ -28,18 +30,26 @@ assetRoutes.post('/upload', async (context) => {
   if (!fileName || !isXlsx && (!encoding || !delimiter)) {
     return context.json({ code: 'INVALID_UPLOAD', message: 'CSV 上传参数不完整' }, 400)
   }
+  const logger = createLogger({ requestId: context.get('requestId'), operation: 'asset_upload', fileType: isXlsx ? 'xlsx' : 'csv' })
   const content = await context.req.arrayBuffer()
+  logger.info('数据上传阶段完成', { stage: 'request_body_read', byteSize: content.byteLength, durationMs: Date.now() - startedAt })
   const selectedSheet = context.req.header('x-selected-sheet') ? decodeURIComponent(context.req.header('x-selected-sheet')!) : undefined
+  const parseStartedAt = Date.now()
   const rows = isXlsx
     ? readXlsxRows(content, selectedSheet)
     : parse(iconv.decode(new Uint8Array(content), encoding === 'gb18030' ? 'gb18030' : 'utf-8').replace(/^\uFEFF/, ''), { delimiter, skip_empty_lines: true }) as string[][]
-  if (!Array.isArray(rows)) return context.json({ status: 'awaiting_sheet', sheets: rows.sheets })
+  if (!Array.isArray(rows)) {
+    logger.info('数据上传阶段完成', { stage: 'xlsx_sheet_inspection', durationMs: Date.now() - parseStartedAt, sheetCount: rows.sheets.length })
+    return context.json({ status: 'awaiting_sheet', sheets: rows.sheets })
+  }
   const [header, ...values] = rows
   if (!header || header.length === 0 || header.some((field) => !field.trim()) || new Set(header).size !== header.length) {
     return context.json({ code: 'INVALID_HEADER', message: 'CSV 表头不能为空且不能重复' }, 422)
   }
   const sourceFields = header.map((field) => field.trim())
   const records = values.map((row) => Object.fromEntries(sourceFields.map((field, index) => [field, row[index] ?? ''])))
+  const ndjson = records.map((record) => JSON.stringify(record)).join('\n') + (records.length ? '\n' : '')
+  logger.info('数据上传阶段完成', { stage: 'parse_and_convert', rowCount: records.length, columnCount: sourceFields.length, byteSize: ndjson.length, durationMs: Date.now() - parseStartedAt })
   const assetId = crypto.randomUUID()
   const prefix = `data-analyze/assets/${assetId}`
   const now = new Date().toISOString()
@@ -47,13 +57,22 @@ assetRoutes.post('/upload', async (context) => {
   const dataKey = `${prefix}/data/data.ndjson`
   const schemaKey = `${prefix}/schema.json`
   const previewKey = `${prefix}/preview.json`
-  await context.env.DATA_BUCKET.put(dataKey, records.map((record) => JSON.stringify(record)).join('\n') + (records.length ? '\n' : ''))
+  const dataWriteStartedAt = Date.now()
+  await context.env.DATA_BUCKET.put(dataKey, ndjson)
+  logger.info('数据上传阶段完成', { stage: 'r2_data_write', rowCount: records.length, byteSize: ndjson.length, durationMs: Date.now() - dataWriteStartedAt })
+  const schemaWriteStartedAt = Date.now()
   await context.env.DATA_BUCKET.put(schemaKey, JSON.stringify(sourceFields.map((field) => ({ sourceLabel: field, name: field, type: 'string', required: false }))))
+  logger.info('数据上传阶段完成', { stage: 'r2_schema_write', columnCount: sourceFields.length, durationMs: Date.now() - schemaWriteStartedAt })
+  const previewWriteStartedAt = Date.now()
   await context.env.DATA_BUCKET.put(previewKey, JSON.stringify(records.slice(0, 50)))
+  logger.info('数据上传阶段完成', { stage: 'r2_preview_write', rowCount: Math.min(records.length, 50), durationMs: Date.now() - previewWriteStartedAt })
+  const d1WriteStartedAt = Date.now()
   await context.env.DB.prepare(
     `INSERT INTO data_assets (id, kind, name, description, tags_json, data_object_key, schema_object_key, preview_object_key, row_count, status, created_by, created_at, updated_at)
      VALUES (?, 'source', ?, NULL, '[]', ?, ?, ?, ?, 'ready', ?, ?, ?)`,
   ).bind(assetId, name, dataKey, schemaKey, previewKey, records.length, context.get('authenticatedUser').email, now, now).run()
+  logger.info('数据上传阶段完成', { stage: 'd1_asset_insert', rowCount: records.length, durationMs: Date.now() - d1WriteStartedAt })
+  logger.info('数据上传完成', { stage: 'complete', rowCount: records.length, columnCount: sourceFields.length, byteSize: content.byteLength, durationMs: Date.now() - startedAt })
   return context.json(await new AssetService(context.env).get(assetId), 201)
 })
 
