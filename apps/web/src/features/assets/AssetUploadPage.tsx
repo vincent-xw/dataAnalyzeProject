@@ -20,7 +20,7 @@ export function AssetUploadPage() {
     disabled: uploading,
     maxCount: 1,
     onChange: (info) => {
-      setFile(info.file.originFileObj || null)
+      setFile(info.fileList[0]?.originFileObj || null)
       setSheets([])
       setSelectedSheet('')
     },

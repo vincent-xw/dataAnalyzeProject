@@ -5,14 +5,13 @@ import { Link } from 'react-router-dom'
 import { apiRequest, type AnalysisFailureGuidance, type AnalysisPage, type AnalysisSummary, type DataAsset, type DataAssetPreview } from '../../api/client'
 
 type ApiFailure = { payload?: { message?: string; guidance?: AnalysisFailureGuidance } }
+type CreateAnalysisValues = { assetIds?: string[]; primaryAssetId?: string; requirement?: string }
 
 export function AnalysisListPage() {
+  const [form] = Form.useForm<CreateAnalysisValues>()
   const [items, setItems] = useState<AnalysisSummary[]>([])
   const [assets, setAssets] = useState<DataAsset[]>([])
-  const [selected, setSelected] = useState<string[]>([])
   const [previews, setPreviews] = useState<Record<string, DataAssetPreview | null>>({})
-  const [primaryAssetId, setPrimaryAssetId] = useState('')
-  const [requirement, setRequirement] = useState('')
   const [error, setError] = useState('')
   const [guidance, setGuidance] = useState<AnalysisFailureGuidance | null>(null)
   const [saving, setSaving] = useState(false)
@@ -23,6 +22,9 @@ export function AnalysisListPage() {
   const [historyPageSize, setHistoryPageSize] = useState(10)
   const [historyTotal, setHistoryTotal] = useState(0)
   const [historyRefresh, setHistoryRefresh] = useState(0)
+  const watchedAssetIds = Form.useWatch('assetIds', form)
+  const selected = Array.isArray(watchedAssetIds) ? watchedAssetIds : []
+  const primaryAssetId = Form.useWatch('primaryAssetId', form) || ''
 
   const loadAssets = () => {
     setLoadingAssets(true)
@@ -49,23 +51,29 @@ export function AnalysisListPage() {
     })
   }, [selected, previews])
 
-  function toggle(id: string) {
-    setSelected((current) => {
-      const next = current.includes(id) ? current.filter((item) => item !== id) : [...current, id]
-      if (!next.includes(primaryAssetId)) setPrimaryAssetId(next[0] || '')
-      return next
-    })
+  function selectAssets(next: string[]) {
+    const currentPrimaryAssetId = form.getFieldValue('primaryAssetId')
+    form.setFieldsValue({ assetIds: next, primaryAssetId: next.includes(currentPrimaryAssetId || '') ? currentPrimaryAssetId : next[0] || undefined })
   }
 
-  async function create() {
+  async function create(values: CreateAnalysisValues) {
+    const normalizedRequirement = values.requirement?.trim() || ''
+    const assetIds = [...new Set(values.assetIds || [])]
+    const selectedPrimaryAssetId = assetIds.includes(values.primaryAssetId || '') ? values.primaryAssetId! : assetIds[0] || ''
+    if (!normalizedRequirement) {
+      setError('请填写分析需求。')
+      return
+    }
+    if (!assetIds.length || !selectedPrimaryAssetId) {
+      setError('请至少选择一张数据表，并从中指定主表。')
+      return
+    }
     setSaving(true)
     setError('')
     setGuidance(null)
     try {
-      await apiRequest('/api/analyses', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ requirement, assetIds: selected, primaryAssetId }) })
-      setRequirement('')
-      setSelected([])
-      setPrimaryAssetId('')
+      await apiRequest('/api/analyses', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ requirement: normalizedRequirement, assetIds, primaryAssetId: selectedPrimaryAssetId }) })
+      form.resetFields()
       setHistoryPage(1)
       setHistoryRefresh((current) => current + 1)
     } catch (caught) {
@@ -77,19 +85,19 @@ export function AnalysisListPage() {
     }
   }
 
-  const createContent = <section className="stack"><div className="page-heading"><div><h2>新建分析</h2><p>选择数据表并描述你的分析目标，系统会生成可查看的数据分析结果。</p></div></div><Form className="panel stack analysis-create-panel" layout="vertical" onFinish={create}>
-    <Form.Item label="选择数据表"><Spin spinning={loadingAssets}>{assets.map((asset) => <Checkbox key={asset.id} checked={selected.includes(asset.id)} onChange={() => toggle(asset.id)}>{asset.name}</Checkbox>)}</Spin></Form.Item>
+  const createContent = <section className="stack"><div className="page-heading"><div><h2>新建分析</h2><p>选择数据表并描述你的分析目标，系统会生成可查看的数据分析结果。</p></div></div><Form className="panel stack analysis-create-panel" form={form} layout="vertical" onFinish={create}>
+    <Form.Item label="选择数据表" required><Spin spinning={loadingAssets}><Form.Item name="assetIds" noStyle rules={[{ required: true, message: '请至少选择一张数据表' }]}><Checkbox.Group onChange={(values) => selectAssets(values as string[])}>{assets.map((asset) => <Checkbox key={asset.id} value={asset.id}>{asset.name}</Checkbox>)}</Checkbox.Group></Form.Item></Spin></Form.Item>
     {selected.map((id) => {
       const preview = previews[id]
       const columns = preview?.rows[0] ? Object.keys(preview.rows[0]) : []
       const previewColumns: NonNullable<TableProps<Record<string, unknown>>['columns']> = columns.map((column) => ({ title: column, dataIndex: column, key: column, render: (value: unknown) => String(value ?? '') }))
       return <div className="preview-table-wrap" key={id}><h4>{assets.find((asset) => asset.id === id)?.name} 数据参考</h4>{preview === null ? <p className="muted">正在加载预览…</p> : preview?.rows.length ? <Table columns={previewColumns} dataSource={preview.rows.slice(0, 10)} pagination={false} rowKey={(_, index) => String(index)} scroll={{ x: 'max-content' }} /> : <p className="muted">预览数据加载失败或为空。</p>}</div>
     })}
-    {selected.length ? <Form.Item label="主表"><Select value={primaryAssetId} onChange={setPrimaryAssetId} options={selected.map((id) => ({ value: id, label: assets.find((asset) => asset.id === id)?.name }))} /></Form.Item> : null}
-    <Form.Item label="分析需求" required><Input.TextArea required value={requirement} onChange={(event) => setRequirement(event.target.value)} placeholder="例如：按班级展示平均成绩" /></Form.Item>
+    {selected.length ? <Form.Item label="主表" name="primaryAssetId" rules={[{ required: true, message: '请选择主表' }]}><Select options={selected.map((id) => ({ value: id, label: assets.find((asset) => asset.id === id)?.name }))} /></Form.Item> : null}
+    <Form.Item label="分析需求" name="requirement" rules={[{ required: true, whitespace: true, message: '请填写分析需求' }]}><Input.TextArea placeholder="例如：按班级展示平均成绩" /></Form.Item>
     <Button type="primary" htmlType="submit" disabled={saving || !primaryAssetId} loading={saving}>创建分析</Button>
     {error && <p className="error">{error}</p>}
-    {guidance ? <aside className="panel stack"><h4>{guidance.summary}</h4><p>{guidance.suggestion}</p><Space><Button onClick={() => { setRequirement(guidance.revisedRequirement); setGuidance(null); setError('') }}>应用建议</Button></Space></aside> : null}
+    {guidance ? <aside className="panel stack"><h4>{guidance.summary}</h4><p>{guidance.suggestion}</p><Space><Button onClick={() => { form.setFieldValue('requirement', guidance.revisedRequirement); setGuidance(null); setError('') }}>应用建议</Button></Space></aside> : null}
   </Form></section>
 
   const historyContent = <section className="stack"><div className="page-heading"><div><h2>历史分析</h2><p>查看已创建的数据分析和生成状态。</p></div><Button type="primary" onClick={() => setActiveTab('create')}>新增分析</Button></div>{loadingHistory ? <Skeleton active paragraph={{ rows: 4 }} /> : <><div className="stack">{items.map((item) => {

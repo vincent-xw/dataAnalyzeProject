@@ -7,7 +7,7 @@ import { AnalysisService, type FailureGuidance } from './service'
 import { SystemPromptService } from '../settings/service'
 import { createLogger, createSensitiveDebugLogger } from '../../lib/logger'
 
-const RequestSchema = z.object({ requirement: z.string().trim().min(1).max(1_000), assetIds: z.array(z.string().uuid()).min(1).max(20), primaryAssetId: z.string().uuid() }).strict()
+const RequestSchema = z.object({ requirement: z.string().trim().min(1).max(20_000), assetIds: z.array(z.string().uuid()).min(1).max(20), primaryAssetId: z.string().uuid() }).strict()
 const ListQuerySchema = z.object({ page: z.coerce.number().int().min(1).default(1), pageSize: z.coerce.number().int().min(1).max(100).default(10) })
 class AnalysisConfigError extends Error {}
 export const analysisRoutes = new Hono<Env>()
