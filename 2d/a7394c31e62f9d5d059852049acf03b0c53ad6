@@ -1,0 +1,24 @@
+ARCHITECTURE.md
+  s_ede19c60347b78::t_13c83ad48f29de 3,5,7-15,19-20,22-28,33,35-41,43,45,47,51-56,58,60,62,64,66-70,72,74-84,94-106,109-115,117,119-122,124,126-138,143-169,175,180,190
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.14",
+  "base_commit_sha": "2da7394c31e62f9d5d059852049acf03b0c53ad6",
+  "prompts": {},
+  "humans": {
+    "h_c3a612a540ca0b": {
+      "author": "xuewen.jia <xuewen.jia@ly.com>"
+    }
+  },
+  "sessions": {
+    "s_ede19c60347b78": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019f83dc-bf2d-7101-89b8-9fcc3770ad60",
+        "model": "gpt-5.6-terra"
+      },
+      "human_author": "xuewen.jia <xuewen.jia@ly.com>"
+    }
+  }
+}
