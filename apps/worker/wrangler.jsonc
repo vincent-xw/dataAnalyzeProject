@@ -1,35 +1,74 @@
+/**
+ * Cloudflare Worker 生产环境配置。
+ *
+ * 首次初始化（在仓库根目录执行）：
+ * 1. 安装依赖：corepack enable && pnpm install --frozen-lockfile。
+ * 2. 创建 R2 与 D1，并将 D1 命令输出的 database_id 写入下方 d1_databases：
+ *    pnpm --filter @data-analyze/worker exec wrangler r2 bucket create data-analyze-data
+ *    pnpm --filter @data-analyze/worker exec wrangler d1 create data-analyze-db
+ * 3. 创建 Cloudflare Access Self-hosted Application 与访问策略；将 Team Domain 和
+ *    Application Audience 分别填入 CF_ACCESS_TEAM_DOMAIN、CF_ACCESS_AUD。
+ * 4. 写入不应提交到仓库的 Worker Secret：
+ *    pnpm --filter @data-analyze/worker exec wrangler secret put LLM_API_KEY
+ *    pnpm --filter @data-analyze/worker exec wrangler secret put GITHUB_TOKEN
+ * 5. 初始化生产 D1 并部署：
+ *    pnpm --filter @data-analyze/worker exec wrangler d1 migrations apply data-analyze-db --remote
+ *    pnpm --filter @data-analyze/worker exec wrangler deploy
+ *
+ * 本文件只保存非敏感的资源标识和运行参数。bucket_name、database_id、Access Audience
+ * 都不是访问凭据；API Token、LLM Key、Access Client Secret、R2 S3 Key 必须保存在
+ * Cloudflare Secret 或 CI Secret 中，不能写入 vars 或提交到 Git。
+ */
 {
+	// 使用项目内安装的 Wrangler Schema 提供编辑器校验与补全。
 	"$schema": "node_modules/wrangler/config-schema.json",
+	// Cloudflare Worker 名称；部署时会更新同名 Worker。
 	"name": "data-analyze-worker",
+	// Worker 入口文件，相对于 apps/worker 目录。
 	"main": "src/index.ts",
+	// 固定运行时兼容日期，升级前应先完成回归验证。
 	"compatibility_date": "2026-07-14",
 	"compatibility_flags": [
+		// 允许使用 Node.js 兼容 API（例如部分依赖的 Node 内置能力）。
 		"nodejs_compat"
 	],
+	// 禁用 *.workers.dev 默认域名，避免绕过绑定到正式域名的 Access 策略。
 	"workers_dev": false,
 	"vars": {
+		// LLM 上游地址和模型名属于公开运行参数；真实认证信息使用 LLM_API_KEY Secret。
 		"LLM_BASE_URL": "https://api.deepseek.com",
 		"LLM_MODEL": "deepseek-v4-flash",
+		// Cloudflare Access 租户域名与应用 Audience，用于 Worker 二次校验访问 JWT；两者均不是 JWT 签名密钥。
 		"CF_ACCESS_TEAM_DOMAIN": "bold-pine-ccca.cloudflareaccess.com",
 		"CF_ACCESS_AUD": "098b3ab19f6cea0000ed52468f3f49c8a3fd4f85c770a0a273395c56f6a11d60",
+		// 历史候选脚本发布链路的仓库定位参数；当前数据资产分析主链路不使用它们。
 		"GITHUB_OWNER": "vincent-xw",
 		"GITHUB_REPO": "dataAnalyzeProject",
 		"GITHUB_BASE_BRANCH": "main",
+		// 生产环境标识；禁止使用仅限本地开发的模拟 Access 身份。
 		"ENVIRONMENT": "production"
 	},
 	"r2_buckets": [
 		{
+			// Worker 代码通过 env.DATA_BUCKET 访问 R2；访问权限由 Worker Binding 授予，而非 bucket_name。
 			"binding": "DATA_BUCKET",
+			// 实际 R2 Bucket 名称。开源时可替换为自己账户下创建的 Bucket。
 			"bucket_name": "data-analyze-data",
+			// 本地 Wrangler 开发直接连接该远程 Bucket；若需要完全离线开发，应改为 false。
 			"remote": true
 		}
 	],
 	"d1_databases": [
 		{
+			// Worker 代码通过 env.DB 访问 D1。
 			"binding": "DB",
+			// 实际 D1 数据库名称；应与上方初始化命令和迁移命令保持一致。
 			"database_name": "data-analyze-db",
+			// D1 创建命令返回的资源 ID，不是数据库密码或 Cloudflare API Token。
 			"database_id": "00a898db-0120-4de1-b651-a348da9ddf81",
+			// Migration 文件目录，相对于 apps/worker。
 			"migrations_dir": "migrations",
+			// 本地 Wrangler 开发直接连接该远程 D1；若需要完全离线开发，应改为 false。
 			"remote": true
 		}
 	]
