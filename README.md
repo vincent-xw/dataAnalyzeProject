@@ -7,9 +7,9 @@
 - Web：React + Vite，部署到 Cloudflare Pages。
 - API/执行：Hono Worker、Cloudflare Queue。
 - 结构化索引：D1；原始文件、中间结果、报表数据：R2。
-- Secret：只保存在 Worker Secret 或 GitHub Actions Secret。
+- Secret：只保存在 Worker Secret。
 - 身份：除 `/health` 外，`/api/*` 与 `/internal/*` 强制校验 Cloudflare Access JWT。
-- 脚本：隐藏页面 `/internal/scripts` 只创建候选 Pull Request；CI、人工合并、重新部署和目录同步后才可用于新任务。
+- 脚本：隐藏页面 `/internal/scripts` 只创建候选 Pull Request；人工合并、重新部署和目录同步后才可用于新任务。
 
 不包含多租户、运行时动态代码沙箱、自动合并、自动字段猜测和完整导出功能。
 

@@ -4,6 +4,7 @@ dist/
 coverage/
 .wrangler/
 .dev.vars
+apps/worker/wrangler.staging.jsonc
 .env
 .DS_Store
 playwright-report/

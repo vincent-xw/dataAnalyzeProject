@@ -17,7 +17,7 @@
  *
  * 本文件只保存非敏感的资源标识和运行参数。bucket_name、database_id、Access Audience
  * 都不是访问凭据；API Token、LLM Key、Access Client Secret、R2 S3 Key 必须保存在
- * Cloudflare Secret 或 CI Secret 中，不能写入 vars 或提交到 Git。
+ * Cloudflare Secret 中，不能写入 vars 或提交到 Git。
  */
 {
 	// 使用项目内安装的 Wrangler Schema 提供编辑器校验与补全。

@@ -30,8 +30,8 @@ pnpm test:e2e  # 启动本地服务、应用 D1 Migration 并运行 Playwright
 
 ## 测试要求
 
-单元与组件测试使用 Vitest，前端交互使用 Testing Library，Worker 行为使用 Cloudflare Vitest pool。除成功路径外，覆盖协议、错误路径和字段映射校验。涉及完整流程的改动，在提审前运行 CI 等价命令：`pnpm validate:scripts`、`pnpm typecheck`、`pnpm test`、`pnpm build` 与 `pnpm test:e2e`。
+单元与组件测试使用 Vitest，前端交互使用 Testing Library，Worker 行为使用 Cloudflare Vitest pool。除成功路径外，覆盖协议、错误路径和字段映射校验。涉及完整流程的改动，在提审前运行完整验证：`pnpm validate:scripts`、`pnpm typecheck`、`pnpm test`、`pnpm build` 与 `pnpm test:e2e`。
 
 ## 提交与拉取请求规范
 
-提交标题遵循现有 Conventional Commit 风格：`feat(worker): ...`、`fix(scripts): ...`、`test(e2e): ...` 或 `docs: ...`。每个提交保持单一、明确的改动范围。拉取请求应说明用户可见或 API 影响、列出已执行命令、关联相关问题；涉及 UI 时附截图。严禁提交 Cloudflare、GitHub、Access 或 LLM 密钥；通过 Worker 或 GitHub Actions Secret 配置，部署变更请参考 `docs/runbooks/`。
+提交标题遵循现有 Conventional Commit 风格：`feat(worker): ...`、`fix(scripts): ...`、`test(e2e): ...` 或 `docs: ...`。每个提交保持单一、明确的改动范围。拉取请求应说明用户可见或 API 影响、列出已执行命令、关联相关问题；涉及 UI 时附截图。严禁提交 Cloudflare、GitHub、Access 或 LLM 密钥；通过 Worker Secret 配置敏感运行参数，部署使用 `wrangler` 手工执行，具体命令请参考 `docs/runbooks/`。

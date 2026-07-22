@@ -1,0 +1,40 @@
+/**
+ * Staging Worker 配置模板。
+ *
+ * 复制为 wrangler.staging.jsonc 后，必须替换 D1 ID、Access Team Domain 与 Audience。
+ * 该实际配置文件已被 .gitignore 忽略，避免把测试环境资源标识误提交到仓库。
+ */
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "data-analyze-worker-staging",
+  "main": "src/index.ts",
+  "compatibility_date": "2026-07-14",
+  "compatibility_flags": ["nodejs_compat"],
+  "workers_dev": false,
+  "vars": {
+    "LLM_BASE_URL": "https://api.deepseek.com",
+    "LLM_MODEL": "deepseek-v4-flash",
+    "CF_ACCESS_TEAM_DOMAIN": "REPLACE_WITH_ACCESS_TEAM_DOMAIN",
+    "CF_ACCESS_AUD": "REPLACE_WITH_STAGING_ACCESS_AUDIENCE",
+    "GITHUB_OWNER": "vincent-xw",
+    "GITHUB_REPO": "dataAnalyzeProject",
+    "GITHUB_BASE_BRANCH": "main",
+    "ENVIRONMENT": "staging"
+  },
+  "r2_buckets": [
+    {
+      "binding": "DATA_BUCKET",
+      "bucket_name": "data-analyze-data-staging",
+      "remote": true
+    }
+  ],
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "data-analyze-db-staging",
+      "database_id": "REPLACE_WITH_STAGING_D1_DATABASE_ID",
+      "migrations_dir": "migrations",
+      "remote": true
+    }
+  ]
+}
