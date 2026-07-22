@@ -42,6 +42,105 @@ flowchart LR
 
 生产环境中，Pages 承载前端，Worker 提供 `/api/*` 与 `/health`。除 `GET /health` 外，所有 API 都校验 `Cf-Access-Jwt-Assertion`：JWT 必须通过 Access issuer、audience 和邮箱声明校验。Cloudflare Access 是认证边界；本地开发仅在 `ENVIRONMENT=development` 且 Vite 代理注入固定开发标记时模拟身份，测试环境仍校验完整测试 JWT。
 
+### 整体架构图
+
+```mermaid
+flowchart TB
+  U[单用户浏览器]
+  A[Cloudflare Access\n身份认证与 JWT 签发]
+
+  subgraph CF[Cloudflare]
+    P[Pages\nReact 19 + Vite]
+    W[Worker\nHono API 与业务编排]
+    D[(D1\n控制面元数据)]
+    R[(R2\n数据面对象存储)]
+  end
+
+  subgraph DATA[资产与分析数据]
+    F[CSV / XLSX 文件]
+    N[NDJSON 主表数据]
+    S[字段 Schema 与 50 行预览]
+    M[资产、分析、提示词版本与展示设置]
+  end
+
+  L[兼容 Chat Completions 的 LLM\n仅接收需求、字段 Schema、行数与提示词]
+
+  U -->|访问页面| P
+  U -->|携带 Cf-Access-Jwt-Assertion 的 API 请求| W
+  A -->|验证 JWT| W
+  P -->|同源 /api 请求| W
+  U -->|选择上传文件| F
+  F -->|上传请求| W
+  W -->|写入 / 读取| R
+  R --- N
+  R --- S
+  W -->|写入 / 查询| D
+  D --- M
+  W -->|受限上下文| L
+  L -->|JSON ReportConfig 或失败诊断| W
+  W -->|主表行与受限规则| P
+  P -->|固定 React / ECharts 组件渲染| U
+
+  classDef boundary fill:#fff3cd,stroke:#d39e00,color:#4a3800;
+  class L boundary;
+```
+
+图中 D1 仅保存控制面索引和状态，原始或标准化后的数据保留在 R2；LLM 不接触任何数据行。Worker 在返回结果前负责协议、字段引用和数据规模校验，前端只渲染白名单内的固定组件。
+
+### 技术架构图
+
+```mermaid
+flowchart TB
+  subgraph CLIENT[客户端]
+    Browser[浏览器]
+    Web[apps/web\nReact 19 + Vite + Ant Design]
+    Charts[固定 React / ECharts 图表组件]
+  end
+
+  subgraph EDGE[Cloudflare 边缘层]
+    Access[Cloudflare Access\nJWT 身份边界]
+    Pages[Cloudflare Pages\n静态 Web 产物]
+    Worker[Cloudflare Worker\nHono]
+  end
+
+  subgraph APP[Worker 应用层]
+    Middleware[requestContext + 错误处理\nAccess 鉴权中间件]
+    Routes[assets / analyses / settings 路由]
+    Services[资产解析、分析编排\n提示词与展示设置服务]
+    Schema[packages/report-schema\nZod ReportConfig 协议校验]
+    Logger[结构化日志\n敏感调试受开关控制]
+  end
+
+  subgraph BINDINGS[Worker Bindings]
+    D1[(D1: DB\n控制面元数据)]
+    R2[(R2: DATA_BUCKET\nNDJSON、Schema、预览)]
+    Secrets[Worker Secret / 环境变量\nLLM_API_KEY、Access 配置]
+  end
+
+  subgraph EXTERNAL[外部服务]
+    LLM[兼容 Chat Completions 的 LLM]
+  end
+
+  Browser --> Web
+  Browser -->|页面请求| Pages
+  Pages --> Web
+  Web --> Charts
+  Web -->|同源 /api| Worker
+  Browser -->|Access JWT| Access
+  Access -->|JWT 验证依据| Worker
+  Worker --> Middleware --> Routes --> Services
+  Services --> Schema
+  Middleware --> Logger
+  Services --> Logger
+  Services <-->|SQL 元数据| D1
+  Services <-->|对象读写| R2
+  Secrets -->|运行时绑定| Worker
+  Services -->|仅传受限上下文| LLM
+  LLM -->|JSON 响应| Services
+```
+
+构建期由 pnpm workspace 管理 `apps/web`、`apps/worker` 与共享协议包；部署时 Pages 仅承载前端静态产物，Worker 通过 `DB`、`DATA_BUCKET` 和环境变量绑定访问后端能力。当前生产主链路未使用 Queue、Durable Objects 或运行时脚本执行；历史脚本相关包不在本图的运行时依赖中。
+
 ## 3. 前端信息架构
 
 前端路由定义于 `apps/web/src/router.tsx`，根路径重定向到 `/assets`。
