@@ -1,0 +1,24 @@
+apps/worker/wrangler.jsonc
+  s_ede19c60347b78::t_25820639ae1fbd 1-21,23,25,27,29,32,35,38,41,44,48,53,55,57,63,65,67,69,71
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.14",
+  "base_commit_sha": "106979883dc5e39716c473779d657b448a7145a2",
+  "prompts": {},
+  "humans": {
+    "h_c3a612a540ca0b": {
+      "author": "xuewen.jia <xuewen.jia@ly.com>"
+    }
+  },
+  "sessions": {
+    "s_ede19c60347b78": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019f83dc-bf2d-7101-89b8-9fcc3770ad60",
+        "model": "gpt-5.6-terra"
+      },
+      "human_author": "xuewen.jia <xuewen.jia@ly.com>"
+    }
+  }
+}
