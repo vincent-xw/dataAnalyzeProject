@@ -1,0 +1,41 @@
+apps/worker/wrangler.staging.example.jsonc
+  s_ede19c60347b78::t_fcb4090423e2b0 1-40
+docs/runbooks/incident-recovery.md
+  s_ede19c60347b78::t_cd4e4cf1e3fb88 12,24,63-64
+AGENTS.md
+  s_ede19c60347b78::t_cd4e4cf1e3fb88 33,37
+README.md
+  s_ede19c60347b78::t_cd4e4cf1e3fb88 10,12
+.gitignore
+  s_ede19c60347b78::t_fcb4090423e2b0 7
+docs/runbooks/cloudflare-deployment.md
+  s_ede19c60347b78::t_c12b8cc278e6fe 5,10,21,45,68-71,114
+  s_ede19c60347b78::t_23231a0ccc054a 42,47
+  s_ede19c60347b78::t_cd4e4cf1e3fb88 64-66
+  s_ede19c60347b78::t_fcb4090423e2b0 73-79,82-84,87,89,91-93,95,97,99-104,106,108,110
+  s_ede19c60347b78::t_99cf60301a8cc3 67
+  s_ede19c60347b78::t_efc5f02d304794 72
+apps/worker/wrangler.jsonc
+  s_ede19c60347b78::t_cd4e4cf1e3fb88 20
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.14",
+  "base_commit_sha": "19923ff36dff43e39c241021318fc22264ff687a",
+  "prompts": {},
+  "humans": {
+    "h_c3a612a540ca0b": {
+      "author": "xuewen.jia <xuewen.jia@ly.com>"
+    }
+  },
+  "sessions": {
+    "s_ede19c60347b78": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019f83dc-bf2d-7101-89b8-9fcc3770ad60",
+        "model": "gpt-5.6-terra"
+      },
+      "human_author": "xuewen.jia <xuewen.jia@ly.com>"
+    }
+  }
+}
